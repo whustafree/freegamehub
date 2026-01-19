@@ -18,8 +18,14 @@ app.use(express.static('public'));
 
 let cachedGames = [];
 let lastUpdated = null;
+// ESTADÍSTICAS EN MEMORIA
+let stats = {
+  bootTime: new Date().toISOString(),
+  totalScans: 0,
+  alertsSent: 0,
+  gamesFoundHistory: 0
+};
 
-// === SNIPER MODE: Palabras clave VIP ===
 const VIP_KEYWORDS = ['gta', 'assassin', 'cyberpunk', 'elden', 'fifa', 'call of duty', 'battlefield', 'sims', 'fallout', 'skyrim', 'witcher', 'red dead'];
 
 function loadCache() {
@@ -40,47 +46,37 @@ function saveCache() {
   } catch (err) { console.error('⚠️ Error guardando:', err.message); }
 }
 
-// === LIMPIEZA AUTOMÁTICA ===
 function cleanupExpired() {
   const now = new Date();
-  const initialCount = cachedGames.length;
   cachedGames = cachedGames.filter(g => {
-    if (!g.endDate) return true; // Si no tiene fecha, se queda
-    return new Date(g.endDate) > now; // Si la fecha es futura, se queda
+    if (!g.endDate) return true; 
+    return new Date(g.endDate) > now; 
   });
-  const deleted = initialCount - cachedGames.length;
-  if (deleted > 0) {
-    console.log(`🧹 Limpieza: Se eliminaron ${deleted} ofertas expiradas.`);
-    saveCache();
-  }
+  saveCache();
 }
 
-// === TELEGRAM AVANZADO ===
 async function sendTelegramAlert(newGames) {
   if (!newGames || newGames.length === 0) return;
+  stats.alertsSent++; // Sumar a estadísticas
 
-  // Detectar VIPs (Sniper Mode)
   const vips = newGames.filter(g => VIP_KEYWORDS.some(k => g.title.toLowerCase().includes(k)));
   const isVipAlert = vips.length > 0;
 
-  let header = isVipAlert ? '🚨🚨 <b>¡ALERTA SNIPER: JUEGO AAA DETECTADO!</b> 🚨🚨' : '✨ <b>Nuevas Ofertas Detectadas</b>';
+  let header = isVipAlert ? '🚨🚨 <b>¡ALERTA SNIPER: JUEGO AAA!</b> 🚨🚨' : '✨ <b>Nuevas Ofertas</b>';
   let message = `${header}\n\n`;
 
   const limit = 10;
   const showList = newGames.slice(0, limit);
 
   showList.forEach(g => {
-    // Icono especial si es VIP
     const isVip = VIP_KEYWORDS.some(k => g.title.toLowerCase().includes(k));
     const icon = isVip ? '💎' : (g.category === 'android' ? '📱' : '💻');
     const title = g.title.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    
-    message += `${icon} <b>${title}</b>\n`;
-    message += `➜ <a href="${g.url}">Reclamar</a>\n\n`;
+    message += `${icon} <b>${title}</b>\n➜ <a href="${g.url}">Reclamar</a>\n\n`;
   });
 
   if (newGames.length > limit) message += `<i>...y ${newGames.length - limit} más.</i>\n`;
-  message += `👀 <a href="https://freegamehub.onrender.com">Ver en la Web</a>`;
+  message += `👀 <a href="https://freegamehub.onrender.com">Ver Web</a>`;
 
   try {
     await axios.post(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
@@ -93,7 +89,6 @@ async function sendTelegramAlert(newGames) {
   } catch (err) { console.error('❌ Error Telegram:', err.message); }
 }
 
-// === DATOS ===
 async function fetchGamerPower() {
   try {
     const [pcRes, androidRes] = await Promise.all([
@@ -118,7 +113,7 @@ async function fetchRedditApps() {
         return (t.includes('[app') || t.includes('[icon pack')) && (t.includes('free') || t.includes('100%'));
       }).map(post => {
         const p = post.data;
-        let img = 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg'; 
+        let img = 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg'\; 
         if (p.thumbnail && p.thumbnail.startsWith('http')) img = p.thumbnail;
         else if (p.preview?.images?.[0]?.source?.url) img = p.preview.images[0].source.url.replace('&amp;', '&');
         return {
@@ -131,6 +126,7 @@ async function fetchRedditApps() {
 
 async function updateFreeGames() {
   console.log('🔄 Actualizando...');
+  stats.totalScans++;
   try {
     const [gpGames, redditApps] = await Promise.all([fetchGamerPower(), fetchRedditApps()]);
     const total = [...gpGames, ...redditApps];
@@ -142,13 +138,24 @@ async function updateFreeGames() {
       }
       cachedGames = total;
       lastUpdated = new Date().toISOString();
-      cleanupExpired(); // Limpieza cada vez que actualizamos
+      stats.gamesFoundHistory = total.length;
+      cleanupExpired(); 
       saveCache();
     }
   } catch (err) { console.error('Error update:', err.message); }
 }
 
 cron.schedule('0 */4 * * *', updateFreeGames);
+
+// RUTA ADMIN
+app.get('/api/stats', (req, res) => {
+  res.json({
+    ...stats,
+    currentGames: cachedGames.length,
+    lastUpdate: lastUpdated,
+    uptime: process.uptime()
+  });
+});
 
 app.get('/api/free-games', (req, res) => res.json({ lastUpdated, games: cachedGames }));
 app.listen(PORT, () => { console.log(`🚀 Server on port ${PORT}`); loadCache(); updateFreeGames(); });
