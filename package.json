@@ -1,0 +1,15 @@
+{
+  "name": "freegamehub-cl",
+  "version": "1.0.0",
+  "description": "Juegos gratis en Chile",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.6.0",
+    "node-cron": "^3.0.3",
+    "cors": "^2.8.5"
+  }
+}

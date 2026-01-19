@@ -1,0 +1,1393 @@
+:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #3b82f6;
+  /* Colores de Plataformas */
+  --epic: #333333;
+  --steam: #171a21;
+  --gog: #5c2e91;
+  --itch: #fa5c5c;
+  --indiegala: #e81b25;
+  --ubisoft: #005695;
+  --other: #475569;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(45deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; }
+
+/* Filtros */
+.controls {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-btn {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid #475569;
+  color: var(--text-secondary);
+  padding: 0.6rem 1.5rem;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.update-info { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; }
+
+/* Grid Principal */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tarjeta de Juego */
+.game-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
+.game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-card:hover img { transform: scale(1.05); }
+
+/* Etiquetas de Plataforma Flotantes */
+.platform-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.platform-badge.epic { background: var(--epic); }
+.platform-badge.steam { background: var(--steam); border: 1px solid #2a475e; }
+.platform-badge.gog { background: var(--gog); }
+.platform-badge.itch { background: var(--itch); }
+.platform-badge.indiegala { background: var(--indiegala); }
+.platform-badge.ubisoft { background: var(--ubisoft); }
+.platform-badge.other { background: var(--other); }
+
+/* Info del Juego */
+.game-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.game-info p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta Data (Precio, Tiempo, Botón) */
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.price-time-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.worth-tag {
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.time-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.time-tag.urgent { color: #fb923c; }
+.time-tag.expired { color: #ef4444; }
+
+.claim-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claim-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem;
+  background: #0b1120;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .games-grid { grid-template-columns: 1fr; padding: 1rem; }
+  h1 { font-size: 2rem; }
+}:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #3b82f6;
+  /* Colores de Plataformas */
+  --epic: #333333;
+  --steam: #171a21;
+  --gog: #5c2e91;
+  --itch: #fa5c5c;
+  --indiegala: #e81b25;
+  --ubisoft: #005695;
+  --other: #475569;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(45deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; }
+
+/* Filtros */
+.controls {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-btn {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid #475569;
+  color: var(--text-secondary);
+  padding: 0.6rem 1.5rem;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.update-info { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; }
+
+/* Grid Principal */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tarjeta de Juego */
+.game-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
+.game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-card:hover img { transform: scale(1.05); }
+
+/* Etiquetas de Plataforma Flotantes */
+.platform-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.platform-badge.epic { background: var(--epic); }
+.platform-badge.steam { background: var(--steam); border: 1px solid #2a475e; }
+.platform-badge.gog { background: var(--gog); }
+.platform-badge.itch { background: var(--itch); }
+.platform-badge.indiegala { background: var(--indiegala); }
+.platform-badge.ubisoft { background: var(--ubisoft); }
+.platform-badge.other { background: var(--other); }
+
+/* Info del Juego */
+.game-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.game-info p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta Data (Precio, Tiempo, Botón) */
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.price-time-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.worth-tag {
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.time-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.time-tag.urgent { color: #fb923c; }
+.time-tag.expired { color: #ef4444; }
+
+.claim-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claim-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem;
+  background: #0b1120;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .games-grid { grid-template-columns: 1fr; padding: 1rem; }
+  h1 { font-size: 2rem; }
+}:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #3b82f6;
+  /* Colores de Plataformas */
+  --epic: #333333;
+  --steam: #171a21;
+  --gog: #5c2e91;
+  --itch: #fa5c5c;
+  --indiegala: #e81b25;
+  --ubisoft: #005695;
+  --other: #475569;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(45deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; }
+
+/* Filtros */
+.controls {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-btn {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid #475569;
+  color: var(--text-secondary);
+  padding: 0.6rem 1.5rem;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.update-info { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; }
+
+/* Grid Principal */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tarjeta de Juego */
+.game-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
+.game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-card:hover img { transform: scale(1.05); }
+
+/* Etiquetas de Plataforma Flotantes */
+.platform-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.platform-badge.epic { background: var(--epic); }
+.platform-badge.steam { background: var(--steam); border: 1px solid #2a475e; }
+.platform-badge.gog { background: var(--gog); }
+.platform-badge.itch { background: var(--itch); }
+.platform-badge.indiegala { background: var(--indiegala); }
+.platform-badge.ubisoft { background: var(--ubisoft); }
+.platform-badge.other { background: var(--other); }
+
+/* Info del Juego */
+.game-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.game-info p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta Data (Precio, Tiempo, Botón) */
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.price-time-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.worth-tag {
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.time-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.time-tag.urgent { color: #fb923c; }
+.time-tag.expired { color: #ef4444; }
+
+.claim-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claim-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem;
+  background: #0b1120;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .games-grid { grid-template-columns: 1fr; padding: 1rem; }
+  h1 { font-size: 2rem; }
+}:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #3b82f6;
+  /* Colores de Plataformas */
+  --epic: #333333;
+  --steam: #171a21;
+  --gog: #5c2e91;
+  --itch: #fa5c5c;
+  --indiegala: #e81b25;
+  --ubisoft: #005695;
+  --other: #475569;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(45deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; }
+
+/* Filtros */
+.controls {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-btn {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid #475569;
+  color: var(--text-secondary);
+  padding: 0.6rem 1.5rem;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.update-info { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; }
+
+/* Grid Principal */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tarjeta de Juego */
+.game-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
+.game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-card:hover img { transform: scale(1.05); }
+
+/* Etiquetas de Plataforma Flotantes */
+.platform-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.platform-badge.epic { background: var(--epic); }
+.platform-badge.steam { background: var(--steam); border: 1px solid #2a475e; }
+.platform-badge.gog { background: var(--gog); }
+.platform-badge.itch { background: var(--itch); }
+.platform-badge.indiegala { background: var(--indiegala); }
+.platform-badge.ubisoft { background: var(--ubisoft); }
+.platform-badge.other { background: var(--other); }
+
+/* Info del Juego */
+.game-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.game-info p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta Data (Precio, Tiempo, Botón) */
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.price-time-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.worth-tag {
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.time-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.time-tag.urgent { color: #fb923c; }
+.time-tag.expired { color: #ef4444; }
+
+.claim-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claim-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem;
+  background: #0b1120;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .games-grid { grid-template-columns: 1fr; padding: 1rem; }
+  h1 { font-size: 2rem; }
+}:root {
+  --bg-color: #0f172a;
+  --card-bg: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #3b82f6;
+  /* Colores de Plataformas */
+  --epic: #333333;
+  --steam: #171a21;
+  --gog: #5c2e91;
+  --itch: #fa5c5c;
+  --indiegala: #e81b25;
+  --ubisoft: #005695;
+  --other: #475569;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Outfit', 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: linear-gradient(to bottom, #1e293b 0%, #0f172a 100%);
+  padding: 2.5rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid #334155;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+h1 {
+  font-size: 2.8rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  background: -webkit-linear-gradient(45deg, #60a5fa, #c084fc);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle { color: var(--text-secondary); margin-bottom: 2rem; font-size: 1.1rem; }
+
+/* Filtros */
+.controls {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.filters {
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-btn {
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid #475569;
+  color: var(--text-secondary);
+  padding: 0.6rem 1.5rem;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+  transform: translateY(-2px);
+}
+
+.update-info { font-size: 0.8rem; color: #64748b; margin-top: 0.5rem; }
+
+/* Grid Principal */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Tarjeta de Juego */
+.game-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+
+.card-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 180px;
+}
+
+.game-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.game-card:hover img { transform: scale(1.05); }
+
+/* Etiquetas de Plataforma Flotantes */
+.platform-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 5px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.platform-badge.epic { background: var(--epic); }
+.platform-badge.steam { background: var(--steam); border: 1px solid #2a475e; }
+.platform-badge.gog { background: var(--gog); }
+.platform-badge.itch { background: var(--itch); }
+.platform-badge.indiegala { background: var(--indiegala); }
+.platform-badge.ubisoft { background: var(--ubisoft); }
+.platform-badge.other { background: var(--other); }
+
+/* Info del Juego */
+.game-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-info h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.game-info p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: 1.2rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Meta Data (Precio, Tiempo, Botón) */
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.price-time-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.worth-tag {
+  font-size: 0.85rem;
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.time-tag {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4ade80;
+}
+
+.time-tag.urgent { color: #fb923c; }
+.time-tag.expired { color: #ef4444; }
+
+.claim-btn {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.claim-btn:hover {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+}
+
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem;
+  background: #0b1120;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .games-grid { grid-template-columns: 1fr; padding: 1rem; }
+  h1 { font-size: 2rem; }
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid #475569;
+  color: var(--text-secondary);
+  padding: 0.5rem 1.2rem;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 600;
+}
+
+.filter-btn:hover, .filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+}
+
+.update-info { font-size: 0.8rem; color: #64748b; }
+
+/* Grid de Juegos */
+.games-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.game-card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid #334155;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.game-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+  border-color: var(--accent);
+}
+
+.game-card img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.game-info {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.game-info h3 { font-size: 1.3rem; margin-bottom: 0.5rem; line-height: 1.2; }
+.game-info p { color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1rem; flex-grow: 1; }
+
+.meta-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 1rem;
+  border-top: 1px solid #334155;
+}
+
+.platform-tag {
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+}
+.platform-tag.epic { background: var(--epic); }
+.platform-tag.steam { background: var(--steam); }
+.platform-tag.gog { background: var(--gog); }
+.platform-tag.itch { background: var(--itch); }
+
+.claim-btn {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  background: rgba(59, 130, 246, 0.1);
+  transition: background 0.2s;
+}
+.claim-btn:hover { background: rgba(59, 130, 246, 0.2); }
+
+footer {
+  margin-top: auto;
+  text-align: center;
+  padding: 2rem;
+  background: #0f172a;
+  color: #475569;
+  font-size: 0.85rem;
+}
+
+/* Skeleton Loading */
+.skeleton-card {
+  height: 350px;
+  background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+  border-radius: 16px;
+}
+@keyframes loading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+/* === MEJORAS VISUALES NUEVAS === */
+
+.card-image-wrapper {
+  position: relative;
+}
+
+.platform-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: white;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+  backdrop-filter: blur(4px);
+}
+
+.platform-badge.epic { background: #333; }
+.platform-badge.steam { background: #171a21; }
+.platform-badge.itch { background: #fa5c5c; }
+.platform-badge.gog { background: #5c2e91; }
+
+.time-tag {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+.time-tag.permanent { color: #4ade80; background: rgba(74, 222, 128, 0.1); }
+.time-tag.normal { color: #facc15; background: rgba(250, 204, 21, 0.1); }
+.time-tag.urgent { color: #fb923c; background: rgba(251, 146, 60, 0.1); border: 1px solid #fb923c; }
+.time-tag.critical { color: #ef4444; background: rgba(239, 68, 68, 0.1); animation: pulse 2s infinite; }
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
