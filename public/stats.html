@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { background: #0f172a; color: #fff; font-family: 'Outfit', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+    .dashboard { background: #1e293b; padding: 2rem; border-radius: 20px; border: 1px solid #3b82f6; max-width: 400px; width: 100%; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+    h1 { text-align: center; color: #3b82f6; margin-bottom: 2rem; }
+    .stat-row { display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #334155; }
+    .stat-label { color: #94a3b8; }
+    .stat-value { font-weight: bold; font-size: 1.1rem; }
+    .refresh-btn { background: #3b82f6; color: white; border: none; width: 100%; padding: 1rem; border-radius: 10px; margin-top: 1.5rem; cursor: pointer; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <h1>⚙️ Panel Admin</h1>
+    <div id="stats-container">Cargando datos...</div>
+    <button class="refresh-btn" onclick="location.href='/'">Volver a la Web</button>
+  </div>
+  <script>
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(data => {
+        const formatTime = (iso) => iso ? new Date(iso).toLocaleString() : 'Nunca';
+        const uptime = Math.floor(data.uptime / 60) + ' min';
+        const html = `
+          <div class="stat-row"><span class="stat-label">Juegos Actuales:</span><span class="stat-value">${data.currentGames}</span></div>
+          <div class="stat-row"><span class="stat-label">Alertas Enviadas:</span><span class="stat-value">${data.alertsSent}</span></div>
+          <div class="stat-row"><span class="stat-label">Escaneos Totales:</span><span class="stat-value">${data.totalScans}</span></div>
+          <div class="stat-row"><span class="stat-label">Tiempo Encendido:</span><span class="stat-value">${uptime}</span></div>
+          <div class="stat-row"><span class="stat-label">Inicio Servidor:</span><span class="stat-value" style="font-size:0.8rem">${formatTime(data.bootTime)}</span></div>
+        `;
+        document.getElementById('stats-container').innerHTML = html;
+      })
+      .catch(err => document.getElementById('stats-container').innerHTML = 'Error conectando al servidor.');
+  </script>
+</body>
+</html>
