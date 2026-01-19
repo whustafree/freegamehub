@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>FreeGameHub Ultimate 🚀</title>
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#0f172a">
@@ -14,9 +14,8 @@
   
   <div id="qr-modal" class="modal hidden" onclick="closeQR()">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <h3>📱 Escanea para llevar</h3>
-      <img id="qr-image" src="" alt="QR Code">
-      <p>Abre la cámara de tu celular y escanea este código para ver la web en tu móvil.</p>
+      <h3>📱 Escanea</h3>
+      <img id="qr-image" src="" alt="QR">
       <button class="close-btn" onclick="closeQR()">Cerrar</button>
     </div>
   </div>
@@ -25,22 +24,25 @@
     <div class="header-content">
       <div class="top-bar">
         <h1>🎮 FreeGameHub <span class="cl-flag">CL</span></h1>
-        <button class="qr-btn" onclick="openQR()" title="Ver en celular">📱 QR</button>
+        <div class="top-actions">
+           <button class="icon-header-btn" onclick="toggleTheme()" title="Cambiar Tema">🎨</button>
+           <button class="icon-header-btn" onclick="openQR()" title="QR">📱</button>
+        </div>
       </div>
       
       <div id="savings-banner" class="savings-banner">
-        <span class="savings-label">AHORRO TOTAL HOY:</span>
-        <span id="total-savings" class="savings-amount">$0.00</span>
+        <span class="savings-label">AHORRO TOTAL</span>
+        <span id="total-savings" class="savings-amount">...</span>
       </div>
 
       <div class="mode-switcher">
-        <button id="mode-pc" class="mode-btn active" onclick="switchMode('pc')">💻 PC / Consolas</button>
+        <button id="mode-pc" class="mode-btn active" onclick="switchMode('pc')">💻 PC</button>
         <button id="mode-android" class="mode-btn" onclick="switchMode('android')">📱 Android</button>
       </div>
 
       <div class="controls">
         <div class="toolbar">
-          <input type="text" id="search-input" placeholder="🔍 Buscar juego..." />
+          <input type="text" id="search-input" placeholder="🔍 Buscar..." />
           <select id="sort-select">
             <option value="default">📅 Recientes</option>
             <option value="price-desc">💰 Mayor Precio</option>
@@ -48,20 +50,29 @@
           </select>
         </div>
 
+        <div class="genre-chips">
+          <button class="chip active" data-genre="all">Todo</button>
+          <button class="chip" data-genre="action">Acción</button>
+          <button class="chip" data-genre="rpg">RPG</button>
+          <button class="chip" data-genre="indie">Indie</button>
+          <button class="chip" data-genre="shooter">Shooter</button>
+          <button class="chip" data-genre="puzzle">Puzzle</button>
+        </div>
+
         <div class="sub-filters-container">
           <div id="sub-filters-pc" class="sub-filters">
              <button class="type-btn active" data-type="all">Todo</button>
-             <button class="type-btn" data-type="game">🎮 Juegos</button>
-             <button class="type-btn" data-type="dlc">📦 DLCs</button>
+             <button class="type-btn" data-type="game">Juegos</button>
+             <button class="type-btn" data-type="dlc">DLCs</button>
           </div>
           <div id="sub-filters-android" class="sub-filters hidden">
              <button class="type-btn active" data-type="all">Todo</button>
-             <button class="type-btn" data-type="game">🎮 Juegos</button>
-             <button class="type-btn" data-type="app">📱 Apps</button>
+             <button class="type-btn" data-type="game">Juegos</button>
+             <button class="type-btn" data-type="app">Apps</button>
           </div>
           <div class="fav-filter-wrapper">
             <button id="btn-favorites" class="type-btn fav-btn" onclick="toggleShowFavorites()">
-              ❤️ Favoritos (<span id="fav-count">0</span>)
+              ❤️ (<span id="fav-count">0</span>)
             </button>
           </div>
         </div>
@@ -71,8 +82,7 @@
           <button class="filter-btn" data-filter="steam">Steam</button>
           <button class="filter-btn" data-filter="epic">Epic</button>
           <button class="filter-btn" data-filter="gog">GOG</button>
-          <button class="filter-btn" data-filter="indiegala">IndieGala</button>
-          <button class="filter-btn" data-filter="itch">Itch.io</button>
+          <button class="filter-btn" data-filter="itch">Itch</button>
         </div>
         
         <p class="update-info">Actualizado: <span id="last-update">...</span></p>
@@ -82,23 +92,14 @@
 
   <main>
     <div id="games-container" class="games-grid">
-      <p style="color:#64748b; grid-column:1/-1; text-align:center;">Cargando catálogo...</p>
-    </div>
+      </div>
   </main>
 
-  <footer>
-    <p>Desarrollado en Rancagua, Chile 🇨🇱</p>
-  </footer>
+  <footer><p>Desarrollado en Rancagua, Chile 🇨🇱</p></footer>
 
-  <script src="script.js"></script>
-<script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-          .then(reg => console.log('Service Worker registrado 🚀'))
-          .catch(err => console.log('Fallo SW:', err));
-      });
-    }
+  <script>
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
   </script>
+  <script src="script.js"></script>
 </body>
 </html>
