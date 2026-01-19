@@ -23,7 +23,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: 'Outfit', sans-serif; background-color: var(--bg-color); color: var(--text-primary); min-height: 100vh; display: flex; flex-direction: column; transition: background 0.3s; }
 
-/* HEADER */
+/* HEADER (Por defecto Sticky para PC) */
 header { background: var(--header-bg); padding: 1rem; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
 .header-content { max-width: 900px; margin: 0 auto; }
 
@@ -49,13 +49,10 @@ h1 { font-size: 1.5rem; font-weight: 800; background: -webkit-linear-gradient(45
 #search-input { background: rgba(0,0,0,0.3); border: 1px solid var(--text-secondary); color: var(--text-primary); padding: 0.8rem; border-radius: 12px; outline: none; flex-grow: 1; font-size: 1rem; }
 #sort-select { background: rgba(0,0,0,0.3); border: 1px solid var(--text-secondary); color: var(--text-primary); padding: 0.8rem; border-radius: 12px; outline: none; width: 50px; text-align: center; font-size: 1.2rem; cursor: pointer; }
 
-/* SCROLL HORIZONTAL (LA MAGIA MOVIL) */
+/* SCROLL HORIZONTAL */
 .scroll-container { 
   display: flex; gap: 0.5rem; overflow-x: auto; padding: 0.2rem; 
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE */
-  white-space: nowrap; 
-  width: 100%;
+  scrollbar-width: none; -ms-overflow-style: none; white-space: nowrap; width: 100%;
   mask-image: linear-gradient(to right, black 90%, transparent 100%);
   -webkit-mask-image: linear-gradient(to right, black 90%, transparent 100%);
 }
@@ -64,12 +61,9 @@ h1 { font-size: 1.5rem; font-weight: 800; background: -webkit-linear-gradient(45
 .chip, .type-btn, .filter-btn { 
   background: rgba(255,255,255,0.05); border: 1px solid var(--text-secondary); 
   color: var(--text-secondary); padding: 6px 14px; border-radius: 20px; 
-  font-size: 0.85rem; cursor: pointer; flex-shrink: 0; /* Evita que se aplasten */
+  font-size: 0.85rem; cursor: pointer; flex-shrink: 0;
 }
-
-.chip.active, .type-btn.active, .filter-btn.active { 
-  background: var(--text-primary); color: var(--bg-color); font-weight: bold; border-color: var(--text-primary); 
-}
+.chip.active, .type-btn.active, .filter-btn.active { background: var(--text-primary); color: var(--bg-color); font-weight: bold; border-color: var(--text-primary); }
 .filter-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
 .fav-btn.active { background: var(--love); color: white; border-color: var(--love); }
 
@@ -112,16 +106,15 @@ footer { padding: 2rem; text-align: center; color: var(--text-secondary); font-s
 
 /* === AJUSTES ESPECÍFICOS MÓVIL === */
 @media (max-width: 600px) {
+  /* CAMBIO CLAVE: El header deja de ser sticky en móvil */
+  header { position: relative; top: auto; }
+
   h1 { font-size: 1.3rem; }
   .games-grid { grid-template-columns: 1fr; gap: 1rem; padding: 0.8rem; }
   .top-bar { margin-bottom: 0.5rem; }
   .savings-banner { margin-bottom: 0.5rem; padding: 0.3rem 1rem; }
   
-  /* Hacer que los filtros no ocupen verticalmente */
   .sub-filters-container, .filters, .genre-chips {
-    flex-wrap: nowrap; /* No bajar de línea */
-    overflow-x: auto; /* Scroll lateral */
-    justify-content: flex-start;
-    padding-bottom: 5px;
+    flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; padding-bottom: 5px;
   }
 }
