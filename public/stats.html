@@ -178,18 +178,26 @@
       background: rgba(255,255,255,0.15);
     }
     
-    .logs {
-      max-height: 300px;
+    .logs-container {
+      background: #000;
+      border-radius: 12px;
+      padding: 1rem;
+      margin-top: 1rem;
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      max-height: 200px;
       overflow-y: auto;
-      font-family: monospace;
-      font-size: 0.85rem;
+      border: 1px solid #333;
     }
-    
+
     .log-entry {
-      padding: 0.5rem;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-      color: var(--text-secondary);
+      margin-bottom: 5px;
+      border-bottom: 1px solid #1a1a1a;
+      padding-bottom: 2px;
     }
+
+    .log-error { color: #ef4444; }
+    .log-success { color: #22c55e; }
     
     .footer-actions {
       display: flex;
@@ -258,22 +266,6 @@
     </div>
 
     <div class="section">
-      <h3 class="section-title">🎮 Fuentes de Datos</h3>
-      <div class="info-row">
-        <span class="info-label">GamerPower API</span>
-        <span class="status-badge status-online">✓ Activo</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Epic Games API</span>
-        <span class="status-badge status-online">✓ Activo</span>
-      </div>
-      <div class="info-row">
-        <span class="info-label">Reddit r/googleplaydeals</span>
-        <span class="status-badge status-online">✓ Activo</span>
-      </div>
-    </div>
-
-    <div class="section">
       <h3 class="section-title">⚡ Acciones</h3>
       <div class="actions">
         <button class="btn btn-primary" onclick="refreshGames()">
@@ -286,6 +278,10 @@
           🏥 Health Check
         </button>
       </div>
+      
+      <div id="debug-logs" class="logs-container">
+        <div class="log-entry">Esperando acciones...</div>
+      </div>
     </div>
 
     <div class="footer-actions">
@@ -294,7 +290,15 @@
   </div>
 
   <script>
-    // Cargar estadísticas
+    function addLog(message, type = '') {
+      const console = document.getElementById('debug-logs');
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type === 'error' ? 'log-error' : type === 'success' ? 'log-success' : ''}`;
+      entry.textContent = `[${time}] ${message}`;
+      console.prepend(entry);
+    }
+
     async function loadStats() {
       try {
         const res = await fetch('/api/stats');
@@ -312,39 +316,56 @@
           document.getElementById('memory').textContent = `${mb} MB`;
         }
       } catch (err) {
-        console.error('Error cargando stats:', err);
+        addLog('Error cargando stats: ' + err.message, 'error');
       }
     }
 
-    // Acciones
     async function refreshGames() {
       if (!confirm('¿Forzar actualización de juegos ahora?')) return;
-      
       try {
         const btn = event.target;
         btn.disabled = true;
         btn.textContent = '⏳ Actualizando...';
-        
+        addLog('Iniciando actualización forzada...');
+
         const res = await fetch('/api/refresh', { method: 'POST' });
         const data = await res.json();
         
-        alert(data.success ? `✅ ${data.message}` : '❌ Error en la actualización');
-        loadStats();
+        if(data.success) {
+            addLog('Juegos actualizados con éxito', 'success');
+            alert(`✅ ${data.message}`);
+        } else {
+            addLog('Error en actualización: ' + data.message, 'error');
+            alert('❌ Error: ' + data.message);
+        }
         
+        loadStats();
         btn.disabled = false;
         btn.textContent = '🔄 Actualizar Ahora';
       } catch (err) {
-        alert('❌ Error: ' + err.message);
+        addLog('Error de conexión: ' + err.message, 'error');
+        alert('❌ Error de red: ' + err.message);
       }
     }
 
     async function testTelegram() {
+      addLog('Enviando mensaje de prueba a Telegram...');
       try {
         const res = await fetch('/api/test-telegram', { method: 'POST' });
         const data = await res.json();
-        alert(data.success ? '✅ Mensaje de prueba enviado' : '❌ Error enviando mensaje');
+        
+        if (data.success) {
+          addLog('Mensaje enviado correctamente a Telegram', 'success');
+          alert('✅ Mensaje de prueba enviado con éxito.');
+        } else {
+          // Mostramos el error específico que viene del backend
+          const errorMsg = data.error || 'Error desconocido del servidor';
+          addLog('Telegram Error: ' + errorMsg, 'error');
+          alert('❌ Error de Telegram: ' + errorMsg);
+        }
       } catch (err) {
-        alert('❌ Error: ' + err.message);
+        addLog('Error de red al conectar con la API: ' + err.message, 'error');
+        alert('❌ No se pudo conectar con el servidor: ' + err.message);
       }
     }
 
@@ -352,13 +373,14 @@
       try {
         const res = await fetch('/api/health');
         const data = await res.json();
+        addLog('Health Check realizado con éxito', 'success');
         alert(data.success ? `✅ Servidor saludable\n🕐 ${new Date(data.timestamp).toLocaleString()}` : '❌ Problema detectado');
       } catch (err) {
+        addLog('Error en Health Check: ' + err.message, 'error');
         alert('❌ Error de conexión');
       }
     }
 
-    // Cargar al iniciar y cada 30 segundos
     loadStats();
     setInterval(loadStats, 30000);
   </script>
