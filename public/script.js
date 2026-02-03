@@ -657,6 +657,15 @@ function showToast(message, type = 'info') {
     setTimeout(() => toast.remove(), 300);
   }, 3000);
 }
+function toggleFilters() {
+    const menu = document.getElementById('filter-menu');
+    const arrow = document.getElementById('filter-arrow');
+    
+    menu.classList.toggle('active');
+    
+    // Cambia la flecha según el estado
+    arrow.textContent = menu.classList.contains('active') ? '▲' : '▼';
+}
 
 // Exponer funciones globales
 window.switchMode = switchMode;
