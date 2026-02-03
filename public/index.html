@@ -19,12 +19,10 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Fondo animado -->
   <div class="background-overlay"></div>
   <div class="gradient-orb orb-1"></div>
   <div class="gradient-orb orb-2"></div>
   
-  <!-- Modal QR -->
   <div id="qr-modal" class="modal hidden" onclick="closeQR()">
     <div class="modal-content" onclick="event.stopPropagation()">
       <h3>📱 Compartir</h3>
@@ -34,7 +32,6 @@
     </div>
   </div>
 
-  <!-- Modal de notificaciones -->
   <div id="notification-modal" class="modal hidden">
     <div class="modal-content">
       <h3>🔔 Notificaciones</h3>
@@ -46,7 +43,6 @@
     </div>
   </div>
 
-  <!-- Toast container -->
   <div id="toast-container"></div>
 
   <header>
@@ -68,43 +64,41 @@
           </button>
         </div>
       </div>
-      
-      <!-- Banner de ahorro -->
-      <div class="stats-banner">
-        <div class="stat-item">
-          <span class="stat-label">💰 Ahorro Total</span>
-          <span id="total-savings" class="stat-value">$0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">🎮 Juegos</span>
-          <span id="games-count" class="stat-value">0</span>
-        </div>
-        <div class="stat-item">
-          <span class="stat-label">⏰ Actualizado</span>
-          <span id="last-update" class="stat-value">--</span>
-        </div>
-      </div>
 
-      <!-- Selector de modo -->
-      <div class="mode-switcher-container">
-        <div class="mode-switcher">
-          <button id="mode-pc" class="mode-btn active" onclick="switchMode('pc')">
-            <span class="mode-icon">💻</span>
-            <span class="mode-text">PC</span>
-          </button>
-          <button id="mode-android" class="mode-btn" onclick="switchMode('android')">
-            <span class="mode-icon">📱</span>
-            <span class="mode-text">Android</span>
-          </button>
-        </div>
-      </div>
-
-<button class="mobile-filter-toggle" onclick="toggleFilters()">
-        <span>🔍 Filtros y Búsqueda</span>
+      <button class="mobile-filter-toggle" onclick="toggleFilters()">
+        <span>🔍 Filtros y Estadísticas</span>
         <span id="filter-arrow">▼</span>
       </button>
 
       <div class="controls collapsible-menu" id="filter-menu">
+        <div class="stats-banner">
+          <div class="stat-item">
+            <span class="stat-label">💰 Ahorro Total</span>
+            <span id="total-savings" class="stat-value">$0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">🎮 Juegos</span>
+            <span id="games-count" class="stat-value">0</span>
+          </div>
+          <div class="stat-item">
+            <span class="stat-label">⏰ Actualizado</span>
+            <span id="last-update" class="stat-value">--</span>
+          </div>
+        </div>
+
+        <div class="mode-switcher-container">
+          <div class="mode-switcher">
+            <button id="mode-pc" class="mode-btn active" onclick="switchMode('pc')">
+              <span class="mode-icon">💻</span>
+              <span class="mode-text">PC</span>
+            </button>
+            <button id="mode-android" class="mode-btn" onclick="switchMode('android')">
+              <span class="mode-icon">📱</span>
+              <span class="mode-text">Android</span>
+            </button>
+          </div>
+        </div>
+
         <div class="toolbar">
           <div class="search-box">
             <span class="search-icon">🔍</span>
@@ -121,7 +115,6 @@
           </div>
         </div>
 
-        <!-- Filtros de género -->
         <div class="filter-section">
           <span class="filter-label">Género:</span>
           <div class="genre-chips scroll-container">
@@ -137,7 +130,6 @@
           </div>
         </div>
 
-        <!-- Filtros de tipo -->
         <div class="filter-section">
           <span class="filter-label">Tipo:</span>
           <div id="sub-filters-pc" class="sub-filters scroll-container">
@@ -152,7 +144,6 @@
           </div>
         </div>
 
-        <!-- Filtros de plataforma (solo PC) -->
         <div class="filter-section" id="platform-section">
           <span class="filter-label">Plataforma:</span>
           <div class="filters scroll-container" id="platform-filters">
@@ -164,7 +155,6 @@
           </div>
         </div>
 
-        <!-- Favoritos -->
         <div class="favorites-bar">
           <button id="btn-favorites" class="fav-btn" onclick="toggleShowFavorites()">
             <span class="fav-icon">❤️</span>
@@ -181,17 +171,13 @@
   </header>
 
   <main>
-    <!-- Estado de carga -->
     <div id="loading-state" class="loading-state">
       <div class="spinner"></div>
       <p>Cargando juegos gratuitos...</p>
     </div>
 
-    <!-- Grid de juegos -->
-    <div id="games-container" class="games-grid hidden">
-    </div>
+    <div id="games-container" class="games-grid hidden"></div>
 
-    <!-- Estado vacío -->
     <div id="empty-state" class="empty-state hidden">
       <div class="empty-icon">🔍</div>
       <h3>No se encontraron juegos</h3>
@@ -212,7 +198,6 @@
     </div>
   </footer>
 
-  <!-- Scripts -->
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
   <script src="script.js"></script>
 </body>
