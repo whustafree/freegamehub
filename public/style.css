@@ -1116,7 +1116,43 @@ footer {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+/* Botón de toggle oculto en PC */
+.mobile-filter-toggle {
+    display: none;
+    width: 100%;
+    padding: 12px;
+    background: #1e293b;
+    color: white;
+    border: 1px solid #334155;
+    border-radius: 8px;
+    margin: 10px 0;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+}
 
+@media (max-width: 768px) {
+    .mobile-filter-toggle { display: flex; } /* Aparece en móvil */
+
+    .collapsible-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+        opacity: 0;
+    }
+
+    .collapsible-menu.active {
+        max-height: 1200px; /* Ajusta según el tamaño de tus filtros */
+        opacity: 1;
+        margin-bottom: 20px;
+    }
+
+    /* Reduce el espacio del banner para que los juegos suban */
+    .stats-banner {
+        padding: 10px;
+        gap: 8px;
+    }
+}
 /* Animación de entrada para tarjetas con delay */
 .game-card:nth-child(1) { animation-delay: 0.05s; }
 .game-card:nth-child(2) { animation-delay: 0.1s; }
