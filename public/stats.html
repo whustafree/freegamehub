@@ -3,40 +3,364 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard</title>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap" rel="stylesheet">
+  <title>FreeGameHub - Panel de Administración</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { background: #0f172a; color: #fff; font-family: 'Outfit', sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-    .dashboard { background: #1e293b; padding: 2rem; border-radius: 20px; border: 1px solid #3b82f6; max-width: 400px; width: 100%; box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-    h1 { text-align: center; color: #3b82f6; margin-bottom: 2rem; }
-    .stat-row { display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid #334155; }
-    .stat-label { color: #94a3b8; }
-    .stat-value { font-weight: bold; font-size: 1.1rem; }
-    .refresh-btn { background: #3b82f6; color: white; border: none; width: 100%; padding: 1rem; border-radius: 10px; margin-top: 1.5rem; cursor: pointer; font-weight: bold; }
+    :root {
+      --bg-color: #0a0f1a;
+      --card-bg: #1a2236;
+      --accent: #3b82f6;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --text: #f8fafc;
+      --text-secondary: #94a3b8;
+    }
+    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: var(--bg-color);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      color: var(--text-secondary);
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.3s;
+    }
+    
+    .stat-card:hover {
+      transform: translateY(-4px);
+    }
+    
+    .stat-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent);
+    }
+    
+    .stat-label {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+    
+    .section {
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .section-title {
+      font-size: 1.1rem;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    
+    .info-label {
+      color: var(--text-secondary);
+    }
+    
+    .info-value {
+      font-weight: 600;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    
+    .status-online {
+      background: rgba(34, 197, 94, 0.15);
+      color: var(--success);
+    }
+    
+    .status-offline {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+    
+    .actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .btn {
+      padding: 0.875rem 1.5rem;
+      border-radius: 12px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.15);
+    }
+    
+    .logs {
+      max-height: 300px;
+      overflow-y: auto;
+      font-family: monospace;
+      font-size: 0.85rem;
+    }
+    
+    .log-entry {
+      padding: 0.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      color: var(--text-secondary);
+    }
+    
+    .footer-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+    
+    @media (max-width: 600px) {
+      body { padding: 1rem; }
+      h1 { font-size: 1.5rem; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
   </style>
 </head>
 <body>
-  <div class="dashboard">
-    <h1>⚙️ Panel Admin</h1>
-    <div id="stats-container">Cargando datos...</div>
-    <button class="refresh-btn" onclick="location.href='/'">Volver a la Web</button>
+  <div class="container">
+    <header>
+      <h1>⚙️ Panel de Administración</h1>
+      <p class="subtitle">FreeGameHub v2.0</p>
+    </header>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">🎮</div>
+        <div class="stat-value" id="current-games">-</div>
+        <div class="stat-label">Juegos Activos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📨</div>
+        <div class="stat-value" id="alerts-sent">-</div>
+        <div class="stat-label">Alertas Enviadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔄</div>
+        <div class="stat-value" id="total-scans">-</div>
+        <div class="stat-label">Escaneos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⏱️</div>
+        <div class="stat-value" id="uptime">-</div>
+        <div class="stat-label">Tiempo Activo</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">📊 Información del Sistema</h3>
+      <div class="info-row">
+        <span class="info-label">Estado del Servidor</span>
+        <span class="status-badge status-online">
+          <span>🟢</span> En línea
+        </span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Última Actualización</span>
+        <span class="info-value" id="last-update">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Inicio del Servidor</span>
+        <span class="info-value" id="boot-time">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Memoria Usada</span>
+        <span class="info-value" id="memory">-</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">🎮 Fuentes de Datos</h3>
+      <div class="info-row">
+        <span class="info-label">GamerPower API</span>
+        <span class="status-badge status-online">✓ Activo</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Epic Games API</span>
+        <span class="status-badge status-online">✓ Activo</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Reddit r/googleplaydeals</span>
+        <span class="status-badge status-online">✓ Activo</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3 class="section-title">⚡ Acciones</h3>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="refreshGames()">
+          🔄 Actualizar Ahora
+        </button>
+        <button class="btn btn-secondary" onclick="testTelegram()">
+          📨 Probar Telegram
+        </button>
+        <button class="btn btn-secondary" onclick="checkHealth()">
+          🏥 Health Check
+        </button>
+      </div>
+    </div>
+
+    <div class="footer-actions">
+      <a href="/" class="btn btn-secondary">← Volver a la Web</a>
+    </div>
   </div>
+
   <script>
-    fetch('/api/stats')
-      .then(r => r.json())
-      .then(data => {
-        const formatTime = (iso) => iso ? new Date(iso).toLocaleString() : 'Nunca';
-        const uptime = Math.floor(data.uptime / 60) + ' min';
-        const html = `
-          <div class="stat-row"><span class="stat-label">Juegos Actuales:</span><span class="stat-value">${data.currentGames}</span></div>
-          <div class="stat-row"><span class="stat-label">Alertas Enviadas:</span><span class="stat-value">${data.alertsSent}</span></div>
-          <div class="stat-row"><span class="stat-label">Escaneos Totales:</span><span class="stat-value">${data.totalScans}</span></div>
-          <div class="stat-row"><span class="stat-label">Tiempo Encendido:</span><span class="stat-value">${uptime}</span></div>
-          <div class="stat-row"><span class="stat-label">Inicio Servidor:</span><span class="stat-value" style="font-size:0.8rem">${formatTime(data.bootTime)}</span></div>
-        `;
-        document.getElementById('stats-container').innerHTML = html;
-      })
-      .catch(err => document.getElementById('stats-container').innerHTML = 'Error conectando al servidor.');
+    // Cargar estadísticas
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        
+        document.getElementById('current-games').textContent = data.currentGames || 0;
+        document.getElementById('alerts-sent').textContent = data.alertsSent || 0;
+        document.getElementById('total-scans').textContent = data.totalScans || 0;
+        document.getElementById('uptime').textContent = data.uptimeFormatted || '-';
+        document.getElementById('last-update').textContent = data.lastUpdate ? new Date(data.lastUpdate).toLocaleString('es-CL') : '-';
+        document.getElementById('boot-time').textContent = data.bootTime ? new Date(data.bootTime).toLocaleString('es-CL') : '-';
+        
+        if (data.memoryUsage) {
+          const mb = Math.round(data.memoryUsage.heapUsed / 1024 / 1024);
+          document.getElementById('memory').textContent = `${mb} MB`;
+        }
+      } catch (err) {
+        console.error('Error cargando stats:', err);
+      }
+    }
+
+    // Acciones
+    async function refreshGames() {
+      if (!confirm('¿Forzar actualización de juegos ahora?')) return;
+      
+      try {
+        const btn = event.target;
+        btn.disabled = true;
+        btn.textContent = '⏳ Actualizando...';
+        
+        const res = await fetch('/api/refresh', { method: 'POST' });
+        const data = await res.json();
+        
+        alert(data.success ? `✅ ${data.message}` : '❌ Error en la actualización');
+        loadStats();
+        
+        btn.disabled = false;
+        btn.textContent = '🔄 Actualizar Ahora';
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
+    }
+
+    async function testTelegram() {
+      try {
+        const res = await fetch('/api/test-telegram', { method: 'POST' });
+        const data = await res.json();
+        alert(data.success ? '✅ Mensaje de prueba enviado' : '❌ Error enviando mensaje');
+      } catch (err) {
+        alert('❌ Error: ' + err.message);
+      }
+    }
+
+    async function checkHealth() {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        alert(data.success ? `✅ Servidor saludable\n🕐 ${new Date(data.timestamp).toLocaleString()}` : '❌ Problema detectado');
+      } catch (err) {
+        alert('❌ Error de conexión');
+      }
+    }
+
+    // Cargar al iniciar y cada 30 segundos
+    loadStats();
+    setInterval(loadStats, 30000);
   </script>
 </body>
 </html>

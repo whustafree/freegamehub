@@ -1,0 +1,22 @@
+# Render Blueprint para FreeGameHub v2.0
+services:
+  - type: web
+    name: freegamehub
+    env: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: TELEGRAM_TOKEN
+        sync: false
+      - key: TELEGRAM_CHAT_ID
+        sync: false
+      - key: APP_URL
+        value: https://freegamehub.onrender.com
+      - key: UPDATE_INTERVAL_HOURS
+        value: 4
+    healthCheckPath: /api/health
+    autoDeploy: true

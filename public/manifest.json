@@ -1,15 +1,37 @@
 {
-  "name": "FreeGameHub CL",
-  "short_name": "FreeGames",
+  "name": "FreeGameHub - Juegos Gratis",
+  "short_name": "FreeGameHub",
+  "description": "Descubre los mejores juegos gratuitos para PC, Android y más. Actualizado diariamente.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "background_color": "#0a0f1a",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "es",
+  "categories": ["games", "entertainment"],
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3408/3408506.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
-  ]
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/screenshots/mobile.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
 }

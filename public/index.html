@@ -3,104 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>FreeGameHub App 🚀</title>
-  <link rel="manifest" href="manifest.json" />
+  <meta name="description" content="Descubre los mejores juegos gratuitos para PC, Android y más. Actualizado diariamente con ofertas de Epic Games, Steam, Play Store y más.">
+  <meta name="keywords" content="juegos gratis, free games, epic games, steam, android, ofertas">
   <meta name="theme-color" content="#0f172a">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;700;800&display=swap" rel="stylesheet">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  
+  <title>FreeGameHub - Juegos Gratis 🎮</title>
+  
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- Fondo animado -->
   <div class="background-overlay"></div>
+  <div class="gradient-orb orb-1"></div>
+  <div class="gradient-orb orb-2"></div>
   
+  <!-- Modal QR -->
   <div id="qr-modal" class="modal hidden" onclick="closeQR()">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <h3>📱 Escanea</h3>
-      <img id="qr-image" src="" alt="QR">
+      <h3>📱 Compartir</h3>
+      <p>Escanea para abrir en tu móvil</p>
+      <img id="qr-image" src="" alt="QR Code">
       <button class="close-btn" onclick="closeQR()">Cerrar</button>
     </div>
   </div>
 
+  <!-- Modal de notificaciones -->
+  <div id="notification-modal" class="modal hidden">
+    <div class="modal-content">
+      <h3>🔔 Notificaciones</h3>
+      <p>Activa las notificaciones para recibir alertas cuando haya nuevos juegos gratuitos.</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeNotificationModal()">Ahora no</button>
+        <button class="btn-primary" onclick="enableNotifications()">Activar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
   <header>
     <div class="header-content">
       <div class="top-bar">
-        <h1>FreeGameHub <span class="cl-flag">CL</span></h1>
+        <div class="logo">
+          <h1>FreeGameHub</h1>
+          <span class="version">v2.0</span>
+        </div>
         <div class="top-actions">
-           <button class="icon-header-btn" onclick="toggleTheme()" title="Cambiar Tema">🎨</button>
-           <button class="icon-header-btn" onclick="openQR()" title="QR">📱</button>
+          <button class="icon-header-btn" onclick="toggleTheme()" title="Cambiar Tema">
+            <span id="theme-icon">🎨</span>
+          </button>
+          <button class="icon-header-btn" onclick="openQR()" title="Compartir">
+            <span>📱</span>
+          </button>
+          <button class="icon-header-btn" onclick="requestNotificationPermission()" title="Notificaciones">
+            <span id="notif-icon">🔔</span>
+          </button>
         </div>
       </div>
       
-      <div id="savings-banner" class="savings-banner">
-        <span class="savings-label">AHORRO:</span>
-        <span id="total-savings" class="savings-amount">...</span>
+      <!-- Banner de ahorro -->
+      <div class="stats-banner">
+        <div class="stat-item">
+          <span class="stat-label">💰 Ahorro Total</span>
+          <span id="total-savings" class="stat-value">$0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">🎮 Juegos</span>
+          <span id="games-count" class="stat-value">0</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">⏰ Actualizado</span>
+          <span id="last-update" class="stat-value">--</span>
+        </div>
       </div>
 
-      <div style="text-align:center;">
+      <!-- Selector de modo -->
+      <div class="mode-switcher-container">
         <div class="mode-switcher">
-          <button id="mode-pc" class="mode-btn active" onclick="switchMode('pc')">💻 PC</button>
-          <button id="mode-android" class="mode-btn" onclick="switchMode('android')">📱 Android</button>
+          <button id="mode-pc" class="mode-btn active" onclick="switchMode('pc')">
+            <span class="mode-icon">💻</span>
+            <span class="mode-text">PC</span>
+          </button>
+          <button id="mode-android" class="mode-btn" onclick="switchMode('android')">
+            <span class="mode-icon">📱</span>
+            <span class="mode-text">Android</span>
+          </button>
         </div>
       </div>
 
+      <!-- Controles -->
       <div class="controls">
+        <!-- Búsqueda y orden -->
         <div class="toolbar">
-          <input type="text" id="search-input" placeholder="🔍 Buscar..." />
-          <select id="sort-select">
-            <option value="default">📅</option>
-            <option value="price-desc">💰</option>
-            <option value="ending-soon">⏳</option>
-          </select>
-        </div>
-
-        <div class="genre-chips scroll-container">
-          <button class="chip active" data-genre="all">Todo</button>
-          <button class="chip" data-genre="action">Acción</button>
-          <button class="chip" data-genre="rpg">RPG</button>
-          <button class="chip" data-genre="indie">Indie</button>
-          <button class="chip" data-genre="shooter">FPS</button>
-          <button class="chip" data-genre="puzzle">Puzzle</button>
-          <button class="chip" data-genre="racing">Carreras</button>
-        </div>
-
-        <div class="sub-filters-container scroll-container">
-          <div id="sub-filters-pc" class="sub-filters scroll-container" style="padding:0;">
-             <button class="type-btn active" data-type="all">Todo</button>
-             <button class="type-btn" data-type="game">Juegos</button>
-             <button class="type-btn" data-type="dlc">DLCs</button>
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="search-input" placeholder="Buscar juegos..." autocomplete="off" />
+            <button class="clear-search hidden" onclick="clearSearch()">✕</button>
           </div>
-          <div id="sub-filters-android" class="sub-filters hidden scroll-container" style="padding:0;">
-             <button class="type-btn active" data-type="all">Todo</button>
-             <button class="type-btn" data-type="game">Juegos</button>
-             <button class="type-btn" data-type="app">Apps</button>
-          </div>
-          <div class="fav-filter-wrapper">
-            <button id="btn-favorites" class="type-btn fav-btn" onclick="toggleShowFavorites()">
-              ❤️ Favoritos (<span id="fav-count">0</span>)
-            </button>
+          <div class="sort-box">
+            <select id="sort-select">
+              <option value="default">📅 Más recientes</option>
+              <option value="price-desc">💰 Mayor precio</option>
+              <option value="ending-soon">⏳ Termina pronto</option>
+              <option value="title">🔤 Alfabético</option>
+            </select>
           </div>
         </div>
 
-        <div class="filters scroll-container" id="platform-filters">
-          <button class="filter-btn active" data-filter="all">Todas</button>
-          <button class="filter-btn" data-filter="steam">Steam</button>
-          <button class="filter-btn" data-filter="epic">Epic</button>
-          <button class="filter-btn" data-filter="gog">GOG</button>
-          <button class="filter-btn" data-filter="itch">Itch</button>
-          <button class="filter-btn" data-filter="indiegala">Indie</button>
+        <!-- Filtros de género -->
+        <div class="filter-section">
+          <span class="filter-label">Género:</span>
+          <div class="genre-chips scroll-container">
+            <button class="chip active" data-genre="all">🎮 Todo</button>
+            <button class="chip" data-genre="action">⚔️ Acción</button>
+            <button class="chip" data-genre="rpg">🗡️ RPG</button>
+            <button class="chip" data-genre="indie">💎 Indie</button>
+            <button class="chip" data-genre="shooter">🔫 Shooter</button>
+            <button class="chip" data-genre="strategy">♟️ Estrategia</button>
+            <button class="chip" data-genre="puzzle">🧩 Puzzle</button>
+            <button class="chip" data-genre="racing">🏎️ Carreras</button>
+            <button class="chip" data-genre="sports">⚽ Deportes</button>
+          </div>
         </div>
-        
-        <p class="update-info">Actualizado: <span id="last-update">...</span></p>
+
+        <!-- Filtros de tipo -->
+        <div class="filter-section">
+          <span class="filter-label">Tipo:</span>
+          <div id="sub-filters-pc" class="sub-filters scroll-container">
+            <button class="type-btn active" data-type="all">Todo</button>
+            <button class="type-btn" data-type="game">🎮 Juegos</button>
+            <button class="type-btn" data-type="dlc">📦 DLCs</button>
+          </div>
+          <div id="sub-filters-android" class="sub-filters hidden scroll-container">
+            <button class="type-btn active" data-type="all">Todo</button>
+            <button class="type-btn" data-type="game">🎮 Juegos</button>
+            <button class="type-btn" data-type="app">📱 Apps</button>
+          </div>
+        </div>
+
+        <!-- Filtros de plataforma (solo PC) -->
+        <div class="filter-section" id="platform-section">
+          <span class="filter-label">Plataforma:</span>
+          <div class="filters scroll-container" id="platform-filters">
+            <button class="filter-btn active" data-filter="all">Todas</button>
+            <button class="filter-btn" data-filter="steam">🎮 Steam</button>
+            <button class="filter-btn" data-filter="epic">🎯 Epic</button>
+            <button class="filter-btn" data-filter="gog">🎲 GOG</button>
+            <button class="filter-btn" data-filter="itch">🕹️ Itch.io</button>
+          </div>
+        </div>
+
+        <!-- Favoritos -->
+        <div class="favorites-bar">
+          <button id="btn-favorites" class="fav-btn" onclick="toggleShowFavorites()">
+            <span class="fav-icon">❤️</span>
+            <span class="fav-text">Mis Favoritos</span>
+            <span id="fav-count" class="fav-badge">0</span>
+          </button>
+          <button id="btn-hidden" class="hidden-btn" onclick="showHiddenGames()">
+            <span>🙈</span>
+            <span id="hidden-count" class="hidden-badge">0</span>
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
   <main>
-    <div id="games-container" class="games-grid">
-      </div>
+    <!-- Estado de carga -->
+    <div id="loading-state" class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando juegos gratuitos...</p>
+    </div>
+
+    <!-- Grid de juegos -->
+    <div id="games-container" class="games-grid hidden">
+    </div>
+
+    <!-- Estado vacío -->
+    <div id="empty-state" class="empty-state hidden">
+      <div class="empty-icon">🔍</div>
+      <h3>No se encontraron juegos</h3>
+      <p>Prueba con otros filtros o términos de búsqueda</p>
+      <button class="btn-primary" onclick="resetAllFilters()">Limpiar filtros</button>
+    </div>
   </main>
 
-  <footer><p>Hecho en Rancagua 🇨🇱</p></footer>
+  <footer>
+    <div class="footer-content">
+      <p class="footer-text">Hecho con ❤️ para gamers</p>
+      <div class="footer-links">
+        <a href="/stats" target="_blank">📊 Stats</a>
+        <span>•</span>
+        <a href="#" onclick="showAbout()">ℹ️ Acerca de</a>
+      </div>
+      <p class="footer-copyright">© 2026 FreeGameHub</p>
+    </div>
+  </footer>
 
+  <!-- Scripts -->
   <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
   <script src="script.js"></script>
 </body>
