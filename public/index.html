@@ -99,9 +99,12 @@
         </div>
       </div>
 
-      <!-- Controles -->
-      <div class="controls">
-        <!-- Búsqueda y orden -->
+<button class="mobile-filter-toggle" onclick="toggleFilters()">
+        <span>🔍 Filtros y Búsqueda</span>
+        <span id="filter-arrow">▼</span>
+      </button>
+
+      <div class="controls collapsible-menu" id="filter-menu">
         <div class="toolbar">
           <div class="search-box">
             <span class="search-icon">🔍</span>
