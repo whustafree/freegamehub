@@ -1,8 +1,7 @@
 /* ========================================
-   FREE GAME HUB v2.0 - ESTILOS OPTIMIZADOS
+   FREE GAME HUB v2.0 - ESTILOS ACTUALIZADOS
    ======================================== */
 
-/* Variables de tema */
 :root {
   --bg-color: #0a0f1a;
   --bg-secondary: #111827;
@@ -16,15 +15,9 @@
   --accent-light: #60a5fa;
   --accent-glow: rgba(59, 130, 246, 0.4);
   --success: #22c55e;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --info: #06b6d4;
   --gold: #fbbf24;
-  --love: #ef4444;
-  --android: #3ddc84;
   --radius: 12px;
   --radius-lg: 16px;
-  --radius-xl: 24px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   --shadow-glow: 0 0 20px var(--accent-glow);
 }
@@ -39,7 +32,6 @@
   --accent: #00ff41; --accent-glow: rgba(0, 255, 65, 0.4);
 }
 
-/* Base */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
   font-family: 'Outfit', sans-serif;
@@ -49,10 +41,40 @@ body {
 }
 
 /* ========================================
-   MENU COLAPSABLE Y TOGGLE (MÓVIL)
+   HEADER Y LOGO (MÓVIL OPTIMIZADO)
+   ======================================== */
+header {
+  background: var(--header-bg);
+  backdrop-filter: blur(20px);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.header-content { max-width: 1200px; margin: 0 auto; }
+
+.top-bar { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-bottom: 1rem; 
+}
+
+.logo h1 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ========================================
+   MENU COLAPSABLE (MÓVIL)
    ======================================== */
 .mobile-filter-toggle {
-    display: none; /* Oculto en PC */
+    display: none;
     width: 100%;
     padding: 14px;
     background: var(--card-bg);
@@ -67,11 +89,6 @@ body {
     transition: var(--transition);
 }
 
-.mobile-filter-toggle:hover {
-    border-color: var(--accent);
-    background: var(--card-hover);
-}
-
 .collapsible-menu {
     display: flex;
     flex-direction: column;
@@ -79,30 +96,8 @@ body {
 }
 
 /* ========================================
-   HEADER Y COMPONENTES
+   STATS Y COMPONENTES
    ======================================== */
-header {
-  background: var(--header-bg);
-  backdrop-filter: blur(20px);
-  padding: 1rem;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-.header-content { max-width: 1200px; margin: 0 auto; }
-
-.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
-
-.logo h1 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--accent), var(--accent-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
 .stats-banner {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -119,14 +114,9 @@ header {
 
 .stat-value { color: var(--gold); font-weight: 700; }
 
-/* Filtros y Chips */
-.scroll-container {
-  display: flex;
-  gap: 0.5rem;
-  overflow-x: auto;
-  padding: 5px 0;
-  scrollbar-width: none;
-}
+.mode-switcher-container { display: flex; justify-content: center; margin-bottom: 1rem; }
+
+.scroll-container { display: flex; gap: 0.5rem; overflow-x: auto; padding: 5px 0; }
 .scroll-container::-webkit-scrollbar { display: none; }
 
 .chip, .type-btn, .filter-btn {
@@ -137,7 +127,6 @@ header {
   color: var(--text-secondary);
   cursor: pointer;
   white-space: nowrap;
-  transition: 0.2s;
 }
 
 .chip.active, .type-btn.active, .filter-btn.active {
@@ -150,7 +139,6 @@ header {
    GRID DE JUEGOS
    ======================================== */
 main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-
 .games-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -168,31 +156,22 @@ main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
 
 .game-card:hover {
   transform: translateY(-5px);
-  border-color: var(--accent);
   box-shadow: 0 10px 30px rgba(0,0,0,0.5), var(--shadow-glow);
 }
 
-.card-image-wrapper { height: 160px; overflow: hidden; }
-.card-image-wrapper img { width: 100%; height: 100%; object-fit: cover; }
-
-.game-info { padding: 1.25rem; }
-.claim-btn {
-  display: block;
-  text-align: center;
-  background: var(--accent);
-  color: white;
-  padding: 0.75rem;
-  border-radius: var(--radius);
-  text-decoration: none;
-  font-weight: 600;
-  margin-top: 1rem;
-}
-
 /* ========================================
-   MEDIA QUERIES (MÓVIL)
+   MEDIA QUERIES (ULTRA SLIM)
    ======================================== */
 @media (max-width: 768px) {
-    .mobile-filter-toggle { display: flex; }
+    header { padding: 0.6rem 0.75rem; }
+    .top-bar { margin-bottom: 0.5rem; }
+    .logo h1 { font-size: 1.2rem; }
+
+    .mobile-filter-toggle { 
+      display: flex; 
+      margin: 5px 0;
+      font-size: 0.9rem;
+    }
 
     .collapsible-menu {
         max-height: 0;
@@ -203,16 +182,17 @@ main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
     }
 
     .collapsible-menu.active {
-        max-height: 1500px;
+        max-height: 2000px; /* Aumentado para cubrir stats + filtros */
         opacity: 1;
         pointer-events: auto;
-        margin-bottom: 20px;
+        margin-top: 10px;
+        padding-bottom: 20px;
     }
 
-    .stats-banner { gap: 0.5rem; }
-    .stat-value { font-size: 0.9rem; }
+    .stats-banner { margin-top: 10px; gap: 0.4rem; }
+    .stat-item { padding: 0.5rem; }
+    .stat-value { font-size: 0.85rem; }
     .games-grid { grid-template-columns: 1fr; }
 }
 
-/* Utilidades */
 .hidden { display: none !important; }
