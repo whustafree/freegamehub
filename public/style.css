@@ -1,5 +1,5 @@
 /* ========================================
-   FREE GAME HUB v2.0 - ESTILOS ACTUALIZADOS
+   FREE GAME HUB v2.0 - ESTILOS FINALES
    ======================================== */
 
 :root {
@@ -7,15 +7,14 @@
   --bg-secondary: #111827;
   --card-bg: #1a2236;
   --card-hover: #232d44;
-  --header-bg: rgba(17, 24, 39, 0.95);
+  --header-bg: rgba(17, 24, 39, 0.9);
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
-  --text-muted: #64748b;
   --accent: #3b82f6;
   --accent-light: #60a5fa;
   --accent-glow: rgba(59, 130, 246, 0.4);
-  --success: #22c55e;
   --gold: #fbbf24;
+  --love: #ef4444;
   --radius: 12px;
   --radius-lg: 16px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -23,12 +22,12 @@
 }
 
 [data-theme="cyberpunk"] {
-  --bg-color: #050011; --bg-secondary: #0d0021; --card-bg: #1a0b2e;
+  --bg-color: #050011; --card-bg: #1a0b2e;
   --accent: #d946ef; --accent-glow: rgba(217, 70, 239, 0.5);
 }
 
 [data-theme="matrix"] {
-  --bg-color: #000000; --bg-secondary: #0a110a; --card-bg: #0d1a0d;
+  --bg-color: #000000; --card-bg: #0d1a0d;
   --accent: #00ff41; --accent-glow: rgba(0, 255, 65, 0.4);
 }
 
@@ -40,9 +39,31 @@ body {
   overflow-x: hidden;
 }
 
-/* ========================================
-   HEADER Y LOGO (MÓVIL OPTIMIZADO)
-   ======================================== */
+/* --- ICONOS DE CABECERA (RESTAURADOS) --- */
+.icon-header-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(30, 41, 59, 0.5);
+  backdrop-filter: blur(10px);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: var(--transition);
+}
+
+.icon-header-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+}
+
+/* --- ESTRUCTURA HEADER --- */
 header {
   background: var(--header-bg);
   backdrop-filter: blur(20px);
@@ -54,13 +75,7 @@ header {
 }
 
 .header-content { max-width: 1200px; margin: 0 auto; }
-
-.top-bar { 
-  display: flex; 
-  justify-content: space-between; 
-  align-items: center; 
-  margin-bottom: 1rem; 
-}
+.top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
 
 .logo h1 {
   font-size: 1.5rem;
@@ -70,9 +85,7 @@ header {
   -webkit-text-fill-color: transparent;
 }
 
-/* ========================================
-   MENU COLAPSABLE (MÓVIL)
-   ======================================== */
+/* --- MENU COLAPSABLE (MÓVIL) --- */
 .mobile-filter-toggle {
     display: none;
     width: 100%;
@@ -86,113 +99,40 @@ header {
     align-items: center;
     font-weight: 600;
     cursor: pointer;
-    transition: var(--transition);
 }
 
-.collapsible-menu {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-}
+.collapsible-menu { display: flex; flex-direction: column; gap: 0.75rem; }
 
-/* ========================================
-   STATS Y COMPONENTES
-   ======================================== */
-.stats-banner {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.stat-item {
-  background: var(--card-bg);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  text-align: center;
-}
-
+/* --- COMPONENTES --- */
+.stats-banner { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1rem; }
+.stat-item { background: var(--card-bg); border-radius: var(--radius); padding: 0.75rem; text-align: center; }
 .stat-value { color: var(--gold); font-weight: 700; }
 
 .mode-switcher-container { display: flex; justify-content: center; margin-bottom: 1rem; }
+.mode-switcher { background: var(--bg-secondary); padding: 4px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1); }
+.mode-btn { padding: 8px 16px; border-radius: 20px; border: none; background: transparent; color: white; cursor: pointer; transition: 0.3s; }
+.mode-btn.active { background: var(--accent); box-shadow: var(--shadow-glow); }
 
-.scroll-container { display: flex; gap: 0.5rem; overflow-x: auto; padding: 5px 0; }
-.scroll-container::-webkit-scrollbar { display: none; }
+.scroll-container { display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 5px; }
+.chip, .type-btn, .filter-btn { padding: 0.5rem 1rem; background: var(--card-bg); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; color: var(--text-secondary); cursor: pointer; white-space: nowrap; }
+.chip.active, .type-btn.active, .filter-btn.active { background: var(--accent); color: white; }
 
-.chip, .type-btn, .filter-btn {
-  padding: 0.5rem 1rem;
-  background: var(--card-bg);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 20px;
-  color: var(--text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.chip.active, .type-btn.active, .filter-btn.active {
-  background: var(--accent);
-  color: white;
-  box-shadow: var(--shadow-glow);
-}
-
-/* ========================================
-   GRID DE JUEGOS
-   ======================================== */
+/* --- GRID Y CARDS --- */
 main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
-.games-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
-}
+.games-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+.game-card { background: var(--card-bg); border-radius: var(--radius-lg); border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; transition: var(--transition); }
+.game-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: var(--shadow-glow); }
 
-.game-card {
-  background: var(--card-bg);
-  border-radius: var(--radius-lg);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.game-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5), var(--shadow-glow);
-}
-
-/* ========================================
-   MEDIA QUERIES (ULTRA SLIM)
-   ======================================== */
+/* --- MEDIA QUERIES (MÓVIL) --- */
 @media (max-width: 768px) {
     header { padding: 0.6rem 0.75rem; }
     .top-bar { margin-bottom: 0.5rem; }
     .logo h1 { font-size: 1.2rem; }
-
-    .mobile-filter-toggle { 
-      display: flex; 
-      margin: 5px 0;
-      font-size: 0.9rem;
-    }
-
-    .collapsible-menu {
-        max-height: 0;
-        overflow: hidden;
-        opacity: 0;
-        transition: max-height 0.4s ease-in-out, opacity 0.3s;
-        pointer-events: none;
-    }
-
-    .collapsible-menu.active {
-        max-height: 2000px; /* Aumentado para cubrir stats + filtros */
-        opacity: 1;
-        pointer-events: auto;
-        margin-top: 10px;
-        padding-bottom: 20px;
-    }
-
-    .stats-banner { margin-top: 10px; gap: 0.4rem; }
-    .stat-item { padding: 0.5rem; }
-    .stat-value { font-size: 0.85rem; }
+    .mobile-filter-toggle { display: flex; margin: 5px 0; }
+    .collapsible-menu { max-height: 0; overflow: hidden; opacity: 0; transition: max-height 0.4s ease-in-out, opacity 0.3s; pointer-events: none; }
+    .collapsible-menu.active { max-height: 2000px; opacity: 1; pointer-events: auto; margin-top: 10px; }
     .games-grid { grid-template-columns: 1fr; }
+    .mode-text { display: none; }
 }
 
 .hidden { display: none !important; }
