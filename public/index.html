@@ -35,7 +35,7 @@
   <div id="notification-modal" class="modal hidden">
     <div class="modal-content">
       <h3>🔔 Notificaciones</h3>
-      <p>Activa las notificaciones para recibir alertas cuando haya nuevos juegos gratuitos.</p>
+      <p>Activa las notificaciones para recibir alertas de nuevos juegos.</p>
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeNotificationModal()">Ahora no</button>
         <button class="btn-primary" onclick="enableNotifications()">Activar</button>
@@ -125,8 +125,6 @@
             <button class="chip" data-genre="shooter">🔫 Shooter</button>
             <button class="chip" data-genre="strategy">♟️ Estrategia</button>
             <button class="chip" data-genre="puzzle">🧩 Puzzle</button>
-            <button class="chip" data-genre="racing">🏎️ Carreras</button>
-            <button class="chip" data-genre="sports">⚽ Deportes</button>
           </div>
         </div>
 
@@ -151,7 +149,6 @@
             <button class="filter-btn" data-filter="steam">🎮 Steam</button>
             <button class="filter-btn" data-filter="epic">🎯 Epic</button>
             <button class="filter-btn" data-filter="gog">🎲 GOG</button>
-            <button class="filter-btn" data-filter="itch">🕹️ Itch.io</button>
           </div>
         </div>
 
@@ -175,30 +172,20 @@
       <div class="spinner"></div>
       <p>Cargando juegos gratuitos...</p>
     </div>
-
     <div id="games-container" class="games-grid hidden"></div>
-
     <div id="empty-state" class="empty-state hidden">
       <div class="empty-icon">🔍</div>
       <h3>No se encontraron juegos</h3>
-      <p>Prueba con otros filtros o términos de búsqueda</p>
       <button class="btn-primary" onclick="resetAllFilters()">Limpiar filtros</button>
     </div>
   </main>
 
   <footer>
     <div class="footer-content">
-      <p class="footer-text">Hecho con ❤️ para gamers</p>
-      <div class="footer-links">
-        <a href="/stats" target="_blank">📊 Stats</a>
-        <span>•</span>
-        <a href="#" onclick="showAbout()">ℹ️ Acerca de</a>
-      </div>
-      <p class="footer-copyright">© 2026 FreeGameHub</p>
+      <p>© 2026 FreeGameHub - Hecho con ❤️</p>
     </div>
   </footer>
 
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
   <script src="script.js"></script>
 </body>
 </html>
