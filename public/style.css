@@ -1,6 +1,35 @@
 /* ========================================
    FREE GAME HUB v2.0 - ESTILOS MODERNOS
    ======================================== */
+/* Esto debe ir fuera de cualquier media query */
+.collapsible-menu {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Reglas específicas para móviles */
+@media (max-width: 768px) {
+    .mobile-filter-toggle {
+        display: flex; /* Muestra el botón solo en móvil */
+        margin: 10px auto;
+        width: 95%;
+    }
+
+    .collapsible-menu {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-in-out, opacity 0.2s;
+        opacity: 0;
+        pointer-events: none; /* Evita clics accidentales cuando está oculto */
+    }
+
+    .collapsible-menu.active {
+        max-height: 2000px; /* Suficiente para todos los filtros expandidos */
+        opacity: 1;
+        pointer-events: auto;
+        padding-bottom: 15px;
+    }
+}
 
 /* Variables de tema */
 :root {
