@@ -81,10 +81,22 @@ function setupEventListeners() {
     const clearBtn = document.querySelector('.clear-search');
     clearBtn.classList.toggle('hidden', !e.target.value);
     searchTimeout = setTimeout(applyFilters, 300);
+  });    // Sort
+  document.getElementById('sort-select').addEventListener('change', function() {
+    // Sync mobile select
+    const mobile = document.getElementById('sort-select-mobile');
+    if (mobile) mobile.value = this.value;
+    applyFilters();
   });
 
-  // Sort
-  document.getElementById('sort-select').addEventListener('change', applyFilters);
+  // Mobile sort sync
+  const mobileSort = document.getElementById('sort-select-mobile');
+  if (mobileSort) {
+    mobileSort.addEventListener('change', function() {
+      document.getElementById('sort-select').value = this.value;
+      applyFilters();
+    });
+  }
 
   // Chips de género
   document.querySelectorAll('.chip').forEach(btn => {
@@ -98,7 +110,7 @@ function setupEventListeners() {
   // Type buttons
   document.querySelectorAll('.type-btn').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      const container = e.target.closest('.sub-filters');
+      const container = e.target.closest('.scroll-container');
       container.querySelectorAll('.type-btn').forEach(b => b.classList.remove('active'));
       e.target.classList.add('active');
       applyFilters();
@@ -122,6 +134,7 @@ function setupEventListeners() {
     }
     if (e.key === 'Escape') {
       closeAllModals();
+      closeFilters();
     }
   });
 }
@@ -156,7 +169,11 @@ async function loadGames() {
 function showLoading(show) {
   state.isLoading = show;
   document.getElementById('loading-state').classList.toggle('hidden', !show);
+  document.getElementById('skeleton-grid').classList.toggle('hidden', !show);
   document.getElementById('games-container').classList.toggle('hidden', show);
+
+  // Close filters while loading
+  if (show) closeFilters();
 }
 
 function showError(message) {
@@ -483,6 +500,8 @@ function clearSearch() {
 function resetAllFilters() {
   document.getElementById('search-input').value = '';
   document.getElementById('sort-select').value = 'default';
+  const ms = document.getElementById('sort-select-mobile');
+  if (ms) ms.value = 'default';
   document.querySelectorAll('.chip, .type-btn, .filter-btn').forEach(b => b.classList.remove('active'));
   document.querySelector('.chip[data-genre="all"]').classList.add('active');
   document.querySelector('.filter-btn[data-filter="all"]').classList.add('active');
@@ -494,6 +513,7 @@ function resetAllFilters() {
   state.showHiddenOnly = false;
   document.getElementById('btn-favorites')?.classList.remove('active');
   
+  closeFilters();
   applyFilters();
 }
 
@@ -658,6 +678,36 @@ function showToast(message, type = 'info') {
   }, 3000);
 }
 
+// ========================================
+// FILTROS COLAPSABLES
+// ========================================
+
+function toggleFilters() {
+  const panel = document.getElementById('filter-panel');
+  const toggle = document.getElementById('filter-toggle');
+  panel.classList.toggle('open');
+  toggle.classList.toggle('active');
+}
+
+function closeFilters() {
+  const panel = document.getElementById('filter-panel');
+  const toggle = document.getElementById('filter-toggle');
+  panel.classList.remove('open');
+  toggle.classList.remove('active');
+}
+
+// Cerrar filtros al hacer click fuera en móvil
+document.addEventListener('click', function(e) {
+  const panel = document.getElementById('filter-panel');
+  const toggle = document.getElementById('filter-toggle');
+  if (window.innerWidth <= 768) {
+    const isClickInside = panel.contains(e.target) || toggle.contains(e.target);
+    if (!isClickInside && panel.classList.contains('open')) {
+      closeFilters();
+    }
+  }
+});
+
 // Exponer funciones globales
 window.switchMode = switchMode;
 window.toggleTheme = toggleTheme;
@@ -673,3 +723,5 @@ window.markAsViewed = markAsViewed;
 window.copyCoupon = copyCoupon;
 window.showAbout = showAbout;
 window.requestNotificationPermission = requestNotificationPermission;
+window.toggleFilters = toggleFilters;
+window.closeFilters = closeFilters;
