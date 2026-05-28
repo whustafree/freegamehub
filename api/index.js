@@ -28,19 +28,6 @@ app.use(cors());
 app.use(express.json());
 app.use(rateLimiter);
 
-// Middleware que asegura que los juegos estén cargados (para Vercel serverless)
-// En cold starts, la caché comienza vacía, así que forzamos una actualización
-let initialLoadStarted = false;
-app.use('/api', (req, res, next) => {
-  if (!initialLoadStarted) {
-    initialLoadStarted = true;
-    gamesService.updateAll().catch(err => {
-      logger.error('Error en carga inicial de juegos (Vercel):', err);
-    });
-  }
-  next();
-});
-
 // API routes
 app.use('/api', apiRoutes);
 
@@ -65,10 +52,10 @@ app.get('*', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
-// Iniciar carga de juegos inmediatamente (no bloqueante)
-gamesService.updateAll().catch(err => {
-  logger.error('Error en carga inicial de juegos:', err);
-});
+// Iniciar carga de juegos inmediatamente en background (no bloqueante)
+// En Vercel serverless la cache comienza vacia en cada cold start
+logger.info('Iniciando carga inicial de juegos (Vercel serverless)...');
+gamesService.updateAll();
 
 // Exportar para Vercel serverless
 module.exports = app;

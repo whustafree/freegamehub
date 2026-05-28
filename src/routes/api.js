@@ -5,9 +5,17 @@ const telegramService = require('../services/telegram');
 const logger = require('../utils/logger');
 
 // GET /api/free-games
-router.get('/free-games', (req, res) => {
+router.get('/free-games', async (req, res) => {
   try {
-    const data = gamesService.getGames();
+    let data = gamesService.getGames();
+    
+    // Si no hay juegos en cache (cold start en serverless), forzar actualizacion
+    if (data.games.length === 0) {
+      logger.info('Cache vacio, forzando actualizacion antes de responder...');
+      await gamesService.updateAll();
+      data = gamesService.getGames();
+    }
+    
     res.json({
       success: true,
       ...data,
