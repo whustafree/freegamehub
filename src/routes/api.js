@@ -26,9 +26,11 @@ router.get('/free-games', (req, res) => {
 router.get('/stats', (req, res) => {
   try {
     const stats = gamesService.getStats();
+    const gamesData = gamesService.getGames();
     res.json({
       success: true,
-      ...stats
+      ...stats,
+      lastUpdated: gamesData.lastUpdated
     });
   } catch (err) {
     logger.error('Error en /api/stats', err);

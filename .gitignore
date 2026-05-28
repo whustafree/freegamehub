@@ -9,3 +9,4 @@ yarn-error.log*
 .cache/
 dist/
 coverage/
+nul

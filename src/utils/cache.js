@@ -8,7 +8,13 @@ class CacheManager {
       games: [],
       lastUpdated: null
     };
-    this.load();
+    // En Vercel no podemos escribir archivos, solo usamos memoria
+    this.isVercel = !!process.env.VERCEL;
+    if (!this.isVercel) {
+      this.load();
+    } else {
+      logger.info('Caché en modo memoria (Vercel)');
+    }
   }
 
   load() {
@@ -27,6 +33,7 @@ class CacheManager {
   }
 
   save() {
+    if (this.isVercel) return; // No escribir en Vercel
     try {
       fs.writeFileSync(config.cache.filePath, JSON.stringify(this.data, null, 2));
       logger.debug('Caché guardado');

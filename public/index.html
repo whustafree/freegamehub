@@ -210,7 +210,13 @@
   </footer>
 
   <!-- Scripts -->
-  <script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js').catch(function(err) {
+        console.warn('[SW] Error registrando Service Worker:', err);
+      });
+    }
+  </script>
   <script src="script.js"></script>
 </body>
 </html>

@@ -308,7 +308,7 @@
         document.getElementById('alerts-sent').textContent = data.alertsSent || 0;
         document.getElementById('total-scans').textContent = data.totalScans || 0;
         document.getElementById('uptime').textContent = data.uptimeFormatted || '-';
-        document.getElementById('last-update').textContent = data.lastUpdate ? new Date(data.lastUpdate).toLocaleString('es-CL') : '-';
+        document.getElementById('last-update').textContent = data.lastUpdated ? new Date(data.lastUpdated).toLocaleString('es-CL') : '-';
         document.getElementById('boot-time').textContent = data.bootTime ? new Date(data.bootTime).toLocaleString('es-CL') : '-';
         
         if (data.memoryUsage) {

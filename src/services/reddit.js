@@ -3,19 +3,74 @@ const logger = require('../utils/logger');
 
 class RedditService {
   constructor() {
-    this.baseUrl = 'https://www.reddit.com/r/googleplaydeals/new.json';
+    this.oauthUrl = 'https://www.reddit.com/api/v1/access_token';
+    this.apiUrl = 'https://oauth.reddit.com';
     this.timeout = 10000;
+    this.accessToken = null;
+    this.tokenExpiresAt = 0;
+    
+    this.clientId = process.env.REDDIT_CLIENT_ID;
+    this.clientSecret = process.env.REDDIT_CLIENT_SECRET;
+    this.enabled = !!(this.clientId && this.clientSecret);
+  }
+
+  async getAccessToken() {
+    if (this.accessToken && Date.now() < this.tokenExpiresAt) {
+      return this.accessToken;
+    }
+
+    try {
+      logger.info('Obteniendo token de acceso de Reddit...');
+      
+      const response = await axios.post(this.oauthUrl, 
+        'grant_type=client_credentials',
+        {
+          timeout: this.timeout,
+          auth: {
+            username: this.clientId,
+            password: this.clientSecret
+          },
+          headers: {
+            'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)',
+            'Content-Type': 'application/x-www-form-urlencoded'
+          }
+        }
+      );
+
+      this.accessToken = response.data.access_token;
+      // Expirar 5 minutos antes para tener margen
+      this.tokenExpiresAt = Date.now() + (response.data.expires_in - 300) * 1000;
+      
+      logger.success('Token de Reddit obtenido');
+      return this.accessToken;
+    } catch (err) {
+      logger.error('Error obteniendo token de Reddit', err);
+      return null;
+    }
   }
 
   async fetchDeals(limit = 25) {
+    if (!this.enabled) {
+      logger.warn('Reddit no configurado. Agrega REDDIT_CLIENT_ID y REDDIT_CLIENT_SECRET en .env');
+      return [];
+    }
+
     try {
       logger.info('Obteniendo ofertas de Reddit...');
       const startTime = Date.now();
 
-      const response = await axios.get(`${this.baseUrl}?limit=${limit}`, {
+      const token = await this.getAccessToken();
+      if (!token) {
+        logger.warn('No se pudo obtener token de Reddit, saltando...');
+        return [];
+      }
+
+      const response = await axios.get(`${this.apiUrl}/r/googleplaydeals/new.json`, {
+        params: { limit, raw_json: 1 },
         timeout: this.timeout,
         headers: {
-          'User-Agent': 'FreeGameHub/2.0'
+          'Authorization': `bearer ${token}`,
+          'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)'
         }
       });
 
@@ -27,6 +82,11 @@ class RedditService {
       return deals;
 
     } catch (err) {
+      if (err.response?.status === 401) {
+        // Token expirado, limpiar y reintentar en la próxima ejecución
+        this.accessToken = null;
+        this.tokenExpiresAt = 0;
+      }
       logger.error('Error fetching Reddit deals', err);
       return [];
     }

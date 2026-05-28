@@ -37,12 +37,14 @@ app.get('/health', (req, res) => {
 // Error handler
 app.use(errorHandler);
 
-// Programar actualización automática cada N horas
-const cronExpression = `0 */${config.app.updateIntervalHours} * * *`;
-cron.schedule(cronExpression, () => {
-  logger.info('Ejecutando actualización programada...');
-  gamesService.updateAll();
-});
+// Solo ejecutar cron en servidor tradicional, no en Vercel
+if (!process.env.VERCEL) {
+  const cronExpression = `0 */${config.app.updateIntervalHours} * * *`;
+  cron.schedule(cronExpression, () => {
+    logger.info('Ejecutando actualización programada...');
+    gamesService.updateAll();
+  });
+}
 
 // Iniciar servidor
 app.listen(config.port, () => {
