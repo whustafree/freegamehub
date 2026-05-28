@@ -19,6 +19,7 @@ const gamesService = require('../src/services/games');
 const apiRoutes = require('../src/routes/api');
 const errorHandler = require('../src/middleware/errorHandler');
 const rateLimiter = require('../src/middleware/rateLimiter');
+const logger = require('../src/utils/logger');
 
 const app = express();
 
@@ -26,6 +27,19 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(rateLimiter);
+
+// Middleware que asegura que los juegos estén cargados (para Vercel serverless)
+// En cold starts, la caché comienza vacía, así que forzamos una actualización
+let initialLoadStarted = false;
+app.use('/api', (req, res, next) => {
+  if (!initialLoadStarted) {
+    initialLoadStarted = true;
+    gamesService.updateAll().catch(err => {
+      logger.error('Error en carga inicial de juegos (Vercel):', err);
+    });
+  }
+  next();
+});
 
 // API routes
 app.use('/api', apiRoutes);
@@ -50,6 +64,11 @@ app.get('*', (req, res) => {
 
 // Error handler
 app.use(errorHandler);
+
+// Iniciar carga de juegos inmediatamente (no bloqueante)
+gamesService.updateAll().catch(err => {
+  logger.error('Error en carga inicial de juegos:', err);
+});
 
 // Exportar para Vercel serverless
 module.exports = app;
