@@ -49,7 +49,7 @@ export type AccentColor = 'red' | 'blue' | 'green' | 'purple' | 'amber' | 'cyan'
 export type SortMode = 'default' | 'price-desc' | 'ending-soon' | 'title' | 'popular';
 export type Genre = 'all' | 'action' | 'rpg' | 'indie' | 'shooter' | 'strategy' | 'puzzle' | 'racing' | 'sports';
 export type TypeFilter = 'all' | 'game' | 'dlc' | 'app';
-export type StoreFilter = 'all' | 'steam' | 'epic' | 'gog' | 'itch';
+export type StoreFilter = 'all' | 'steam' | 'epic' | 'gog' | 'itch' | 'battlenet' | 'origin' | 'drm' | 'pc';
 export type ViewMode = 'grid' | 'list';
 
 // --- Voting ---

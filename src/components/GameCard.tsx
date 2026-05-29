@@ -138,11 +138,15 @@ export default function GameCard({
         <div className="card-img-badges">
           {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
           {/* Free-to-keep vs Free-to-play badge */}
-          {game.type?.toLowerCase().includes('game') && (
+          {game.type?.toLowerCase().includes('game') && game.source !== 'freetogame' && (
             <span className="card-img-badge free-to-keep">{t('freeToKeep', language)}</span>
           )}
-          {game.type && !game.type.toLowerCase().includes('game') && (
+          {game.type === 'free-to-play' && (
             <span className="card-img-badge free-to-play">{t('freeToPlay', language)}</span>
+          )}
+          {/* Free weekend badge for Steam time-limited giveaways */}
+          {game.platform === 'steam' && game.type?.toLowerCase().includes('game') && game.endDate && (
+            <span className="card-img-badge free-weekend">{t('freeWeekendBadge', language)}</span>
           )}
           <span className="card-img-badge platform">{platformIcon} {game.platformName || game.platform}</span>
           {worth}

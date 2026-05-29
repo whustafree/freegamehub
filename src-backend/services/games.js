@@ -1,6 +1,7 @@
 const gamerPowerService = require('./gamerpower');
 const redditService = require('./reddit');
 const epicGamesService = require('./epicgames');
+const freeToGameService = require('./freetogame');
 const telegramService = require('./telegram');
 const cacheManager = require('../utils/cache');
 const statsManager = require('../utils/stats');
@@ -41,7 +42,8 @@ class GamesService {
       const results = await Promise.allSettled([
         gamerPowerService.fetchAll(),
         redditService.fetchDeals(),
-        epicGamesService.fetchFreeGames()
+        epicGamesService.fetchFreeGames(),
+        freeToGameService.fetchAll()
       ]);
 
       // Combinar todos los resultados
@@ -109,8 +111,9 @@ class GamesService {
   }
 
   getGameScore(game) {
-    let score = 0;
-    if (game.image && !game.image.includes('placeholder')) score += 10;
+    let score = 0;      if (game.image && !game.image.includes('placeholder')) score += 5;
+    if (game.publisher) score += 2;
+    if (game.developer) score += 2;
     if (game.description && game.description.length > 50) score += 5;
     if (game.endDate) score += 3;
     if (game.worth) score += 2;

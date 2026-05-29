@@ -565,6 +565,53 @@ export default function App() {
         </div>
       </div>
 
+      {/* PC Store Sub-nav - visible solo en modo PC */}
+      {currentMode === 'pc' && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
+        <div className="pc-store-nav">
+          <div className="pc-store-nav-inner">
+            <button
+              className={`store-chip ${activeStore === 'all' && activeType !== 'all' ? '' : activeStore === 'all' ? 'active' : ''}`}
+              onClick={() => { setActiveStore('all'); setActiveType('all'); }}
+            >
+              {t('storeAll', language)}
+            </button>
+            {[
+              { store: 'steam' as StoreFilter, icon: '🟦', label: 'Steam' },
+              { store: 'epic' as StoreFilter, icon: '🎯', label: 'Epic' },
+              { store: 'gog' as StoreFilter, icon: '🟣', label: 'GOG' },
+              { store: 'itch' as StoreFilter, icon: '🎨', label: 'Itch.io' },
+              { store: 'battlenet' as StoreFilter, icon: '⚔️', label: 'Battle.net' },
+              { store: 'origin' as StoreFilter, icon: '💠', label: 'Origin' },
+              { store: 'drm' as StoreFilter, icon: '🔓', label: 'DRM-Free' },
+              { store: 'pc' as StoreFilter, icon: '🖥️', label: 'PC' },
+            ].map(s => (
+              <button
+                key={s.store}
+                className={`store-chip ${activeStore === s.store ? 'active' : ''}`}
+                onClick={() => { setActiveStore(s.store); setActiveType('all'); }}
+              >
+                {s.icon} {s.label}
+              </button>
+            ))}
+            <div className="store-nav-divider" />
+            <button
+              className={`store-chip special ${activeType === 'game' ? 'active' : ''}`}
+              onClick={() => { setActiveType(activeType === 'game' ? 'all' : 'game'); setActiveStore('steam'); }}
+              title={t('storeFreeWeekend', language)}
+            >
+              🎉 {language === 'es' ? 'Finde gratis' : 'Weekend'}
+            </button>
+            <button
+              className={`store-chip special ${activeType === 'dlc' ? '' : ''}`}
+              onClick={() => setActiveType(activeType === 'dlc' ? 'all' : 'dlc')}
+              title={t('storeFreeToPlay', language)}
+            >
+              🆓 {language === 'es' ? 'F2P' : 'F2P'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <FilterPanel
         currentMode={currentMode}
         sortMode={sortMode}

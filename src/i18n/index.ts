@@ -24,6 +24,12 @@ export const translations = {
     sortGenre: 'Género',
     sortTrending: 'Tendencias',
 
+    // PC Store Sub-nav
+    storeAll: 'Todas',
+    storeNav: 'Tienda',
+    storeFreeWeekend: '🎉 Finde gratis',
+    storeFreeToPlay: '🆓 Free-to-play',
+
     // Game card
     alwaysFree: '✓ Gratis permanente',
     flashOffer: '⚡ Oferta Flash',
@@ -39,6 +45,7 @@ export const translations = {
     newBadge: 'Nuevo',
     freeToKeep: 'Gratis permanente',
     freeToPlay: 'Free-to-play',
+    freeWeekendBadge: 'Fin de semana gratis',
     limitedOffer: 'Oferta limitada',
     multiSelectHint: 'Toca para seleccionar',
 
@@ -343,6 +350,12 @@ export const translations = {
     sortGenre: 'Genre',
     sortTrending: 'Trending',
 
+    // PC Store Sub-nav
+    storeAll: 'All',
+    storeNav: 'Store',
+    storeFreeWeekend: '🎉 Free weekend',
+    storeFreeToPlay: '🆓 Free-to-play',
+
     alwaysFree: '✓ Always free',
     flashOffer: '⚡ Flash Offer',
     expired: '✗ Expired',
@@ -357,6 +370,7 @@ export const translations = {
     newBadge: 'New',
     freeToKeep: 'Free to keep',
     freeToPlay: 'Free-to-play',
+    freeWeekendBadge: 'Free weekend',
     limitedOffer: 'Limited offer',
     multiSelectHint: 'Tap to select',
 

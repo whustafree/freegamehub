@@ -36,12 +36,16 @@ const genres = (lang: Language): { value: Genre; label: string }[] => [
   { value: 'sports', label: `⚽ ${lang === 'es' ? 'Deportes' : 'Sports'}` },
 ];
 
-const stores: { value: StoreFilter; label: string }[] = [
-  { value: 'all', label: 'Todas' },
-  { value: 'steam', label: 'Steam' },
-  { value: 'epic', label: 'Epic' },
-  { value: 'gog', label: 'GOG' },
-  { value: 'itch', label: 'Itch.io' },
+const stores: { value: StoreFilter; label: string; icon: string }[] = [
+  { value: 'all', label: 'Todas', icon: '🖥️' },
+  { value: 'steam', label: 'Steam', icon: '🟦' },
+  { value: 'epic', label: 'Epic', icon: '🎯' },
+  { value: 'gog', label: 'GOG', icon: '🟣' },
+  { value: 'itch', label: 'Itch.io', icon: '🎨' },
+  { value: 'battlenet', label: 'Battle.net', icon: '⚔️' },
+  { value: 'origin', label: 'Origin', icon: '💠' },
+  { value: 'drm', label: 'DRM-Free', icon: '🔓' },
+  { value: 'pc', label: 'PC', icon: '🖥️' },
 ];
 
 export default function FilterPanel({
@@ -122,7 +126,7 @@ export default function FilterPanel({
               <div className="filter-chips">
                 {stores.map(s => (
                   <button key={s.value} className={`filter-chip ${activeStore === s.value ? 'active' : ''}`} onClick={() => onStoreChange(s.value)}>
-                    {s.label}
+                    {s.icon} {s.label}
                   </button>
                 ))}
               </div>
