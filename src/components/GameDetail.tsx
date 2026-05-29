@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Game, Vote, Language, WishlistStatus } from '../types';
 import { t } from '../i18n';
 import { getTimeInfo } from '../utils/format';
@@ -5,6 +6,7 @@ import { showToast } from './Toast';
 
 interface GameDetailProps {
   game: Game;
+  games?: Game[];
   votes: Record<string, Vote>;
   wishlist: Record<string, WishlistStatus>;
   language: Language;
@@ -13,11 +15,12 @@ interface GameDetailProps {
   onVote: (gameId: string, type: 'up' | 'down') => void;
   onToggleWishlist: (gameId: string) => void;
   onMarkClaimed: (gameId: string) => void;
+  onOpenGame?: (game: Game) => void;
 }
 
 export default function GameDetail({
-  game, votes, wishlist, language, isOpen,
-  onClose, onVote, onToggleWishlist, onMarkClaimed
+  game, games = [], votes, wishlist, language, isOpen,
+  onClose, onVote, onToggleWishlist, onMarkClaimed, onOpenGame
 }: GameDetailProps) {
   const timeInfo = getTimeInfo(game.endDate, game.type);
   const gameVotes = votes[game.id] || { up: 0, down: 0, userVote: null };
@@ -66,6 +69,18 @@ export default function GameDetail({
     }
     if (navigator.vibrate) navigator.vibrate(10);
   };
+
+  // Find similar games by matching genre (or platform fallback)
+  const similarGames = useMemo(() => {
+    if (!games.length) return [];
+    const targetGenre = game.genre || '';
+    return games
+      .filter(g => g.id !== game.id && (
+        (targetGenre && g.genre === targetGenre) ||
+        (!targetGenre && g.platform === game.platform)
+      ))
+      .slice(0, 6);
+  }, [games, game]);
 
   return (
     <div className={`detail-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
@@ -186,6 +201,36 @@ export default function GameDetail({
             🔗 {t('openStore', language)}
           </a>
         </div>
+
+        {/* Similar games */}
+        {similarGames.length > 0 && (
+          <div className="similar-section">
+            <div className="similar-header">{t('similarGames', language)}</div>
+            <div className="similar-scroll">
+              {similarGames.map(sg => (
+                <div
+                  key={sg.id}
+                  className="similar-card"
+                  onClick={() => { if (onOpenGame) onOpenGame(sg); }}
+                >
+                  <img
+                    src={sg.image}
+                    alt={sg.title}
+                    className="similar-card-img"
+                    loading="lazy"
+                    onError={e => {
+                      (e.target as HTMLImageElement).src = `https://placehold.co/200x100/11111b/ef4444?text=${encodeURIComponent(sg.title.slice(0, 15))}`;
+                    }}
+                  />
+                  <div className="similar-card-body">
+                    <div className="similar-card-title">{sg.title}</div>
+                    <div className="similar-card-platform">{sg.platformName || sg.platform}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <button className="detail-close-btn" onClick={onClose}>
           {t('close', language)} ✕

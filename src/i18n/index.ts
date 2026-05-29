@@ -134,6 +134,13 @@ export const translations = {
     platformIos: 'App Store',
     platformVr: 'VR',
     platformPc: 'PC',
+
+    // Recommendations
+    recommendedTitle: 'Recomendados para ti',
+    recommendedSubtitle: 'Basado en tus géneros más vistos',
+    similarGames: 'Juegos similares',
+    noRecommendations: 'Sigue explorando juegos para obtener recomendaciones',
+    recommendedGenre: 'Porque te gusta',
   },
 
   en: {
@@ -257,6 +264,13 @@ export const translations = {
     platformIos: 'App Store',
     platformVr: 'VR',
     platformPc: 'PC',
+
+    // Recommendations
+    recommendedTitle: 'Recommended for you',
+    recommendedSubtitle: 'Based on your most viewed genres',
+    similarGames: 'Similar games',
+    noRecommendations: 'Keep exploring games to get recommendations',
+    recommendedGenre: 'Because you like',
   },
 };
 

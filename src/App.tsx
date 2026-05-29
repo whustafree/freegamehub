@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game, UserStats, Vote, WishlistStatus } from './types';
 import { getRelativeTime, formatCurrency, parsePrice } from './utils/format';
 import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds, loadVotes, saveVotes, loadWishlist, saveWishlist, loadUserStats, saveUserStats } from './utils/storage';
@@ -13,6 +13,7 @@ import EmptyState from './components/EmptyState';
 import Footer from './components/Footer';
 import ToastContainer, { showToast } from './components/Toast';
 import BottomNav from './components/BottomNav';
+import GameCard from './components/GameCard';
 import GameDetail from './components/GameDetail';
 import StatsPanel from './components/StatsPanel';
 import { t } from './i18n';
@@ -149,6 +150,35 @@ export default function App() {
       return bScore - aScore;
     });
   }
+
+  // --- Recommended games (based on most-viewed genres) ---
+  const topGenres = useMemo(() => {
+    const viewedObjects = games.filter(g => viewedGames.includes(g.id) && g.genre);
+    const genreCount: Record<string, number> = {};
+    viewedObjects.forEach(g => {
+      const genre = g.genre || 'other';
+      genreCount[genre] = (genreCount[genre] || 0) + 1;
+    });
+    return Object.entries(genreCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([genre]) => genre);
+  }, [games, viewedGames]);
+
+  const recommendedGames = useMemo(() => {
+    if (topGenres.length === 0) return [];
+    const hidden = showHiddenOnly ? [] : hiddenGames;
+    const alreadyWishlisted = new Set(Object.keys(wishlist));
+    return games.filter(g =>
+      !hidden.includes(g.id) &&
+      !alreadyWishlisted.has(g.id) &&
+      !viewedGames.includes(g.id) &&
+      g.category === currentMode &&
+      g.genre &&
+      topGenres.includes(g.genre) &&
+      !showFavoritesOnly
+    ).slice(0, 8);
+  }, [games, hiddenGames, viewedGames, currentMode, topGenres, showFavoritesOnly, wishlist]);
 
   // Infinite scroll
   const displayedGames = sortedFiltered.slice(0, displayCount);
@@ -452,19 +482,51 @@ export default function App() {
         )}
 
         {isLoaded && displayedGames.length > 0 && (
-          <GameGrid
-            games={displayedGames}
-            favorites={favorites}
-            viewedGames={viewedGames}
-            newGameIds={newGameIds}
-            votes={votes}
-            viewMode={viewMode}
-            language={language}
-            onToggleFavorite={toggleFavorite}
-            onHideGame={hideGame}
-            onMarkAsViewed={handleMarkAsViewed}
-            onOpenDetail={handleOpenDetail}
-          />
+          <>
+            {/* Recommended for you section */}
+            {recommendedGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && (
+              <section className="recommended-section">
+                <div className="recommended-header">
+                  <div className="recommended-icon">✨</div>
+                  <h2 className="recommended-title">{t('recommendedTitle', language)}</h2>
+                  <span className="recommended-subtitle">{t('recommendedSubtitle', language)}</span>
+                </div>
+                <div className="recommended-scroll">
+                  {recommendedGames.map((game, index) => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      index={index}
+                      isFavorite={favorites.includes(game.id)}
+                      isViewed={viewedGames.includes(game.id)}
+                      isNew={newGameIds.includes(game.id)}
+                      votes={votes}
+                      viewMode={viewMode}
+                      language={language}
+                      onToggleFavorite={toggleFavorite}
+                      onHideGame={hideGame}
+                      onMarkAsViewed={handleMarkAsViewed}
+                      onOpenDetail={handleOpenDetail}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <GameGrid
+              games={displayedGames}
+              favorites={favorites}
+              viewedGames={viewedGames}
+              newGameIds={newGameIds}
+              votes={votes}
+              viewMode={viewMode}
+              language={language}
+              onToggleFavorite={toggleFavorite}
+              onHideGame={hideGame}
+              onMarkAsViewed={handleMarkAsViewed}
+              onOpenDetail={handleOpenDetail}
+            />
+          </>
         )}
 
         {/* Infinite scroll sentinel */}
@@ -507,6 +569,7 @@ export default function App() {
       {selectedGame && (
         <GameDetail
           game={selectedGame}
+          games={games}
           votes={votes}
           wishlist={wishlist}
           language={language}
@@ -515,6 +578,7 @@ export default function App() {
           onVote={handleVote}
           onToggleWishlist={handleToggleWishlist}
           onMarkClaimed={handleMarkClaimed}
+          onOpenGame={handleOpenDetail}
         />
       )}
 
