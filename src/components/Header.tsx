@@ -9,10 +9,11 @@ interface HeaderProps {
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onToggleLang: () => void;
+  onOpenDetail?: (game: Game) => void;
 }
 
 export default function Header({
-  searchTerm, language, games = [], onSearchChange, onClearSearch, onToggleLang
+  searchTerm, language, games = [], onSearchChange, onClearSearch, onToggleLang, onOpenDetail
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -71,9 +72,12 @@ export default function Header({
                   onClick={() => {
                     onSearchChange(g.title);
                     setShowSuggestions(false);
-                    // Focus the game? Scroll to it
-                    const card = document.querySelector(`[data-id="${g.id}"]`);
-                    if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    if (onOpenDetail) {
+                      onOpenDetail(g);
+                    } else {
+                      const card = document.querySelector(`[data-id="${g.id}"]`);
+                      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
                   }}
                 >
                   <img src={g.image} alt="" className="search-suggestion-icon"

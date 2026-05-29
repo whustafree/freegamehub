@@ -81,6 +81,7 @@ export default function App() {
 
   // --- State ---
   const [currentMode, setCurrentMode] = useState<Mode>('pc');
+  const [contentTab, setContentTab] = useState<'giveaways' | 'free-to-play'>('giveaways');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortMode, setSortMode] = useState<SortMode>('default');
   const [activeGenre, setActiveGenre] = useState<Genre>('all');
@@ -248,6 +249,24 @@ export default function App() {
     return withVotes;
   }, [sortedFiltered, votes]);
 
+  // --- Free-to-Play games (separate list) ---
+  const freeToPlayGames = useMemo(() => {
+    const allF2P = games.filter(g => g.type === 'free-to-play' || g.source === 'freetogame');
+    // Apply current mode and platform filters to free-to-play games too
+    return allF2P.filter(g => {
+      if (g.category !== currentMode && !g.platform?.includes(currentMode)) return false;
+      return true;
+    });
+  }, [games, currentMode]);
+
+  // --- Final content filter: giveaways vs free-to-play ---
+  const contentFilteredGames = useMemo(() => {
+    if (contentTab === 'free-to-play') {
+      return sortedFiltered.filter(g => g.type === 'free-to-play' || g.source === 'freetogame');
+    }
+    return sortedFiltered.filter(g => g.type !== 'free-to-play' && g.source !== 'freetogame');
+  }, [contentTab, sortedFiltered]);
+
   // --- Ending soon (timeline) ---
   const endingSoonGames = useMemo(() => {
     return sortedFiltered
@@ -280,15 +299,15 @@ export default function App() {
   }, [sortedFiltered, hiddenGames, viewedGames, language]);
 
   // Infinite scroll
-  const displayedGames = sortedFiltered.slice(0, displayCount);
-  const hasMore = displayCount < sortedFiltered.length;
+  const displayedGames = contentFilteredGames.slice(0, displayCount);
+  const hasMore = displayCount < contentFilteredGames.length;
 
   useEffect(() => {
     if (!hasMore) return;
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
-          setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, sortedFiltered.length));
+          setDisplayCount(prev => Math.min(prev + ITEMS_PER_PAGE, contentFilteredGames.length));
         }
       },
       { rootMargin: '200px' }
@@ -296,7 +315,7 @@ export default function App() {
     const sentinel = sentinelRef.current;
     if (sentinel) observer.observe(sentinel);
     return () => { if (sentinel) observer.unobserve(sentinel); };
-  }, [hasMore, sortedFiltered.length]);
+  }, [hasMore, contentFilteredGames.length]);
 
   // --- Pull to refresh ---
   const handleTouchStart = useCallback((e: TouchEvent) => {
@@ -376,6 +395,7 @@ export default function App() {
     setActiveType('all');
     setShowFavoritesOnly(false);
     setShowHiddenOnly(false);
+    setContentTab('giveaways');
     closeFilters();
     showToast(t('filtersReset', language), 'info');
   }, [closeFilters, language]);
@@ -523,6 +543,7 @@ export default function App() {
         onSearchChange={setSearchTerm}
         onClearSearch={handleClearSearch}
         onToggleLang={handleToggleLang}
+        onOpenDetail={handleOpenDetail}
         games={games}
       />
 
@@ -541,6 +562,24 @@ export default function App() {
           <div className="top-stat">
             ⏰ {formatTime}
           </div>
+
+          <div className="top-divider" />
+
+          {/* Content tabs: Giveaways vs Free-to-Play */}
+          <button
+            className={`sort-chip content-tab ${contentTab === 'giveaways' ? 'active' : ''}`}
+            onClick={() => { setContentTab('giveaways'); setDisplayCount(ITEMS_PER_PAGE); }}
+            title={t('giveawaysDesc', language)}
+          >
+            {t('contentGiveaways', language)}
+          </button>
+          <button
+            className={`sort-chip content-tab ${contentTab === 'free-to-play' ? 'active' : ''}`}
+            onClick={() => { setContentTab('free-to-play'); setDisplayCount(ITEMS_PER_PAGE); }}
+            title={t('freeToPlayDesc', language)}
+          >
+            {t('contentFreeToPlay', language)}
+          </button>
 
           <div className="top-divider" />
 
@@ -600,10 +639,9 @@ export default function App() {
               title={t('storeFreeWeekend', language)}
             >
               🎉 {language === 'es' ? 'Finde gratis' : 'Weekend'}
-            </button>
-            <button
-              className={`store-chip special ${activeType === 'dlc' ? '' : ''}`}
-              onClick={() => setActiveType(activeType === 'dlc' ? 'all' : 'dlc')}
+            </button>            <button
+              className={`store-chip special ${contentTab === 'free-to-play' ? 'active' : ''}`}
+              onClick={() => setContentTab(contentTab === 'free-to-play' ? 'giveaways' : 'free-to-play')}
               title={t('storeFreeToPlay', language)}
             >
               🆓 {language === 'es' ? 'F2P' : 'F2P'}
@@ -739,8 +777,8 @@ export default function App() {
               </div>
             )}
 
-            {/* Ending Soon Timeline */}
-            {endingSoonGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
+            {/* Ending Soon Timeline - giveaways only */}
+            {contentTab === 'giveaways' && endingSoonGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
               <section className="timeline-section">
                 <div className="timeline-header">
                   <div className="recommended-icon">⏳</div>
@@ -770,8 +808,8 @@ export default function App() {
               </section>
             )}
 
-            {/* Trending Section */}
-            {trendingGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
+            {/* Trending Section - giveaways only */}
+            {contentTab === 'giveaways' && trendingGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
               <section className="trending-section">
                 <div className="trending-header">
                   <div className="trending-icon">🔥</div>
@@ -800,8 +838,8 @@ export default function App() {
               </section>
             )}
 
-            {/* Recommended for you */}
-            {recommendedGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
+            {/* Recommended for you - giveaways only */}
+            {contentTab === 'giveaways' && recommendedGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
               <section className="recommended-section">
                 <div className="recommended-header">
                   <div className="recommended-icon">✨</div>
@@ -810,6 +848,36 @@ export default function App() {
                 </div>
                 <div className="recommended-scroll">
                   {recommendedGames.map((game, index) => (
+                    <GameCard
+                      key={game.id}
+                      game={game}
+                      index={index}
+                      isFavorite={favorites.includes(game.id)}
+                      isViewed={viewedGames.includes(game.id)}
+                      isNew={newGameIds.includes(game.id)}
+                      votes={votes}
+                      viewMode={viewMode}
+                      language={language}
+                      onToggleFavorite={toggleFavorite}
+                      onHideGame={hideGame}
+                      onMarkAsViewed={handleMarkAsViewed}
+                      onOpenDetail={handleOpenDetail}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {/* Free-to-Play Scroll Section - only in giveaways mode */}
+            {contentTab === 'giveaways' && freeToPlayGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
+              <section className="recommended-section">
+                <div className="recommended-header">
+                  <div className="recommended-icon">🆓</div>
+                  <h2 className="recommended-title">{t('freeToPlaySection', language)}</h2>
+                  <span className="recommended-subtitle">{freeToPlayGames.length} {language === 'es' ? 'juegos' : 'games'}</span>
+                </div>
+                <div className="recommended-scroll">
+                  {freeToPlayGames.map((game, index) => (
                     <GameCard
                       key={game.id}
                       game={game}

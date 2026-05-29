@@ -15,6 +15,13 @@ export const translations = {
     globalFreeGames: 'Juegos gratis hoy',
     globalValue: 'Valor total',
 
+    // Content tabs
+    contentGiveaways: '🎁 Giveaways',
+    contentFreeToPlay: '🎮 Free-to-Play',
+    freeToPlaySection: '🆓 Siempre gratis',
+    freeToPlayDesc: 'Juegos free-to-play sin fecha de término',
+    giveawaysDesc: 'Juegos gratis por tiempo limitado',
+
     // Sort chips
     sortRecent: 'Recientes',
     sortPrice: 'Precio',
@@ -342,6 +349,14 @@ export const translations = {
     globalFreeGames: 'Free games today',
     globalValue: 'Total value',
 
+    // Content tabs
+    contentGiveaways: '🎁 Giveaways',
+    contentFreeToPlay: '🎮 Free-to-Play',
+    freeToPlaySection: '🆓 Always free',
+    freeToPlayDesc: 'Free-to-play games with no end date',
+    giveawaysDesc: 'Limited-time free games',
+
+    // Sort chips
     sortRecent: 'Recent',
     sortPrice: 'Price',
     sortEnding: 'Ending soon',
