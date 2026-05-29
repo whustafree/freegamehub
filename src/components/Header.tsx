@@ -1,12 +1,17 @@
+import { Language } from '../types';
+import { t } from '../i18n';
+
 interface HeaderProps {
   searchTerm: string;
+  language: Language;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onOpenQR: () => void;
+  onToggleLang: () => void;
 }
 
 export default function Header({
-  searchTerm, onSearchChange, onClearSearch, onOpenQR
+  searchTerm, language, onSearchChange, onClearSearch, onOpenQR, onToggleLang
 }: HeaderProps) {
   return (
     <header className="app-header">
@@ -20,7 +25,7 @@ export default function Header({
           <span className="header-search-icon">🔍</span>
           <input
             type="text"
-            placeholder="Buscar juegos..."
+            placeholder={t('searchPlaceholder', language)}
             value={searchTerm}
             onChange={e => onSearchChange(e.target.value)}
             autoComplete="off"
@@ -31,7 +36,10 @@ export default function Header({
         </div>
 
         <div className="header-actions">
-          <button className="header-action" onClick={onOpenQR} title="Compartir">
+          <button className="header-action lang-btn" onClick={onToggleLang} title={language === 'es' ? 'English' : 'Español'}>
+            {language === 'es' ? 'EN' : 'ES'}
+          </button>
+          <button className="header-action" onClick={onOpenQR} title={t('shareTitle', language)}>
             📱
           </button>
         </div>

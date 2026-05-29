@@ -1,55 +1,165 @@
-import { Game } from '../types';
-import { getTimeInfo } from '../utils/format';
+import { useRef, useState, useCallback } from 'react';
+import { Game, ViewMode, Language, Vote } from '../types';
+import { getTimeInfo, formatCurrency, parsePrice } from '../utils/format';
+import { t } from '../i18n';
 
 interface GameCardProps {
   game: Game;
   index: number;
   isFavorite: boolean;
   isViewed: boolean;
+  isNew: boolean;
+  votes: Record<string, Vote>;
+  viewMode: ViewMode;
+  language: Language;
   onToggleFavorite: (id: string) => void;
   onHideGame: (id: string) => void;
   onMarkAsViewed: (id: string) => void;
+  onOpenDetail: (game: Game) => void;
 }
 
-export default function GameCard({ game, index, isFavorite, isViewed, onToggleFavorite, onHideGame, onMarkAsViewed }: GameCardProps) {
+export default function GameCard({
+  game, index, isFavorite, isViewed, isNew, votes, viewMode, language,
+  onToggleFavorite, onHideGame, onMarkAsViewed, onOpenDetail
+}: GameCardProps) {
   const timeInfo = getTimeInfo(game.endDate, game.type);
   const ytLink = `https://www.youtube.com/results?search_query=${encodeURIComponent(game.title + ' gameplay')}`;
-  const sourceBadge = game.source === 'epic' ? '🎯' : game.source === 'gamerpower' ? '🎮' : game.source === 'reddit' ? '📱' : '';
+  const sourceBadge = game.source === 'epic' ? '🎯' : game.source === 'gamerpower' ? '🎮' : game.source === 'reddit' ? '📱' : '🎯';
+  const gameVotes = votes[game.id];
+  const totalVotes = gameVotes ? gameVotes.up + gameVotes.down : 0;
+
+  const [swiping, setSwiping] = useState(false);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [showSwipeLeft, setShowSwipeLeft] = useState(false);
+  const [showSwipeRight, setShowSwipeRight] = useState(false);
+  const touchStartX = useRef(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const longPressTimer = useRef<number | null>(null);
 
   const worth = game.worth && game.worth !== 'N/A'
-    ? <span className="card-img-badge worth">{game.worth}</span>
+    ? <span className="card-img-badge worth">${parsePrice(game.worth) >= 60 ? '🔥' : ''} {game.worth}</span>
     : null;
+
+  const handleShare = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const shareData = { title: game.title, text: `🎮 ${game.title} - ¡Gratis!`, url: game.url };
+    if (navigator.share) {
+      try { await navigator.share(shareData); } catch {}
+    } else {
+      await navigator.clipboard.writeText(game.url);
+    }
+    if (navigator.vibrate) navigator.vibrate(15);
+  }, [game]);
+
+  // Touch handlers for swipe
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    setSwiping(true);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!swiping) return;
+    const diff = e.touches[0].clientX - touchStartX.current;
+    if (Math.abs(diff) > 10) {
+      setSwipeOffset(diff);
+      setShowSwipeLeft(diff < -30);
+      setShowSwipeRight(diff > 30);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    setSwiping(false);
+    if (swipeOffset < -60) {
+      // Swipe left -> hide
+      onHideGame(game.id);
+      if (navigator.vibrate) navigator.vibrate(20);
+    } else if (swipeOffset > 60) {
+      // Swipe right -> favorite
+      onToggleFavorite(game.id);
+      if (navigator.vibrate) navigator.vibrate(20);
+    }
+    setSwipeOffset(0);
+    setShowSwipeLeft(false);
+    setShowSwipeRight(false);
+  };
+
+  // Long press context menu (desktop)
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    onHideGame(game.id);
+    if (navigator.vibrate) navigator.vibrate(15);
+  };
+
+  const handleClick = () => {
+    onOpenDetail(game);
+    onMarkAsViewed(game.id);
+  };
+
+  const isListView = viewMode === 'list';
 
   return (
     <article
-      className={`game-card ${isViewed ? 'viewed' : ''}`}
+      ref={cardRef}
+      className={`game-card ${isViewed ? 'viewed' : ''} ${isNew ? 'new-game' : ''} ${isListView ? 'list-view' : ''}`}
       data-id={game.id}
-      style={{ animationDelay: `${index * 0.04}s` }}
+      style={{
+        animationDelay: `${index * 0.04}s`,
+        transform: swiping ? `translateX(${swipeOffset}px)` : '',
+        transition: swiping ? 'none' : 'transform 0.3s var(--ease)',
+      }}
+      onClick={handleClick}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onContextMenu={handleContextMenu}
     >
+      {/* Swipe indicators */}
+      <div className={`swipe-indicator left ${showSwipeLeft ? 'visible' : ''}`}>🙈</div>
+      <div className={`swipe-indicator right ${showSwipeRight ? 'visible' : ''}`}>❤️</div>
+
       <div className="card-img">
         <img
           src={game.image}
           alt={game.title}
           loading="lazy"
-          onError={e => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x150?text=Juego+Gratis'; }}
+          onError={e => {
+            (e.target as HTMLImageElement).src = `https://placehold.co/300x150/11111b/ef4444?text=${encodeURIComponent(game.title.slice(0, 20))}`;
+          }}
         />
         <div className="card-img-badges">
+          {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
           <span className="card-img-badge platform">{sourceBadge} {game.platformName || game.platform}</span>
           {worth}
         </div>
 
         <div className="card-actions">
-          <button className="card-action" onClick={() => {
-            if (confirm('¿Ocultar este juego?')) onHideGame(game.id);
-          }} title="Ocultar">🙈</button>
+          <button
+            className="card-action"
+            onClick={e => { e.stopPropagation(); onHideGame(game.id); }}
+            title={t('hide', language)}
+          >
+            🙈
+          </button>
           <button
             className={`card-action ${isFavorite ? 'fav' : ''}`}
-            onClick={() => onToggleFavorite(game.id)}
-            title={isFavorite ? 'Quitar favorito' : 'Añadir favorito'}
+            onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}
+            title={isFavorite ? t('removeFav', language) : t('addFav', language)}
           >
             {isFavorite ? '❤️' : '🤍'}
           </button>
-          <a href={ytLink} target="_blank" rel="noopener" className="card-action" title="Gameplay">▶️</a>
+          <a
+            href={ytLink}
+            target="_blank"
+            rel="noopener"
+            className="card-action"
+            title={t('gameplay', language)}
+            onClick={e => e.stopPropagation()}
+          >
+            ▶️
+          </a>
+          <button className="card-action" onClick={handleShare} title={t('share', language)}>
+            📤
+          </button>
         </div>
       </div>
 
@@ -58,14 +168,19 @@ export default function GameCard({ game, index, isFavorite, isViewed, onToggleFa
         <p className="card-desc">{game.description || 'Juego gratuito disponible'}</p>
         <div className="card-meta">
           <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
+          {totalVotes > 0 && (
+            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
+              👍 {gameVotes.up}
+            </span>
+          )}
           <a
             href={game.url}
             target="_blank"
             rel="noopener"
             className="claim-btn"
-            onClick={() => onMarkAsViewed(game.id)}
+            onClick={e => e.stopPropagation()}
           >
-            Reclamar →
+            {t('reclaim', language)}
           </a>
         </div>
       </div>

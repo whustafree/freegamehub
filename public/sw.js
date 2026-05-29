@@ -1,54 +1,35 @@
 /**
- * FreeGameHub Service Worker v2.0
- * Estrategia: Cache First para assets, Network First para API
+ * FreeGameHub Service Worker v3.0
+ * Estrategia: Cache First para Vite assets, Network First para API
+ * Offline support para juegos guardados
  */
 
-const CACHE_NAME = 'freegamehub-v2';
-const STATIC_CACHE = 'fgh-static-v2';
-const API_CACHE = 'fgh-api-v2';
-const IMAGE_CACHE = 'fgh-images-v2';
+const CACHE_NAME = 'freegamehub-v3';
+const STATIC_CACHE = 'fgh-static-v3';
+const API_CACHE = 'fgh-api-v3';
+const IMAGE_CACHE = 'fgh-images-v3';
 
-const STATIC_ASSETS = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/script.js',
-  '/manifest.json',
-  '/stats.html'
-];
-
-// Instalación: Cachear assets estáticos
+// Instalación: Cachear el shell mínimo
 self.addEventListener('install', (event) => {
-  console.log('[SW] Instalando Service Worker v2...');
-  
+  console.log('[SW] Instalando v3...');
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => {
-        console.log('[SW] Cacheando assets estáticos');
-        return cache.addAll(STATIC_ASSETS);
-      })
+      .then((cache) => cache.addAll(['/', '/index.html']))
       .then(() => self.skipWaiting())
   );
 });
 
 // Activación: Limpiar cachés antiguas
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activando Service Worker v2...');
-  
+  console.log('[SW] Activando v3...');
   event.waitUntil(
-    caches.keys().then((cacheNames) => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames
-          .filter((name) => {
-            return name.startsWith('freegamehub-') || 
-                   (name.startsWith('fgh-') && !name.includes('v2'));
-          })
-          .map((name) => {
-            console.log('[SW] Eliminando caché antigua:', name);
-            return caches.delete(name);
-          })
-      );
-    }).then(() => self.clients.claim())
+          .filter((name) => name.startsWith('freegamehub-') || (name.startsWith('fgh-') && !name.includes('v3')))
+          .map((name) => caches.delete(name))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
@@ -56,179 +37,113 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
-  
-  // No interceptar peticiones no-GET
+
   if (request.method !== 'GET') return;
-  
-  // No interceptar extensiones de Chrome
   if (url.protocol === 'chrome-extension:') return;
-  
-  // Estrategia para API
+
+  // API calls: Network First
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(apiStrategy(request));
+    event.respondWith(networkFirst(request, API_CACHE));
     return;
   }
-  
-  // Estrategia para imágenes
+
+  // Images: Cache First con límite
   if (request.destination === 'image') {
-    event.respondWith(imageStrategy(request));
+    event.respondWith(cacheFirstLimited(request, IMAGE_CACHE, 150));
     return;
   }
-  
-  // Estrategia para assets estáticos
-  event.respondWith(staticStrategy(request));
+
+  // Vite assets (JS, CSS, fonts): Cache First
+  if (request.destination === 'script' || request.destination === 'style' || request.destination === 'font') {
+    event.respondWith(cacheFirst(request, STATIC_CACHE));
+    return;
+  }
+
+  // Everything else: Network First, fallback to cache
+  event.respondWith(networkFirst(request, STATIC_CACHE));
 });
 
-// Cache First para assets estáticos
-async function staticStrategy(request) {
-  const cache = await caches.open(STATIC_CACHE);
+async function cacheFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  
-  if (cached) {
-    // Refrescar en background
-    fetch(request).then((response) => {
-      if (response.ok) cache.put(request, response);
-    }).catch(() => {});
-    return cached;
-  }
-  
+  if (cached) return cached;
+
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    console.error('[SW] Error fetching:', request.url, error);
-    // Retornar página offline si existe
-    return caches.match('/offline.html');
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
+    return caches.match('/');
   }
 }
 
-// Network First para API (datos siempre frescos)
-async function apiStrategy(request) {
-  const cache = await caches.open(API_CACHE);
-  
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      cache.put(request, networkResponse.clone());
-    }
-    return networkResponse;
-  } catch (error) {
-    console.log('[SW] API offline, usando caché');
+    const response = await fetch(request);
+    if (response.ok) cache.put(request, response.clone());
+    return response;
+  } catch {
     const cached = await cache.match(request);
     if (cached) return cached;
-    
-    // Respuesta fallback para API
+
+    if (request.destination === 'document') return caches.match('/');
+
     return new Response(
-      JSON.stringify({ 
-        success: false, 
-        error: 'Sin conexión',
-        offline: true 
-      }),
-      { 
-        headers: { 'Content-Type': 'application/json' },
-        status: 503 
-      }
+      JSON.stringify({ success: false, error: 'Sin conexión', offline: true }),
+      { headers: { 'Content-Type': 'application/json' }, status: 503 }
     );
   }
 }
 
-// Cache First con límite para imágenes
-async function imageStrategy(request) {
-  const cache = await caches.open(IMAGE_CACHE);
+async function cacheFirstLimited(request, cacheName, maxItems) {
+  const cache = await caches.open(cacheName);
   const cached = await cache.match(request);
-  
   if (cached) return cached;
-  
+
   try {
-    const networkResponse = await fetch(request);
-    if (networkResponse.ok) {
-      // Limitar tamaño de caché de imágenes
-      const cacheSize = await getCacheSize(IMAGE_CACHE);
-      if (cacheSize < 100) { // Máximo 100 imágenes
-        cache.put(request, networkResponse.clone());
+    const response = await fetch(request);
+    if (response.ok) {
+      const keys = await cache.keys();
+      if (keys.length < maxItems) {
+        cache.put(request, response.clone());
       }
     }
-    return networkResponse;
-  } catch (error) {
-    // Retornar imagen placeholder
+    return response;
+  } catch {
     return new Response(
-      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect fill="%23333" width="300" height="150"/><text fill="%23999" x="50%" y="50%" text-anchor="middle">Sin imagen</text></svg>',
+      `<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect fill="%2311111b" width="300" height="150"/><text fill="%235c5c70" x="50%" y="50%" text-anchor="middle" font-family="sans-serif">Offline</text></svg>`,
       { headers: { 'Content-Type': 'image/svg+xml' } }
     );
   }
 }
 
-// Helper: Contar items en caché
-async function getCacheSize(cacheName) {
-  const cache = await caches.open(cacheName);
-  const keys = await cache.keys();
-  return keys.length;
-}
-
-// Background Sync para actualizaciones
-self.addEventListener('sync', (event) => {
-  if (event.tag === 'refresh-games') {
-    event.waitUntil(refreshGames());
-  }
-});
-
-async function refreshGames() {
-  try {
-    const response = await fetch('/api/free-games');
-    const data = await response.json();
-    
-    // Notificar a los clientes
-    const clients = await self.clients.matchAll();
-    clients.forEach((client) => {
-      client.postMessage({
-        type: 'GAMES_UPDATED',
-        count: data.games?.length || 0
-      });
-    });
-  } catch (error) {
-    console.error('[SW] Error en background sync:', error);
-  }
-}
-
-// Push Notifications (para futuras implementaciones)
+// Push notifications
 self.addEventListener('push', (event) => {
   if (!event.data) return;
-  
   const data = event.data.json();
-  const options = {
-    body: data.body || '¡Nuevos juegos gratuitos disponibles!',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
-    tag: data.tag || 'new-games',
-    requireInteraction: true,
-    actions: [
-      { action: 'open', title: 'Ver juegos' },
-      { action: 'close', title: 'Cerrar' }
-    ]
-  };
-  
   event.waitUntil(
-    self.registration.showNotification('FreeGameHub', options)
+    self.registration.showNotification('FreeGameHub', {
+      body: data.body || '¡Nuevos juegos gratuitos disponibles!',
+      icon: '/vite.svg',
+      tag: 'new-games',
+      requireInteraction: true,
+      actions: [
+        { action: 'open', title: 'Ver juegos' },
+        { action: 'close', title: 'Cerrar' }
+      ]
+    })
   );
 });
 
-// Click en notificación
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
   if (event.action === 'open' || !event.action) {
-    event.waitUntil(
-      clients.openWindow('/')
-    );
+    event.waitUntil(clients.openWindow('/'));
   }
 });
 
-// Mensajes desde el cliente
 self.addEventListener('message', (event) => {
-  if (event.data === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });

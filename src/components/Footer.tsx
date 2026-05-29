@@ -1,8 +1,15 @@
-export default function Footer() {
+import { Language } from '../types';
+import { t } from '../i18n';
+
+interface FooterProps {
+  language: Language;
+}
+
+export default function Footer({ language }: FooterProps) {
   return (
     <footer className="app-footer">
       <p className="footer-text">
-        Hecho con <span className="heart">❤️</span> para gamers
+        {t('footerText', language)}
       </p>
     </footer>
   );

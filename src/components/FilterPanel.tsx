@@ -1,4 +1,5 @@
-import { Mode, SortMode, Genre, TypeFilter, StoreFilter } from '../types';
+import { Mode, SortMode, Genre, TypeFilter, StoreFilter, Language } from '../types';
+import { t } from '../i18n';
 
 interface FilterPanelProps {
   currentMode: Mode;
@@ -11,6 +12,7 @@ interface FilterPanelProps {
   showFavoritesOnly: boolean;
   showHiddenOnly: boolean;
   isOpen: boolean;
+  language: Language;
   onModeChange: (mode: Mode) => void;
   onSortChange: (sort: SortMode) => void;
   onGenreChange: (genre: Genre) => void;
@@ -22,16 +24,16 @@ interface FilterPanelProps {
   onClose: () => void;
 }
 
-const genres: { value: Genre; label: string }[] = [
-  { value: 'all', label: '🎮 Todo' },
-  { value: 'action', label: '⚔️ Acción' },
-  { value: 'rpg', label: '🗡️ RPG' },
-  { value: 'indie', label: '💎 Indie' },
-  { value: 'shooter', label: '🔫 Shooter' },
-  { value: 'strategy', label: '♟️ Estrategia' },
-  { value: 'puzzle', label: '🧩 Puzzle' },
-  { value: 'racing', label: '🏎️ Carreras' },
-  { value: 'sports', label: '⚽ Deportes' },
+const genres = (lang: Language): { value: Genre; label: string }[] => [
+  { value: 'all', label: `🎮 ${lang === 'es' ? 'Todo' : 'All'}` },
+  { value: 'action', label: `⚔️ ${lang === 'es' ? 'Acción' : 'Action'}` },
+  { value: 'rpg', label: `🗡️ ${lang === 'es' ? 'RPG' : 'RPG'}` },
+  { value: 'indie', label: `💎 ${lang === 'es' ? 'Indie' : 'Indie'}` },
+  { value: 'shooter', label: `🔫 ${lang === 'es' ? 'Shooter' : 'Shooter'}` },
+  { value: 'strategy', label: `♟️ ${lang === 'es' ? 'Estrategia' : 'Strategy'}` },
+  { value: 'puzzle', label: `🧩 ${lang === 'es' ? 'Puzzle' : 'Puzzle'}` },
+  { value: 'racing', label: `🏎️ ${lang === 'es' ? 'Carreras' : 'Racing'}` },
+  { value: 'sports', label: `⚽ ${lang === 'es' ? 'Deportes' : 'Sports'}` },
 ];
 
 const stores: { value: StoreFilter; label: string }[] = [
@@ -42,43 +44,44 @@ const stores: { value: StoreFilter; label: string }[] = [
   { value: 'itch', label: 'Itch.io' },
 ];
 
-const sortOptions: { value: SortMode; label: string }[] = [
-  { value: 'default', label: '📅 Recientes' },
-  { value: 'price-desc', label: '💰 Precio' },
-  { value: 'ending-soon', label: '⏳ Termina pronto' },
-  { value: 'title', label: '🔤 A-Z' },
-];
-
 export default function FilterPanel({
   currentMode, sortMode, activeGenre, activeStore, activeType,
-  favoritesCount, hiddenCount, showFavoritesOnly, showHiddenOnly, isOpen,
+  favoritesCount, hiddenCount, showFavoritesOnly, showHiddenOnly, isOpen, language,
   onModeChange, onSortChange, onGenreChange, onStoreChange, onTypeChange,
   onToggleFavorites, onToggleHidden, onResetFilters, onClose
 }: FilterPanelProps) {
+  const sortOptions: { value: SortMode; label: string }[] = [
+    { value: 'default', label: `📅 ${t('sortRecent', language)}` },
+    { value: 'price-desc', label: `💰 ${t('sortPrice', language)}` },
+    { value: 'ending-soon', label: `⏳ ${t('sortEnding', language)}` },
+    { value: 'title', label: `🔤 ${t('sortAZ', language)}` },
+    { value: 'popular', label: `🔥 ${t('sortPopular', language)}` },
+  ];
+
   return (
     <>
       <div className={`filter-overlay ${isOpen ? 'open' : ''}`} onClick={onClose} />
       <div className={`filter-sheet ${isOpen ? 'open' : ''}`}>
         <div className="filter-handle" />
         <div className="filter-head">
-          <h3 className="filter-title">Filtros</h3>
+          <h3 className="filter-title">{t('filters', language)}</h3>
           <button className="filter-close" onClick={onClose}>✕</button>
         </div>
 
         <div className="filter-body">
           <div className="filter-group">
-            <span className="filter-label">Plataforma</span>
+            <span className="filter-label">{t('platformFilter', language)}</span>
             <div className="filter-chips">
               {(['pc', 'android'] as Mode[]).map(mode => (
                 <button key={mode} className={`filter-chip ${currentMode === mode ? 'active' : ''}`} onClick={() => onModeChange(mode)}>
-                  {mode === 'pc' ? '🖥️ PC' : '📱 Android'}
+                  {mode === 'pc' ? `🖥️ ${t('navPC', language)}` : `📱 ${t('navAndroid', language)}`}
                 </button>
               ))}
             </div>
           </div>
 
           <div className="filter-group">
-            <span className="filter-label">Ordenar</span>
+            <span className="filter-label">{t('sortBy', language)}</span>
             <div className="filter-chips">
               {sortOptions.map(opt => (
                 <button key={opt.value} className={`filter-chip ${sortMode === opt.value ? 'active' : ''}`} onClick={() => onSortChange(opt.value)}>
@@ -89,9 +92,9 @@ export default function FilterPanel({
           </div>
 
           <div className="filter-group">
-            <span className="filter-label">Género</span>
+            <span className="filter-label">{t('genre', language)}</span>
             <div className="filter-chips">
-              {genres.map(g => (
+              {genres(language).map(g => (
                 <button key={g.value} className={`filter-chip ${activeGenre === g.value ? 'active' : ''}`} onClick={() => onGenreChange(g.value)}>
                   {g.label}
                 </button>
@@ -100,11 +103,11 @@ export default function FilterPanel({
           </div>
 
           <div className="filter-group">
-            <span className="filter-label">Tipo</span>
+            <span className="filter-label">{t('type', language)}</span>
             <div className="filter-chips">
-              {(['all', 'game', 'dlc'] as TypeFilter[]).map(t => (
-                <button key={t} className={`filter-chip ${activeType === t ? 'active' : ''}`} onClick={() => onTypeChange(t)}>
-                  {t === 'all' ? 'Todo' : t === 'game' ? '🎮 Juegos' : '📦 DLCs'}
+              {(['all', 'game', 'dlc'] as TypeFilter[]).map(tv => (
+                <button key={tv} className={`filter-chip ${activeType === tv ? 'active' : ''}`} onClick={() => onTypeChange(tv)}>
+                  {tv === 'all' ? t('all', language) : tv === 'game' ? `🎮 ${t('games', language)}` : `📦 ${t('dlcs', language)}`}
                 </button>
               ))}
             </div>
@@ -112,7 +115,7 @@ export default function FilterPanel({
 
           {currentMode === 'pc' && (
             <div className="filter-group">
-              <span className="filter-label">Tienda</span>
+              <span className="filter-label">{t('storeFilter', language)}</span>
               <div className="filter-chips">
                 {stores.map(s => (
                   <button key={s.value} className={`filter-chip ${activeStore === s.value ? 'active' : ''}`} onClick={() => onStoreChange(s.value)}>
@@ -124,20 +127,20 @@ export default function FilterPanel({
           )}
 
           <div className="filter-group">
-            <span className="filter-label">Especiales</span>
+            <span className="filter-label">{t('specials', language)}</span>
             <div className="filter-chips">
               <button className={`filter-chip ${showFavoritesOnly ? 'active' : ''}`} onClick={onToggleFavorites}>
-                ❤️ Favoritos ({favoritesCount})
+                ❤️ {t('favOnly', language)} ({favoritesCount})
               </button>
               <button className={`filter-chip ${showHiddenOnly ? 'active' : ''}`} onClick={onToggleHidden}>
-                🙈 Ocultos ({hiddenCount})
+                🙈 {t('hiddenOnly', language)} ({hiddenCount})
               </button>
             </div>
           </div>
 
           <div className="filter-actions">
-            <button className="filter-btn secondary" onClick={onResetFilters}>Restablecer</button>
-            <button className="filter-btn primary" onClick={onClose}>Aplicar</button>
+            <button className="filter-btn secondary" onClick={onResetFilters}>{t('reset', language)}</button>
+            <button className="filter-btn primary" onClick={onClose}>{t('apply', language)}</button>
           </div>
         </div>
       </div>

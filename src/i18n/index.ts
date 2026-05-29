@@ -1,0 +1,226 @@
+import { Language } from '../types';
+
+export const translations = {
+  es: {
+    // Header
+    searchPlaceholder: 'Buscar juegos...',
+    shareTitle: 'Compartir',
+
+    // Top bar stats
+    gamesCount: 'juegos',
+    savings: 'Ahorro',
+    favorites: 'Favoritos',
+    updated: 'Actualizado',
+
+    // Sort chips
+    sortRecent: 'Recientes',
+    sortPrice: 'Precio',
+    sortEnding: 'Por terminar',
+    sortAZ: 'A-Z',
+    sortPopular: 'Popular',
+    sortGenre: 'Género',
+
+    // Game card
+    alwaysFree: '✓ Siempre gratis',
+    flashOffer: '⚡ Oferta Flash',
+    expired: '✗ Expirado',
+    hoursLeft: 'h restantes',
+    reclaim: 'Reclamar →',
+    reclaimBtn: 'Reclamar',
+    gameplay: 'Gameplay',
+    hide: 'Ocultar',
+    removeFav: 'Quitar favorito',
+    addFav: 'Añadir favorito',
+    seen: 'Visto',
+    newBadge: 'Nuevo',
+
+    // Game detail modal
+    gameDetail: 'Detalle del juego',
+    instructions: 'Instrucciones',
+    description: 'Descripción',
+    platform: 'Plataforma',
+    store: 'Tienda',
+    price: 'Precio original',
+    ends: 'Termina',
+    share: 'Compartir',
+    voteUp: 'Útil',
+    voteDown: 'No útil',
+    openStore: 'Abrir tienda',
+    close: 'Cerrar',
+    markClaimed: 'Marcar como reclamado',
+    markWishlist: 'Guardar en lista',
+    removeWishlist: 'Quitar de lista',
+
+    // Stats & export
+    myStats: 'Mis estadísticas',
+    totalClaimed: 'Reclamados',
+    totalSavingsStats: 'Ahorro total',
+    gamesSeen: 'Juegos vistos',
+    votesMade: 'Votos hechos',
+    exportData: 'Exportar datos',
+    exportJSON: 'Exportar JSON',
+    exportText: 'Exportar texto',
+    dataExported: 'Datos exportados',
+
+    // Empty & loading
+    noGames: 'No se encontraron juegos',
+    noGamesDesc: 'Prueba con otros filtros o términos de búsqueda',
+    clearFilters: 'Limpiar filtros',
+    loading: 'Cargando juegos gratuitos...',
+    errorTitle: 'Algo salió mal',
+    errorDesc: 'Error al cargar. Intenta recargar.',
+    retry: 'Reintentar',
+
+    // Filters
+    filters: 'Filtros',
+    platformFilter: 'Plataforma',
+    sortBy: 'Ordenar',
+    genre: 'Género',
+    type: 'Tipo',
+    storeFilter: 'Tienda',
+    specials: 'Especiales',
+    favOnly: 'Favoritos',
+    hiddenOnly: 'Ocultos',
+    reset: 'Restablecer',
+    apply: 'Aplicar',
+    all: 'Todo',
+    games: 'Juegos',
+    dlcs: 'DLCs',
+    allStores: 'Todas',
+
+    // Toasts
+    favoritesOn: 'Mostrando favoritos ❤️',
+    favoritesOff: 'Favoritos desactivados',
+    hiddenOn: 'Mostrando ocultos 🙈',
+    filtersReset: 'Filtros restablecidos ✅',
+    gameHidden: 'Juego oculto 🙈',
+    gameUnhidden: 'Juego visible de nuevo',
+    gameClaimed: '¡Marcado como reclamado! 🎉',
+    gameWishlisted: 'Guardado en tu lista 📋',
+    gameRemoved: 'Eliminado de tu lista',
+    voteRecorded: 'Voto registrado 👍',
+    copied: 'Enlace copiado 📋',
+
+    // Bottom nav
+    navPC: 'PC',
+    navAndroid: 'Android',
+    navFilters: 'Filtros',
+    navFav: 'Fav',
+    navReset: 'Reset',
+    navStats: 'Stats',
+    navList: 'Lista',
+    navGrid: 'Cuadrícula',
+
+    // Footer
+    footerText: 'Hecho con ❤️ para gamers',
+  },
+
+  en: {
+    searchPlaceholder: 'Search games...',
+    shareTitle: 'Share',
+
+    gamesCount: 'games',
+    savings: 'Savings',
+    favorites: 'Favorites',
+    updated: 'Updated',
+
+    sortRecent: 'Recent',
+    sortPrice: 'Price',
+    sortEnding: 'Ending soon',
+    sortAZ: 'A-Z',
+    sortPopular: 'Popular',
+    sortGenre: 'Genre',
+
+    alwaysFree: '✓ Always free',
+    flashOffer: '⚡ Flash Offer',
+    expired: '✗ Expired',
+    hoursLeft: 'h left',
+    reclaim: 'Get it →',
+    reclaimBtn: 'Get it',
+    gameplay: 'Gameplay',
+    hide: 'Hide',
+    removeFav: 'Remove favorite',
+    addFav: 'Add favorite',
+    seen: 'Seen',
+    newBadge: 'New',
+
+    gameDetail: 'Game details',
+    instructions: 'Instructions',
+    description: 'Description',
+    platform: 'Platform',
+    store: 'Store',
+    price: 'Original price',
+    ends: 'Ends',
+    share: 'Share',
+    voteUp: 'Helpful',
+    voteDown: 'Not helpful',
+    openStore: 'Open store',
+    close: 'Close',
+    markClaimed: 'Mark as claimed',
+    markWishlist: 'Save to list',
+    removeWishlist: 'Remove from list',
+
+    myStats: 'My stats',
+    totalClaimed: 'Claimed',
+    totalSavingsStats: 'Total savings',
+    gamesSeen: 'Games seen',
+    votesMade: 'Votes made',
+    exportData: 'Export data',
+    exportJSON: 'Export JSON',
+    exportText: 'Export text',
+    dataExported: 'Data exported',
+
+    noGames: 'No games found',
+    noGamesDesc: 'Try different filters or search terms',
+    clearFilters: 'Clear filters',
+    loading: 'Loading free games...',
+    errorTitle: 'Something went wrong',
+    errorDesc: 'Error loading. Please retry.',
+    retry: 'Retry',
+
+    filters: 'Filters',
+    platformFilter: 'Platform',
+    sortBy: 'Sort by',
+    genre: 'Genre',
+    type: 'Type',
+    storeFilter: 'Store',
+    specials: 'Specials',
+    favOnly: 'Favorites',
+    hiddenOnly: 'Hidden',
+    reset: 'Reset',
+    apply: 'Apply',
+    all: 'All',
+    games: 'Games',
+    dlcs: 'DLCs',
+    allStores: 'All stores',
+
+    favoritesOn: 'Showing favorites ❤️',
+    favoritesOff: 'Favorites off',
+    hiddenOn: 'Showing hidden 🙈',
+    filtersReset: 'Filters reset ✅',
+    gameHidden: 'Game hidden 🙈',
+    gameUnhidden: 'Game visible again',
+    gameClaimed: 'Marked as claimed! 🎉',
+    gameWishlisted: 'Saved to your list 📋',
+    gameRemoved: 'Removed from your list',
+    voteRecorded: 'Vote recorded 👍',
+    copied: 'Link copied 📋',
+
+    navPC: 'PC',
+    navAndroid: 'Android',
+    navFilters: 'Filters',
+    navFav: 'Fav',
+    navReset: 'Reset',
+    navStats: 'Stats',
+    navList: 'List',
+    navGrid: 'Grid',
+
+    footerText: 'Made with ❤️ for gamers',
+  },
+};
+
+export type TranslationKeys = keyof typeof translations.es;
+
+export function t(key: TranslationKeys, lang: Language): string {
+  return translations[lang]?.[key] ?? translations.es[key] ?? key;
+}
