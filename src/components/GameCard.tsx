@@ -150,7 +150,7 @@ export default function GameCard({
         <h3 className="card-title">{game.title}</h3>
         <div className="card-meta">
           <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+          <div className="card-actions">
             <button
               className={`card-action ${isFavorite ? 'fav' : ''}`}
               onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}

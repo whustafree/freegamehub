@@ -332,18 +332,22 @@ export default function GameDetail({
           </div>
         )}
 
-        {/* Sticky Claim Bar */}
+        {/* Sticky Claim Bar - Play Store style */}
         <div className="detail-claim-bar">
           <button className="detail-claim-btn" onClick={handleClaim}>
-            🎁 {game.worth && game.worth !== 'N/A' ? `${t('reclaim', language)} (${game.worth})` : t('reclaimBtn', language)}
+            🎮 {t('reclaim', language)}
+            {game.worth && game.worth !== 'N/A' ? (
+              <span style={{fontSize:'0.65rem', opacity:0.8, marginLeft:'0.15rem'}}>(${game.worth})</span>
+            ) : null}
           </button>
           <button
             className={`detail-claim-btn secondary ${wishlistStatus ? 'active' : ''}`}
             onClick={handleWishlist}
+            title={wishlistStatus ? t('gameWishlisted', language) : t('addWishlist', language)}
           >
-            {wishlistStatus ? '📋' : '📋'}
+            {wishlistStatus ? '💾' : '💾'}
           </button>
-          <button className="detail-claim-btn secondary" onClick={handleShare}>
+          <button className="detail-claim-btn secondary" onClick={handleShare} title={t('shareTitle', language)}>
             📤
           </button>
         </div>
