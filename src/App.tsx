@@ -1,9 +1,10 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
+import { useTheme } from './hooks/useTheme';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game } from './types';
 import { getRelativeTime, formatCurrency, parsePrice } from './utils/format';
-import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds, saveTheme, saveAccentColor } from './utils/storage';
-import { useTheme } from './hooks/useTheme';
+import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds } from './utils/storage';
+
 import { useGames } from './hooks/useGames';
 import { useFilters } from './hooks/useFilters';
 import Header from './components/Header';
@@ -65,8 +66,6 @@ function createConfetti() {
 }
 
 export default function App() {
-  useTheme();
-
   const {
     games, favorites, hiddenGames, viewedGames,
     votes, reactions, wishlist, userStats,
@@ -1114,22 +1113,12 @@ export default function App() {
       {showSettings && (
         <SettingsPanel
           language={language}
-          theme={document.documentElement.getAttribute('data-theme') as any || 'dark'}
-          accentColor={document.documentElement.getAttribute('data-accent') as any || 'red'}
           collections={collections}
           activityLog={activityLog}
           achievements={achievements}
           userStats={userStats}
           games={games.reduce((acc, g) => ({ ...acc, [g.id]: g.title }), {} as Record<string, string>)}
           onClose={handleCloseSettings}
-          onThemeChange={(theme) => {
-            document.documentElement.setAttribute('data-theme', theme);
-            saveTheme(theme as any);
-          }}
-          onAccentChange={(color) => {
-            document.documentElement.setAttribute('data-accent', color);
-            saveAccentColor(color as any);
-          }}
           onCreateCollection={createCollection}
           onDeleteCollection={deleteCollection}
           onOpenCollectionGames={handleOpenCollectionGames}

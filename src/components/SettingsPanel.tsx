@@ -1,41 +1,22 @@
 import { useState } from 'react';
-import { Language, Theme, AccentColor, UserCollection, UserStats, ActivityEntry, Achievement } from '../types';
+import { Language, UserCollection, UserStats, ActivityEntry, Achievement } from '../types';
 import { t } from '../i18n';
 import { showToast } from './Toast';
 
 interface SettingsPanelProps {
   language: Language;
-  theme: Theme;
-  accentColor: AccentColor;
   collections: UserCollection[];
   activityLog: ActivityEntry[];
   achievements: Achievement[];
   userStats: UserStats;
-  games: Record<string, string>; // gameId -> title
+  games: Record<string, string>;
   onClose: () => void;
-  onThemeChange: (theme: Theme) => void;
-  onAccentChange: (color: AccentColor) => void;
   onCreateCollection: (name: string, desc: string, emoji: string) => void;
   onDeleteCollection: (id: string) => void;
   onOpenCollectionGames: (collection: UserCollection) => void;
 }
 
-const ACCENTS: { value: AccentColor; icon: string }[] = [
-  { value: 'red', icon: '🔴' },
-  { value: 'blue', icon: '🔵' },
-  { value: 'green', icon: '🟢' },
-  { value: 'purple', icon: '🟣' },
-  { value: 'amber', icon: '🟡' },
-  { value: 'cyan', icon: '🩵' },
-];
-
-const THEMES: { value: Theme; icon: string; labelKey: string }[] = [
-  { value: 'dark', icon: '🌙', labelKey: 'themeDark' },
-  { value: 'light', icon: '☀️', labelKey: 'themeLight' },
-  { value: 'amoled', icon: '⬛', labelKey: 'themeAmoled' },
-];
-
-type Tab = 'theme' | 'collections' | 'activity' | 'achievements';
+type Tab = 'collections' | 'activity' | 'achievements';
 
 const EMOJIS = ['📁', '🎮', '🕹️', '⭐', '💎', '🔥', '🎯', '👾', '🎲', '🏆', '💿', '🎪'];
 
@@ -83,11 +64,11 @@ function groupActivityByDate(log: ActivityEntry[], lang: Language): { label: str
 }
 
 export default function SettingsPanel({
-  language, theme, accentColor, collections, activityLog, achievements, userStats,
-  games, onClose, onThemeChange, onAccentChange,
+  language, collections, activityLog, achievements, userStats,
+  games, onClose,
   onCreateCollection, onDeleteCollection, onOpenCollectionGames,
 }: SettingsPanelProps) {
-  const [tab, setTab] = useState<Tab>('theme');
+  const [tab, setTab] = useState<Tab>('collections');
   const [showNewCollection, setShowNewCollection] = useState(false);
   const [newColName, setNewColName] = useState('');
   const [newColDesc, setNewColDesc] = useState('');
@@ -110,76 +91,41 @@ export default function SettingsPanel({
   return (
     <div className="filter-overlay open" onClick={onClose} style={{ zIndex: 400 }}>
       <div className="filter-sheet open" onClick={e => e.stopPropagation()} style={{ maxHeight: '85vh' }}>
-        <div className="filter-handle" />
-        <div className="filter-head">
+        <div className="filter-handle" />            <div className="filter-head">
           <h3 className="filter-title">
-            {tab === 'theme' ? '⚙️' : tab === 'collections' ? '📁' : tab === 'activity' ? '📋' : '🏆'} {t('myStats', language)}
+            {tab === 'collections' ? '📁' : tab === 'activity' ? '📋' : '🏆'} {t('myStats', language)}
           </h3>
           <button className="filter-close" onClick={onClose}>✕</button>
         </div>
 
         {/* Tabs */}
         <div className="filter-chips" style={{ padding: '0 1.25rem 0.5rem', display: 'flex', gap: '0.35rem', flexWrap: 'wrap', borderBottom: '1px solid var(--card-border)' }}>
-          <button className={`filter-chip ${tab === 'theme' ? 'active' : ''}`} onClick={() => setTab('theme')}>🎨 {t('theme', language)}</button>
           <button className={`filter-chip ${tab === 'collections' ? 'active' : ''}`} onClick={() => setTab('collections')}>📁 {t('collections', language)}</button>
           <button className={`filter-chip ${tab === 'activity' ? 'active' : ''}`} onClick={() => setTab('activity')}>📋 {t('activityLog', language)}</button>
           <button className={`filter-chip ${tab === 'achievements' ? 'active' : ''}`} onClick={() => setTab('achievements')}>🏆 {t('achievements', language)} ({unlockedCount}/{totalCount})</button>
         </div>
 
         <div className="filter-body">
-          {/* THEME TAB */}
-          {tab === 'theme' && (
-            <>
-              <div className="filter-group">
-                <span className="filter-label">{t('theme', language)}</span>
-                <div className="filter-chips">
-                  {THEMES.map(th => (
-                    <button
-                      key={th.value}
-                      className={`filter-chip ${theme === th.value ? 'active' : ''}`}
-                      onClick={() => onThemeChange(th.value)}
-                    >
-                      {th.icon} {t(th.labelKey as any, language)}
-                    </button>
-                  ))}
-                </div>
+          {/* Stats summary visible in all tabs */}
+          {tab !== 'achievements' && (
+            <div className="stats-grid" style={{ marginBottom: '0.25rem' }}>
+              <div className="stat-card">
+                <div className="stat-value">{userStats.totalClaimed}</div>
+                <div className="stat-label">{t('totalClaimed', language)}</div>
               </div>
-
-              <div className="filter-group">
-                <span className="filter-label">{t('accentColor', language)}</span>
-                <div className="filter-chips">
-                  {ACCENTS.map(ac => (
-                    <button
-                      key={ac.value}
-                      className={`filter-chip ${accentColor === ac.value ? 'active' : ''}`}
-                      onClick={() => onAccentChange(ac.value)}
-                    >
-                      {ac.icon} {t(('accent' + ac.value.charAt(0).toUpperCase() + ac.value.slice(1)) as any, language)}
-                    </button>
-                  ))}
-                </div>
+              <div className="stat-card">
+                <div className="stat-value">${userStats.totalSavings.toFixed(0)}</div>
+                <div className="stat-label">{t('totalSavingsStats', language)}</div>
               </div>
-
-              {/* User stats summary */}
-              <div className="stats-grid" style={{ marginTop: '0.5rem' }}>
-                <div className="stat-card">
-                  <div className="stat-value">{userStats.totalClaimed}</div>
-                  <div className="stat-label">{t('totalClaimed', language)}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">${userStats.totalSavings.toFixed(0)}</div>
-                  <div className="stat-label">{t('totalSavingsStats', language)}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">{userStats.totalGamesSeen}</div>
-                  <div className="stat-label">{t('gamesSeen', language)}</div>
-                </div>
-                <div className="stat-card">
-                  <div className="stat-value">{unlockedCount}/{totalCount}</div>
-                  <div className="stat-label">{t('achievements', language)}</div>
-                </div>
+              <div className="stat-card">
+                <div className="stat-value">{userStats.totalGamesSeen}</div>
+                <div className="stat-label">{t('gamesSeen', language)}</div>
               </div>
-            </>
+              <div className="stat-card">
+                <div className="stat-value">{unlockedCount}/{totalCount}</div>
+                <div className="stat-label">{t('achievements', language)}</div>
+              </div>
+            </div>
           )}
 
           {/* COLLECTIONS TAB */}
