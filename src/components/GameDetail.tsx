@@ -135,25 +135,6 @@ export default function GameDetail({
         <div className="detail-body">
           <h2 className="detail-title">{game.title}</h2>
 
-          {/* Action buttons */}
-          <div className="detail-actions-row">
-            <button className="detail-btn primary" onClick={handleClaim}>
-              🎁 {t('reclaimBtn', language)}
-            </button>
-            <button
-              className={`detail-btn outline ${wishlistStatus ? 'active' : ''}`}
-              onClick={handleWishlist}
-            >
-              {wishlistStatus ? `📋 ${t('removeWishlist', language)}` : `📋 ${t('markWishlist', language)}`}
-            </button>
-            <button className="detail-btn outline" onClick={handleShare}>
-              📤 {t('share', language)}
-            </button>
-            <button className="detail-btn outline" onClick={handleDeepLinkShare}>
-              🔗
-            </button>
-          </div>
-
           {/* Info grid */}
           <div className="detail-info-grid">
             {game.worth && game.worth !== 'N/A' && (
@@ -315,6 +296,22 @@ export default function GameDetail({
             </div>
           </div>
         )}
+
+        {/* Sticky Claim Bar */}
+        <div className="detail-claim-bar">
+          <button className="detail-claim-btn" onClick={handleClaim}>
+            🎁 {game.worth && game.worth !== 'N/A' ? `${t('reclaim', language)} (${game.worth})` : t('reclaimBtn', language)}
+          </button>
+          <button
+            className={`detail-claim-btn secondary ${wishlistStatus ? 'active' : ''}`}
+            onClick={handleWishlist}
+          >
+            {wishlistStatus ? '📋' : '📋'}
+          </button>
+          <button className="detail-claim-btn secondary" onClick={handleShare}>
+            📤
+          </button>
+        </div>
 
         <button className="detail-close-btn" onClick={onClose}>
           {t('close', language)} ✕

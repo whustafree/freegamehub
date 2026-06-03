@@ -798,8 +798,8 @@ main {
 /* === GAMES GRID === */
 .games-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
   animation: fadeUp 0.4s var(--ease);
 }
 
@@ -1561,25 +1561,7 @@ main {
 }
 
 /* === BOTTOM NAV === */
-.bottom-nav {
-  position: fixed;
-  bottom: 0.75rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 200;
-  width: calc(100% - 1.5rem);
-  max-width: 440px;
-  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: var(--radius-xl);
-  padding: 0.35rem 0.4rem;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 40px color-mix(in srgb, var(--accent) 2%, transparent);
-}
+/* (moved to auto-hide section above) */
 
 .nav-btn {
   display: flex;
@@ -2604,6 +2586,137 @@ main {
 .btn-primary:hover { box-shadow: 0 0 16px var(--accent-glow-strong); transform: translateY(-1px); }
 .btn-primary:active { transform: scale(0.96); }
 
+/* === NOTIFICATION BANNER === */
+.notification-banner {
+  position: relative;
+  z-index: 50;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  animation: slideDown 0.3s var(--ease-spring);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  margin: 0.5rem;
+  border-radius: var(--radius);
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+.notification-banner:active {
+  transform: scale(0.98);
+}
+
+.notification-banner-close {
+  margin-left: auto;
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.65rem;
+  flex-shrink: 0;
+  transition: background 0.15s var(--ease);
+}
+
+.notification-banner-close:hover {
+  background: rgba(255,255,255,0.35);
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* === AUTO-HIDE BOTTOM NAV === */
+.bottom-nav {
+  position: fixed;
+  bottom: 0.75rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 200;
+  width: calc(100% - 1.5rem);
+  max-width: 440px;
+  background: color-mix(in srgb, var(--bg-surface) 88%, transparent);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-xl);
+  padding: 0.35rem 0.4rem;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6), 0 0 40px color-mix(in srgb, var(--accent) 2%, transparent);
+  transition: transform 0.35s var(--ease-spring), opacity 0.35s var(--ease);
+}
+
+.bottom-nav.hidden {
+  transform: translateX(-50%) translateY(calc(100% + 1rem));
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* === STICKY CLAIM BAR - GAME DETAIL === */
+.detail-claim-bar {
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  padding-bottom: calc(0.65rem + env(safe-area-inset-bottom, 0px));
+  background: color-mix(in srgb, var(--bg-surface) 92%, transparent);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--card-border);
+  display: flex;
+  gap: 0.5rem;
+  z-index: 10;
+  animation: fadeUp 0.3s var(--ease);
+}
+
+.detail-claim-btn {
+  flex: 1;
+  padding: 0.7rem;
+  border-radius: var(--radius);
+  border: none;
+  background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 2px 12px var(--accent-glow);
+  transition: all 0.2s var(--ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.detail-claim-btn:active {
+  transform: scale(0.96);
+}
+
+.detail-claim-btn.secondary {
+  flex: 0;
+  background: rgba(17,17,27,0.6);
+  border: 1px solid var(--card-border);
+  color: var(--text-secondary);
+  box-shadow: none;
+  padding: 0.7rem 0.9rem;
+}
+
+.detail-claim-btn.secondary:active {
+  background: var(--accent-glow);
+}
+
 /* === TOAST === */
 #toast-container {
   position: fixed;
@@ -2695,13 +2808,13 @@ main {
 
 /* === RESPONSIVE === */
 @media (min-width: 640px) {
-  .games-grid { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
+  .games-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .skeleton-grid { grid-template-columns: repeat(2, 1fr); gap: 0.85rem; }
   main { padding: 1rem; padding-bottom: calc(var(--nav-h) + 1rem); }
 }
 
 @media (min-width: 1024px) {
-  .games-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .games-grid { grid-template-columns: repeat(3, 1fr); gap: 0.85rem; }
   .skeleton-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; }
   main { padding: 1.25rem; padding-bottom: 1.5rem; }
   .bottom-nav { max-width: 400px; }
@@ -2712,7 +2825,7 @@ main {
 }
 
 @media (min-width: 1280px) {
-  .games-grid { grid-template-columns: repeat(4, 1fr); }
+  .games-grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; }
   .skeleton-grid { grid-template-columns: repeat(4, 1fr); }
 }
 

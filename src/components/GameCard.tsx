@@ -33,6 +33,8 @@ export default function GameCard({
   const gameVotes = votes[game.id];
   const totalVotes = gameVotes ? gameVotes.up + gameVotes.down : 0;
 
+  const isListView = viewMode === 'list';
+  
   const [swiping, setSwiping] = useState(false);
   const [swipeOffset, setSwipeOffset] = useState(0);
   const [showSwipeLeft, setShowSwipeLeft] = useState(false);
@@ -104,8 +106,6 @@ export default function GameCard({
     onMarkAsViewed(game.id);
   };
 
-  const isListView = viewMode === 'list';
-
   return (
     <article
       ref={cardRef}
@@ -135,74 +135,48 @@ export default function GameCard({
             (e.target as HTMLImageElement).src = `https://placehold.co/300x150/11111b/ef4444?text=${encodeURIComponent(game.title.slice(0, 20))}`;
           }}
         />
-        <div className="card-img-badges">
-          {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
-          {/* Free-to-keep vs Free-to-play badge */}
-          {game.type?.toLowerCase().includes('game') && game.source !== 'freetogame' && (
-            <span className="card-img-badge free-to-keep">{t('freeToKeep', language)}</span>
-          )}
-          {game.type === 'free-to-play' && (
-            <span className="card-img-badge free-to-play">{t('freeToPlay', language)}</span>
-          )}
-          {/* Free weekend badge for Steam time-limited giveaways */}
-          {game.platform === 'steam' && game.type?.toLowerCase().includes('game') && game.endDate && (
-            <span className="card-img-badge free-weekend">{t('freeWeekendBadge', language)}</span>
-          )}
-          <span className="card-img-badge platform">{platformIcon} {game.platformName || game.platform}</span>
-          {worth}
-        </div>
-
-        <div className="card-actions">
-          <button
-            className="card-action"
-            onClick={e => { e.stopPropagation(); onHideGame(game.id); }}
-            title={t('hide', language)}
-          >
-            🙈
-          </button>
-          <button
-            className={`card-action ${isFavorite ? 'fav' : ''}`}
-            onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}
-            title={isFavorite ? t('removeFav', language) : t('addFav', language)}
-          >
-            {isFavorite ? '❤️' : '🤍'}
-          </button>
-          <a
-            href={ytLink}
-            target="_blank"
-            rel="noopener"
-            className="card-action"
-            title={t('gameplay', language)}
-            onClick={e => e.stopPropagation()}
-          >
-            ▶️
-          </a>
-          <button className="card-action" onClick={handleShare} title={t('share', language)}>
-            📤
-          </button>
-        </div>
+        {!isListView && (
+          <div className="card-img-badges">
+            {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
+            {game.type?.toLowerCase().includes('game') && game.source !== 'freetogame' && (
+              <span className="card-img-badge free-to-keep" style={{fontSize:'0.5rem', padding:'0.1rem 0.3rem'}}>{t('freeToKeep', language)}</span>
+            )}
+            {worth}
+          </div>
+        )}
+        {!isListView && (
+          <div className="card-actions">
+            <button
+              className={`card-action ${isFavorite ? 'fav' : ''}`}
+              onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}
+              title={isFavorite ? t('removeFav', language) : t('addFav', language)}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="card-body">
         <h3 className="card-title">{game.title}</h3>
-        <p className="card-desc">{game.description || 'Juego gratuito disponible'}</p>
-        <div className="card-meta">
-          <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
-          {totalVotes > 0 && (
-            <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.2rem' }}>
-              👍 {gameVotes.up}
-            </span>
-          )}
-          <a
-            href={game.url}
-            target="_blank"
-            rel="noopener"
-            className="claim-btn"
-            onClick={e => e.stopPropagation()}
-          >
-            {t('reclaim', language)}
-          </a>
-        </div>
+        {!isListView && <p className="card-desc">{game.description ? game.description.slice(0, 80) + '...' : 'Juego gratuito'}</p>}          <div className="card-meta">
+            <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
+            {totalVotes > 0 && (
+              <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.15rem' }}>
+                👍 {gameVotes.up}
+              </span>
+            )}
+            <a
+              href={game.url}
+              target="_blank"
+              rel="noopener"
+              className="claim-btn"
+              onClick={e => e.stopPropagation()}
+              style={{ fontSize: '0.65rem', padding: '0.25rem 0.5rem' }}
+            >
+              {t('reclaim', language)}
+            </a>
+          </div>
       </div>
     </article>
   );

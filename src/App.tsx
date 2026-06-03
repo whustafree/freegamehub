@@ -111,6 +111,11 @@ export default function App() {
   const [multiSelectActive, setMultiSelectActive] = useState(false);
   const [multiSelectedIds, setMultiSelectedIds] = useState<string[]>([]);
 
+  // Auto-hide nav on scroll
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const scrollTimer = useRef<number | null>(null);
+
   // Infinite scroll
   const [displayCount, setDisplayCount] = useState(ITEMS_PER_PAGE);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -481,6 +486,47 @@ export default function App() {
     setShowSettings(false);
   }, []);
 
+  // --- Auto-hide nav on scroll (mobile native feel) ---
+  useEffect(() => {
+    const main = mainRef.current;
+    if (!main) return;
+    
+    const handleScroll = () => {
+      const currentY = main.scrollTop;
+      if (currentY > 50 && currentY > lastScrollY.current) {
+        // Scrolling down -> hide nav
+        setNavVisible(false);
+      } else if (currentY < lastScrollY.current - 10 || currentY < 50) {
+        // Scrolling up or at top -> show nav
+        setNavVisible(true);
+      }
+      lastScrollY.current = currentY;
+      
+      // Show nav when scrolling up or at top
+      if (currentY < 50) {
+        setNavVisible(true);
+      }
+    };
+    
+    main.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      main.removeEventListener('scroll', handleScroll);
+      if (scrollTimer.current) clearTimeout(scrollTimer.current);
+    };
+  }, []);
+
+  // --- New games notification ---
+  const [showNewGamesBanner, setShowNewGamesBanner] = useState(false);
+  
+  useEffect(() => {
+    if (!isLoading && newGameIds.length > 0 && games.length > 0) {
+      // Only show if there are genuinely new games since last visit
+      if (lastVisit && newGameIds.length > 0) {
+        setShowNewGamesBanner(true);
+      }
+    }
+  }, [isLoading, newGameIds.length, games.length, lastVisit]);
+
   // --- Keyboard shortcuts ---
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -724,6 +770,15 @@ export default function App() {
 
         {isLoaded && (
           <>
+            {/* New Games Notification Banner */}
+            {showNewGamesBanner && newGameIds.length > 0 && (
+              <div className="notification-banner" onClick={() => { setShowNewGamesBanner(false); handleResetFilters(); }}>
+                <span>🆕</span>
+                <span>{newGameIds.length} {language === 'es' ? 'nuevos juegos disponibles' : 'new games available'}!</span>
+                <button className="notification-banner-close" onClick={e => { e.stopPropagation(); setShowNewGamesBanner(false); }}>✕</button>
+              </div>
+            )}
+
             {/* Surprise Me Button */}
             {!showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
               <button className="surprise-btn" onClick={handleSurpriseMe}>
@@ -957,6 +1012,7 @@ export default function App() {
         isFilterOpen={isFilterOpen}
         showFavoritesOnly={showFavoritesOnly}
         language={language}
+        visible={navVisible}
         onModeChange={handleModeChange}
         onToggleFilters={toggleFilters}
         onToggleFavorites={handleToggleFavorites}

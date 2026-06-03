@@ -10,6 +10,7 @@ interface BottomNavProps {
   showFavoritesOnly: boolean;
   language: Language;
   multiSelectActive?: boolean;
+  visible?: boolean;
   onModeChange: (mode: Mode) => void;
   onToggleFilters: () => void;
   onToggleFavorites: () => void;
@@ -29,7 +30,7 @@ const MODES: { mode: Mode; icon: string; labelKey: 'navPC' | 'navAndroid' | 'nav
 
 export default function BottomNav({
   currentMode, viewMode, favoritesCount, isFilterOpen, showFavoritesOnly, language,
-  multiSelectActive,
+  multiSelectActive, visible = true,
   onModeChange, onToggleFilters, onToggleFavorites, onResetFilters, onToggleViewMode, onOpenStats,
   onOpenSettings, onToggleMultiSelect
 }: BottomNavProps) {
@@ -54,7 +55,7 @@ export default function BottomNav({
   };
 
   return (
-    <nav className="bottom-nav">
+    <nav className={`bottom-nav ${!visible ? 'hidden' : ''}`}>
       {MODES.map(({ mode, icon, labelKey }) => (
         <button
           key={mode}
