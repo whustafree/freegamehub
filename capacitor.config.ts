@@ -9,9 +9,26 @@ const config: CapacitorConfig = {
   },
   plugins: {
     SplashScreen: {
-      launchShowDuration: 2000,
-      backgroundColor: '#0f172a',
+      launchShowDuration: 3000,
+      backgroundColor: '#1a1a2e',
       androidSplashResourceName: 'splash',
+      showSpinner: false,
+      androidSpinnerStyle: 'large',
+      splashFullScreen: true,
+      splashImmersive: true,
+    },
+    StatusBar: {
+      style: 'DARK',
+      backgroundColor: '#1a1a2e',
+      overlaysWebView: false,
+    },
+    Keyboard: {
+      resize: 'body',
+      style: 'DARK',
+      resizeOnFullScreen: true,
+    },
+    Haptics: {
+      vibrateOn: true,
     },
   },
 }
