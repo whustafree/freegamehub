@@ -1,191 +1,201 @@
-# 🎮 FreeGameHub v2.0
+# 🎮 FreeGameHub v2.1
 
-[![Node.js](https://img.shields.io/badge/Node.js-16+-green.svg)](https://nodejs.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue.svg)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6-646CFF.svg)](https://vitejs.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Express](https://img.shields.io/badge/Express-4.18+-orange.svg)](https://expressjs.com/)
 
-> **Plataforma moderna para descubrir juegos gratuitos** - Ahora con múltiples fuentes, mejor UI y sistema de notificaciones.
+> **Plataforma PWA para descubrir juegos gratuitos** — React + TypeScript + Vite frontend, Express backend, multiplataforma con Capacitor.
 
 ![FreeGameHub Preview](https://via.placeholder.com/800x400?text=FreeGameHub+Preview)
 
 ## ✨ Características
 
 ### 🎮 Fuentes de Juegos
-- **GamerPower API** - Juegos gratuitos para PC y Android
-- **Epic Games Store** - Juegos semanales gratuitos
-- **Reddit r/googleplaydeals** - Apps y juegos Android en oferta
+- **GamerPower API** — Juegos gratuitos para PC, consolas, Android y iOS
+- **Epic Games Store** — Juegos semanales gratuitos
+- **Reddit r/googleplaydeals** — Apps y juegos Android en oferta
+- **FreeToGame API** — Juegos free-to-play para PC
 
-### 🎨 Interfaz Moderna
-- **3 Temas visuales**: Default, Cyberpunk, Matrix
-- **Diseño responsive**: Optimizado para móvil y desktop
-- **Animaciones suaves**: Transiciones y efectos modernos
-- **Dark mode**: Siempre activo con variaciones
+### 🎨 Interfaz Moderna (App Store Style)
+- **Diseño dark glass**: Estilo iOS con glassmorphism y animaciones fluidas
+- **Figma-level UX**: Pull-to-refresh, skeleton loading, scroll infinito
+- **Swipe gestures**: Desliza izquierda (ocultar) o derecha (favorito)
+- **3 modos de visualización**: Grid, lista y horizontal carousel
+- **Responsive**: Optimizado para móvil, tablet y desktop
+- **Haptic feedback**: Vibración háptica en dispositivos compatibles
 
 ### 🔔 Notificaciones
-- **Telegram Bot**: Alertas automáticas de nuevos juegos
-- **Detección de AAA**: Alertas especiales para juegos premium
-- **Notificaciones push**: Soporte para navegadores (opcional)
+- **Telegram Bot**: Alertas automáticas de nuevos juegos con detección AAA
+- **Notificaciones push**: Service Worker con soporte PWA
+- **Badge de nuevos juegos**: Indicador visual de novedades
+
+### 🎮 Gamificación
+- **15 logros**: Desde "Primer reclamo" hasta "Magnate" ($1000 ahorrados)
+- **Sistema de votos**: Útil / No útil con ranking de popularidad
+- **Reacciones**: 🔥 ❤️ ⭐ 😂 😎 😢 por juego
+- **Colecciones**: Crea y organiza tus juegos favoritos
+- **Historial de actividad**: Registro completo de interacciones
+- **Confetti**: Animaciones al desbloquear logros 🎉
 
 ### ⚡ Funcionalidades
-- **Búsqueda en tiempo real**: Filtrado instantáneo
-- **Favoritos**: Guarda tus juegos preferidos
-- **Ocultar juegos**: Personaliza tu feed
-- **Estado "visto"**: Marca juegos ya reclamados
-- **QR Code**: Comparte fácilmente desde móvil
-- **PWA**: Instalable como app
+- **Búsqueda en tiempo real** con sugerencias
+- **Favoritos y ocultos**: Personaliza tu feed
+- **Multiselección**: Acciones en lote (favorito/ocultar)
+- **Sorpréndeme 🎲**: Juego aleatorio recomendado
+- **Juego del día**: Destacado rotativo
+- **Tendencias**: Juegos más votados
+- **Contador regresivo**: Ofertas por terminar
+- **i18n**: Español e Inglés completos
+- **PWA**: Instalable como app con soporte offline
+- **Android APK**: Compilado nativo con Capacitor
+
+## 🚀 Stack Tecnológico
+
+| Capa | Tecnología |
+|------|-----------|
+| **Frontend** | React 18, TypeScript, Vite 6 |
+| **Backend** | Node.js, Express 4.18 |
+| **Mobile** | Capacitor 8 (Android) |
+| **Testing** | Vitest, @testing-library/react |
+| **PWA** | Service Worker, Manifest.json |
+| **Despliegue** | Vercel (serverless) + Render |
+| **Seguridad** | Helmet, rate limiting |
 
 ## 🚀 Instalación
 
 ### Requisitos
-- Node.js 16+
-- npm o yarn
+- Node.js 18+
+- npm o pnpm
 
 ### Pasos
 
-1. **Clonar el repositorio**
 ```bash
-git clone https://github.com/tuusuario/freegamehub.git
+# Clonar
+git clone https://github.com/whustafree/freegamehub.git
 cd freegamehub
-```
 
-2. **Instalar dependencias**
-```bash
+# Instalar dependencias
 npm install
-```
 
-3. **Configurar variables de entorno**
-```bash
+# Configurar entorno
 cp .env.example .env
 # Edita .env con tus credenciales
+
+# Iniciar desarrollo
+npm run dev    # Frontend (Vite) en :5173
+npm start      # Backend (Express) en :3000
 ```
-
-4. **Iniciar el servidor**
-```bash
-# Modo desarrollo
-npm run dev
-
-# Modo producción
-npm start
-```
-
-## ⚙️ Configuración
-
-### Variables de Entorno (.env)
-
-```env
-# Telegram (opcional pero recomendado)
-TELEGRAM_TOKEN=tu_token_de_bot
-TELEGRAM_CHAT_ID=tu_chat_id
-
-# Configuración del servidor
-PORT=3000
-NODE_ENV=production
-
-# URL de la aplicación
-APP_URL=https://tu-dominio.com
-
-# Intervalo de actualización (horas)
-UPDATE_INTERVAL_HOURS=4
-```
-
-### Configurar Telegram Bot
-
-1. Habla con [@BotFather](https://t.me/botfather) en Telegram
-2. Crea un nuevo bot con `/newbot`
-3. Copia el token proporcionado
-4. Obtén tu chat ID:
-   ```bash
-   node get_id.js
-   ```
-5. Escribe "Hola" a tu bot
-6. Pega el token cuando se solicite
 
 ## 📁 Estructura del Proyecto
 
 ```
 freegamehub/
-├── src/
-│   ├── config/          # Configuración
-│   ├── middleware/      # Middleware Express
-│   ├── routes/          # Rutas API
-│   ├── services/        # Servicios (Telegram, APIs)
-│   └── utils/           # Utilidades
-├── public/              # Frontend estático
-│   ├── index.html
-│   ├── style.css
-│   ├── script.js
-│   └── stats.html
-├── server.js            # Entry point
+├── src/                    # Frontend React + TypeScript
+│   ├── components/         # 14 componentes (GameCard, GameDetail, etc.)
+│   ├── hooks/              # Custom hooks (useGames, useFilters)
+│   ├── i18n/               # Traducciones ES/EN (~200 keys c/u)
+│   ├── utils/              # Utilidades (format, storage)
+│   └── types.ts            # Tipos compartidos
+├── src-backend/            # Backend Express
+│   ├── config/             # Configuración centralizada
+│   ├── middleware/         # Rate limiter, error handler
+│   ├── routes/             # Rutas API
+│   ├── services/           # Servicios externos (Epic, GamerPower, etc.)
+│   └── utils/              # Caché, logger, stats
+├── api/                    # Entry point serverless (Vercel)
+│   └── index.js
+├── public/                 # Archivos estáticos (SW, manifest)
+├── android/                # Proyecto Android (Capacitor)
+├── server.js               # Entry point tradicional
 ├── package.json
-├── .env.example
-└── README.md
+├── vite.config.ts
+└── capacitor.config.ts
 ```
 
 ## 🔌 API Endpoints
 
 | Endpoint | Método | Descripción |
 |----------|--------|-------------|
-| `/api/free-games` | GET | Obtener todos los juegos |
+| `/api/free-games` | GET | Obtener todos los juegos gratuitos |
 | `/api/stats` | GET | Estadísticas del servidor |
-| `/api/refresh` | POST | Forzar actualización |
-| `/api/test-telegram` | POST | Probar notificaciones |
+| `/api/refresh` | POST | Forzar actualización manual |
+| `/api/test-telegram` | POST | Probar notificación Telegram |
 | `/api/health` | GET | Health check |
-| `/stats` | GET | Panel de administración |
+| `/stats` | GET | Panel de administración Web |
+
+## 🧪 Testing
+
+```bash
+npm test        # Ejecutar tests (Vitest)
+npm run test:watch  # Modo watch
+```
+
+Actualmente **33 tests** cubren utilidades de formato y almacenamiento.
 
 ## 🛠️ Desarrollo
 
-### Scripts disponibles
+### Comandos principales
 
 ```bash
-npm start      # Iniciar servidor
-npm run dev    # Modo desarrollo con nodemon
-npm test       # Ejecutar tests
-npm run lint   # Linting con ESLint
+npm run dev      # Frontend (Vite dev server)
+npm start        # Backend (Express)
+npm run build    # Build frontend producción
+npm test         # Tests
+npx tsc --noEmit # TypeScript check
 ```
 
-### Añadir nuevas fuentes
+### Añadir nueva fuente de juegos
 
-1. Crea un servicio en `src/services/`
-2. Implementa el método `fetch()`
-3. Añade al `GamesService` en `src/services/games.js`
+1. Crea un servicio en `src-backend/services/`
+2. Implementa el método `fetch()` que retorne juegos formateados
+3. Agrégarlo al `Promise.allSettled` en `src-backend/services/games.js`
 
-Ejemplo:
-```javascript
-// src/services/mifuente.js
-async fetchGames() {
-  // Tu implementación
-  return formattedGames;
-}
+## 📱 Android APK (Capacitor)
+
+```bash
+# Build frontend
+npm run build
+
+# Sincronizar con Capacitor
+npx cap sync android
+
+# Abrir en Android Studio
+npx cap open android
+
+# Generar APK desde Android Studio
 ```
-
-## 📱 PWA
-
-La aplicación es una PWA completamente funcional:
-
-- ✅ Service Worker para cacheo
-- ✅ Manifest.json para instalación
-- ✅ Iconos adaptativos
-- ✅ Funciona offline
 
 ## 🔒 Seguridad
 
+- Helmet para cabeceras HTTP seguras
+- Rate limiting (60 req/min por IP)
+- Compresión gzip
 - Variables de entorno para credenciales
-- Rate limiting en API
-- Sanitización de inputs
-- Headers de seguridad
+- Sanitización de salida HTML (Telegram)
 
 ## 📝 Changelog
 
+### v2.1.0 (Actual)
+- ✅ Nuevo diseño App Store style con glassmorphism
+- ✅ Componente TrendingSection extraído y optimizado
+- ✅ Scroll horizontal con ancho fijo para tarjetas
+- ✅ Mejoras en list-view con nombres de plataforma
+- ✅ Refactor: `parsePrice` unificado, dead code eliminado
+- ✅ Backend: compression + helmet + rate limiter mejorado
+- ✅ Backend: logger con stack traces en desarrollo
+- ✅ Todos los errores TS corregidos
+- ✅ Traducciones completas (similarGames, addWishlist)
+
 ### v2.0.0
-- ✅ Código completamente refactorizado y modularizado
+- ✅ Arquitectura modular frontend/backend
 - ✅ Sistema de variables de entorno
-- ✅ Nueva fuente: Epic Games API
-- ✅ Mejoras significativas en UI/UX
-- ✅ Sistema de notificaciones push
-- ✅ Panel de administración mejorado
+- ✅ Fuente: Epic Games API
+- ✅ UI/UX rediseñada
+- ✅ PWA y Capacitor Android
 - ✅ Rate limiting
-- ✅ Logging mejorado
-- ✅ Múltiples temas visuales
+- ✅ Sistema de notificaciones push
 
 ### v1.0.0
 - 🎉 Lanzamiento inicial
@@ -193,20 +203,21 @@ La aplicación es una PWA completamente funcional:
 ## 🤝 Contribuir
 
 1. Fork el proyecto
-2. Crea tu rama (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit tus cambios (`git commit -am 'Añadir nueva funcionalidad'`)
-4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+2. Crea tu rama (`git checkout -b feature/mejora`)
+3. Commit (`git commit -am 'Añadir mejora'`)
+4. Push (`git push origin feature/mejora`)
 5. Abre un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detalles.
+MIT — Ver [LICENSE](LICENSE) para más detalles.
 
 ## 🙏 Agradecimientos
 
-- [GamerPower API](https://www.gamerpower.com/) por los datos de juegos
-- [Epic Games](https://store.epicgames.com/) por su API
-- Comunidad de Reddit r/googleplaydeals
+- [GamerPower API](https://www.gamerpower.com/)
+- [Epic Games Store](https://store.epicgames.com/)
+- [FreeToGame API](https://www.freetogame.com/)
+- Comunidad r/googleplaydeals
 
 ---
 

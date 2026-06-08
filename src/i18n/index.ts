@@ -319,6 +319,10 @@ export const translations = {
     surpriseResult: '🎲 Te recomendamos',
     surpriseResultDesc: 'Intenta suerte con otro',
 
+    // Game detail
+    similarGames: 'Juegos similares',
+    addWishlist: 'Añadir a lista',
+
     // Deep link / share
     shareGameLink: 'Compartir enlace',
     gameUrlCopied: 'Enlace del juego copiado',
@@ -620,6 +624,10 @@ export const translations = {
 
     surpriseResult: '🎲 We recommend',
     surpriseResultDesc: 'Try your luck again',
+
+    // Game detail
+    similarGames: 'Similar games',
+    addWishlist: 'Add to list',
 
     shareGameLink: 'Share link',
     gameUrlCopied: 'Game link copied',

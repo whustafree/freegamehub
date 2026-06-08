@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Game, Mode, SortMode, Genre, TypeFilter, StoreFilter } from '../types';
-import { GENRE_KEYWORDS } from '../utils/format';
+import { GENRE_KEYWORDS, parsePrice } from '../utils/format';
 
 interface UseFiltersProps {
   games: Game[];
@@ -71,10 +71,4 @@ export function useFilters({
 
     return filtered;
   }, [games, hiddenGames, favorites, showFavoritesOnly, showHiddenOnly, currentMode, searchTerm, sortMode, activeGenre, activeStore, activeType]);
-}
-
-function parsePrice(price: string | undefined | null): number {
-  if (!price || price === 'N/A' || price === 'Pago') return 0;
-  const match = price.toString().match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : 0;
 }

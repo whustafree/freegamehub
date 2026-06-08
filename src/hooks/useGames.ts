@@ -14,6 +14,7 @@ import {
   loadAchievements, saveAchievements,
   loadOnboardingStep, saveOnboardingStep,
 } from '../utils/storage';
+import { parsePrice } from '../utils/format';
 
 const ITEMS_PER_PAGE = 30;
 
@@ -34,11 +35,6 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'savings_500', icon: '💎', labelKey: 'achievementSavings500', unlockedAt: null },
   { id: 'savings_1000', icon: '👑', labelKey: 'achievementSavings1000', unlockedAt: null },
 ];
-
-function addActivity(log: ActivityEntry[]): ActivityEntry[] {
-  const updated = [log[0], ...log.slice(0, 499)]; // keep max 500 entries
-  return updated;
-}
 
 export function useGames() {
   const [games, setGames] = useState<Game[]>([]);
@@ -308,7 +304,7 @@ export function useGames() {
   // --- Derived ---
   const visibleGamesCount = games.filter(g => !hiddenGames.includes(g.id)).length;
   const savings = games.filter(g => !hiddenGames.includes(g.id)).reduce((acc, g) => acc + parsePrice(g.worth), 0);
-  const hasUnlockedAchievement = achievements.some(a => a.unlockedAt);
+
 
   // For deep linking - this will be read by App
   const [deepLinkedGame, setDeepLinkedGame] = useState<Game | null>(null);
@@ -350,8 +346,3 @@ export function useGames() {
   };
 }
 
-function parsePrice(price: string | undefined | null): number {
-  if (!price || price === 'N/A' || price === 'Pago') return 0;
-  const match = price.toString().match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : 0;
-}

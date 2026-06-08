@@ -71,7 +71,8 @@ class CacheManager {
   }
 
   findNewGames(newGames) {
-    if (this.data.games.length === 0) return [];
+    // Si el cache esta vacio (primera ejecucion), considerar todos como nuevos
+    if (this.data.games.length === 0) return newGames;
     return newGames.filter(newGame => 
       !this.data.games.some(oldGame => oldGame.id === newGame.id)
     );

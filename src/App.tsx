@@ -19,6 +19,7 @@ import GameDetail from './components/GameDetail';
 import StatsPanel from './components/StatsPanel';
 import Onboarding from './components/Onboarding';
 import SettingsPanel from './components/SettingsPanel';
+import TrendingSection from './components/TrendingSection';
 import { t } from './i18n';
 
 const ITEMS_PER_PAGE = 30;
@@ -842,34 +843,22 @@ export default function App() {
             )}
 
             {/* Trending Section */}
-            {trendingGames.length > 0 && !showFavoritesOnly && !showHiddenOnly && !multiSelectActive && (
-              <section className="trending-section">
-                <div className="trending-header">
-                  <div className="trending-icon">🔥</div>
-                  <h2 className="trending-title">{t('trendingTitle', language)}</h2>
-                  <span className="trending-subtitle">{t('trendingSubtitle', language)}</span>
-                </div>
-                <div className="trending-scroll">
-                  {trendingGames.map((game, index) => (
-                    <GameCard
-                      key={game.id}
-                      game={game}
-                      index={index}
-                      isFavorite={favorites.includes(game.id)}
-                      isViewed={viewedGames.includes(game.id)}
-                      isNew={newGameIds.includes(game.id)}
-                      votes={votes}
-                      viewMode={viewMode}
-                      language={language}
-                      onToggleFavorite={toggleFavorite}
-                      onHideGame={hideGame}
-                      onMarkAsViewed={handleMarkAsViewed}
-                      onOpenDetail={handleOpenDetail}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
+            <TrendingSection
+              trendingGames={trendingGames}
+              favorites={favorites}
+              viewedGames={viewedGames}
+              newGameIds={newGameIds}
+              votes={votes}
+              viewMode={viewMode}
+              language={language}
+              showFavoritesOnly={showFavoritesOnly}
+              showHiddenOnly={showHiddenOnly}
+              multiSelectActive={multiSelectActive}
+              toggleFavorite={toggleFavorite}
+              hideGame={hideGame}
+              handleMarkAsViewed={handleMarkAsViewed}
+              handleOpenDetail={handleOpenDetail}
+            />
 
 
 

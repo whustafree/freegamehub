@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Language, UserStats, Game, Vote, GameReactions, WishlistStatus, UserCollection, ActivityEntry, Achievement } from '../types';
 import { t } from '../i18n';
+import { parsePrice } from '../utils/format';
 import { showToast } from './Toast';
 
 interface StatsPanelProps {
@@ -262,8 +263,3 @@ export default function StatsPanel({
   );
 }
 
-function parsePrice(price: string | undefined | null): number {
-  if (!price || price === 'N/A' || price === 'Pago') return 0;
-  const match = price.toString().match(/[\d.]+/);
-  return match ? parseFloat(match[0]) : 0;
-}

@@ -9,11 +9,6 @@ const logger = require('../utils/logger');
 
 class GamesService {
   constructor() {
-    this.services = [
-      gamerPowerService,
-      redditService,
-      epicGamesService
-    ];
     this._pendingUpdate = null;
   }
 

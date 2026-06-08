@@ -2,6 +2,21 @@
 const requests = new Map();
 const WINDOW_MS = 60000; // 1 minuto
 const MAX_REQUESTS = 60; // 60 requests por minuto
+const CLEANUP_INTERVAL = 600000; // Limpiar IPs inactivas cada 10 minutos
+
+let lastCleanup = Date.now();
+
+function cleanupOldEntries() {
+  const now = Date.now();
+  if (now - lastCleanup < CLEANUP_INTERVAL) return;
+  lastCleanup = now;
+  const hourAgo = now - 3600000;
+  for (const [key, times] of requests.entries()) {
+    if (times.length === 0 || times.every(t => t < hourAgo)) {
+      requests.delete(key);
+    }
+  }
+}
 
 module.exports = (req, res, next) => {
   const ip = req.ip || req.connection.remoteAddress;
@@ -26,15 +41,8 @@ module.exports = (req, res, next) => {
   validRequests.push(now);
   requests.set(ip, validRequests);
   
-  // Limpiar IPs antiguas cada hora
-  if (Math.random() < 0.001) {
-    const hourAgo = now - 3600000;
-    for (const [key, times] of requests.entries()) {
-      if (times.every(t => t < hourAgo)) {
-        requests.delete(key);
-      }
-    }
-  }
+  // Limpiar IPs antiguas periodicamente (no probabilisticamente)
+  cleanupOldEntries();
   
   next();
 };

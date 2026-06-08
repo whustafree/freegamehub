@@ -9,12 +9,14 @@ class TelegramService {
     this.chatId = config.telegram.chatId;
   }
 
+  isVipGame(title) {
+    return config.vipKeywords.some(k => title.toLowerCase().includes(k));
+  }
+
   async sendAlert(newGames) {
     if (!this.enabled || !newGames || newGames.length === 0) return false;
 
-    const vips = newGames.filter(g => 
-      config.vipKeywords.some(k => g.title.toLowerCase().includes(k))
-    );
+    const vips = newGames.filter(g => this.isVipGame(g.title));
     const isVipAlert = vips.length > 0;
 
     let header = isVipAlert 
@@ -26,7 +28,7 @@ class TelegramService {
     const showList = newGames.slice(0, limit);
 
     showList.forEach(game => {
-      const isVip = config.vipKeywords.some(k => game.title.toLowerCase().includes(k));
+      const isVip = this.isVipGame(game.title);
       const icon = isVip ? '💎' : (game.category === 'android' ? '📱' : '🎮');
       const title = this.escapeHtml(game.title);
       const platform = game.platformName || game.platform;

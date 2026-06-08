@@ -19,32 +19,30 @@ interface GameGridProps {
   onToggleMultiSelectGame?: (id: string) => void;
 }
 
-// Platform display info
 const PLATFORM_DISPLAY: Record<string, { icon: string; label: string }> = {
-  steam:     { icon: '🖥️', label: 'Steam' },
-  epic:      { icon: '🎯', label: 'Epic Games' },
-  gog:       { icon: '🟣', label: 'GOG' },
-  itch:      { icon: '🎨', label: 'Itch.io' },
-  battlenet: { icon: '⚔️', label: 'Battle.net' },
-  origin:    { icon: '💠', label: 'Origin' },
-  drm:       { icon: '🔓', label: 'DRM-Free' },
-  ps4:       { icon: '🎮', label: 'PlayStation 4' },
-  ps5:       { icon: '🎮', label: 'PlayStation 5' },
-  xbox:      { icon: '🎮', label: 'Xbox One' },
-  'xbox-series': { icon: '🎮', label: 'Xbox Series X|S' },
-  'xbox-360':    { icon: '🎮', label: 'Xbox 360' },
-  nintendo:  { icon: '🎮', label: 'Nintendo Switch' },
-  android:   { icon: '📱', label: 'Play Store' },
-  ios:       { icon: '🍎', label: 'App Store' },
-  vr:        { icon: '🥽', label: 'VR' },
-  pc:        { icon: '🖥️', label: 'PC' },
+  steam:        { icon: '🟦', label: 'Steam' },
+  epic:         { icon: '🎯', label: 'Epic Games' },
+  gog:          { icon: '🟣', label: 'GOG' },
+  itch:         { icon: '🎨', label: 'Itch.io' },
+  battlenet:    { icon: '⚔️', label: 'Battle.net' },
+  origin:       { icon: '💠', label: 'Origin' },
+  drm:          { icon: '🔓', label: 'DRM-Free' },
+  ps4:          { icon: '🎮', label: 'PlayStation 4' },
+  ps5:          { icon: '🎮', label: 'PlayStation 5' },
+  xbox:         { icon: '🎮', label: 'Xbox One' },
+  'xbox-series':{ icon: '🎮', label: 'Xbox Series X|S' },
+  'xbox-360':   { icon: '🎮', label: 'Xbox 360' },
+  nintendo:     { icon: '🎮', label: 'Nintendo Switch' },
+  android:      { icon: '📱', label: 'Play Store' },
+  ios:          { icon: '🍎', label: 'App Store' },
+  vr:           { icon: '🥽', label: 'VR' },
+  pc:           { icon: '🖥️', label: 'PC' },
 };
 
-// Priority order for platforms
 const PLATFORM_ORDER = [
   'steam', 'epic', 'gog', 'itch', 'battlenet', 'origin', 'drm', 'pc',
   'ps5', 'ps4', 'xbox-series', 'xbox', 'xbox-360', 'nintendo',
-  'android', 'ios', 'vr'
+  'android', 'ios', 'vr',
 ];
 
 interface GroupedGames {
@@ -56,22 +54,23 @@ interface GroupedGames {
 
 function groupByPlatform(games: Game[]): GroupedGames[] {
   const groups = new Map<string, Game[]>();
-
   for (const game of games) {
     const key = game.platform;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key)!.push(game);
   }
-
   return Array.from(groups.entries())
     .map(([platform, gameList]) => {
-      const display = PLATFORM_DISPLAY[platform] || { icon: gameList[0]?.platformIcon || '🎮', label: gameList[0]?.platformName || platform };
+      const display = PLATFORM_DISPLAY[platform] || {
+        icon: gameList[0]?.platformIcon || '🎮',
+        label: gameList[0]?.platformName || platform,
+      };
       return { platform, games: gameList, icon: display.icon, label: display.label };
     })
     .sort((a, b) => {
-      const aIdx = PLATFORM_ORDER.indexOf(a.platform);
-      const bIdx = PLATFORM_ORDER.indexOf(b.platform);
-      return (aIdx === -1 ? 99 : aIdx) - (bIdx === -1 ? 99 : bIdx);
+      const ai = PLATFORM_ORDER.indexOf(a.platform);
+      const bi = PLATFORM_ORDER.indexOf(b.platform);
+      return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
 }
 
@@ -79,11 +78,14 @@ export default function GameGrid({
   games, favorites, viewedGames, newGameIds, votes, viewMode, language,
   multiSelectActive, multiSelectedIds,
   onToggleFavorite, onHideGame, onMarkAsViewed, onOpenDetail,
-  onToggleMultiSelectGame
+  onToggleMultiSelectGame,
 }: GameGridProps) {
   const groupedGames = useMemo(() => groupByPlatform(games), [games]);
 
   if (games.length === 0) return null;
+
+  // CSS class switches between grid and list layout
+  const containerClass = viewMode === 'list' ? 'games-list' : 'games-grid';
 
   return (
     <div id="games-container">
@@ -94,7 +96,7 @@ export default function GameGrid({
             <h3 className="platform-header-name">{group.label}</h3>
             <span className="platform-header-count">{group.games.length}</span>
           </div>
-          <div className={`games-${viewMode}`}>
+          <div className={containerClass}>
             {group.games.map((game, index) => (
               <GameCard
                 key={game.id}
