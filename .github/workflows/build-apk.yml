@@ -44,19 +44,16 @@ jobs:
         run: |
           git checkout -- android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
           git checkout -- android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
-          echo "Custom icon restored after Capacitor sync"
 
       - name: Create keystore from secret
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/freegamehub-release.keystore 2>/dev/null && echo "Keystore created successfully" || echo "WARNING: Invalid base64 keystore, APK will be unsigned"
-          else
-            echo "No keystore secret provided, APK will be unsigned"
+            echo "$KEYSTORE_BASE64" | base64 -d > android/freegamehub-release.keystore 2>/dev/null && echo "Keystore created" || echo "WARNING: Invalid base64"
           fi
 
-      - name: Build Android Release APK
+      - name: Build Android App Bundle (AAB) for Play Store
         run: |
           cd android
           chmod +x gradlew
@@ -66,12 +63,20 @@ jobs:
             export KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
             export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
           fi
-          ./gradlew assembleRelease
+          ./gradlew bundleRelease
 
-      - name: Build Android Debug APK (for testing)
+      - name: Build Android APKs (debug + release)
         run: |
           cd android
-          ./gradlew assembleDebug
+          ./gradlew assembleRelease assembleDebug
+
+      - name: Upload AAB (for Play Store)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          path: android/app/build/outputs/bundle/release/*.aab
+          name: FreeGameHub-AAB
+          if-no-files-found: warn
 
       - name: Upload Release APK
         if: always()
