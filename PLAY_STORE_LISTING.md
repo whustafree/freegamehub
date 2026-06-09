@@ -5,57 +5,46 @@
 **Nombre de la app:** FreeGameHub
 **Idioma:** Español
 **Breve descripción (80 caracteres máx.):**
-Descubre los mejores juegos gratis cada día. ¡Nunca pagues por un juego otra vez!
+Busca ofertas de juegos gratis de Epic Games, Steam y GOG.
 
 **Descripción completa:**
 ---
-FreeGameHub es tu plataforma definitiva para descubrir juegos gratis de todas las plataformas. Te avisamos automáticamente cuando hay nuevos juegos gratuitos disponibles en Epic Games, Steam, GOG y más.
+FreeGameHub es una aplicación que reúne en un solo lugar los juegos gratuitos disponibles en Epic Games, Steam, GOG y otras plataformas.
 
-🎮 **Características principales:**
+**Características:**
 
-• **Juegos gratis actualizados:** Recibe los últimos juegos gratuitos de múltiples fuentes en un solo lugar.
-• **Notificaciones inteligentes:** Te avisamos al instante cuando un nuevo juego gratis está disponible.
-• **Filtros avanzados:** Busca por plataforma, género, fecha y popularidad.
-• **Modo oscuro:** Interfaz elegante con tema oscuro para cuidar tu vista.
-• **Soporte multi-idioma:** Disponible en español e inglés.
-• **Sin publicidad:** Experiencia limpia y sin interrupciones.
+• **Juegos gratis actualizados:** Consulta los juegos gratuitos disponibles de múltiples fuentes.
+• **Notificaciones:** Recibe avisos cuando un nuevo juego gratis está disponible.
+• **Filtros:** Busca por plataforma, género y fecha.
+• **Modo oscuro:** Interfaz con tema oscuro.
+• **Multi-idioma:** Disponible en español e inglés.
+• **Sin publicidad:** Experiencia sin anuncios.
 
-🔥 **Categorías destacadas:**
-• Juegos AAA gratis
-• Ofertas temporales
-• Juegos recomendados
-• Próximos lanzamientos gratuitos
-
-⚡ **¿Por qué FreeGameHub?**
-• Actualizaciones en tiempo real
-• Fuentes verificadas
-• Interfaz moderna y rápida
-• 100% gratuito
-
-Descarga FreeGameHub y empieza a expandir tu biblioteca de juegos sin gastar un centavo. ¡Los mejores juegos gratis te esperan!
+**Categorías de juegos:**
+- Juegos de diversas plataformas
+- Ofertas por tiempo limitado
+- Próximos lanzamientos gratuitos
 
 ---
 
 **Categoría:** Juegos > Utilidades
-**Etiquetas:** juegos gratis, epic games, ofertas, gaming, ahorro
+**Etiquetas:** juegos gratis, epic games, ofertas, juegos, videojuegos
 
 ## Gráficos requeridos
 
 | Asset | Tamaño | Descripción |
 |---|---|---|
-| Icono de la app | 512x512 px (32-bit PNG) | Usar el ícono actual del control con glow cyan |
+| Icono de la app | 512x512 px (32-bit PNG) | Icono actual con las siglas FG |
 | Feature Graphic | 1024x500 px (JPG o PNG) | Banner principal en Play Store |
-| Capturas de pantalla (teléfono) | Mín. 2, máx. 8 | 1240x2688 px (Android 12+) o 1080x1920 px |
+| Capturas de pantalla (teléfono) | Mín. 2, máx. 8 | 1080x1920 px o 1240x2688 px |
 | Capturas de pantalla (tablet) | 2048x2732 px o 2560x1600 px (opcional) |
-| Video destacado | URL de YouTube (opcional) |
 
-## Feature Graphic (texto sugerido para diseñador)
+## Feature Graphic (referencia de diseño)
 
 Crear un banner horizontal con:
-- Fondo degradado: #1a1a2e → #0f3460
+- Fondo degradado oscuro
 - Logo de FreeGameHub centrado
-- Texto: "JUEGOS GRATIS. TODOS LOS DÍAS." en blanco
-- Algunos iconos de juegos flotando
+- Capturas representativas del contenido de la aplicación
 
 ## Política de Privacidad
 
