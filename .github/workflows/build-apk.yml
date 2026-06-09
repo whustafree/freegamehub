@@ -48,7 +48,7 @@ jobs:
             echo "$KEYSTORE_BASE64" | base64 -d > android/freegamehub-release.keystore
             echo "Keystore created successfully"
           else
-            echo "No keystore secret provided, APK will be unsigned"
+            echo "No keystore secret provided"
           fi
 
       - name: Build Android Release APK
@@ -63,22 +63,37 @@ jobs:
           fi
           ./gradlew assembleRelease
 
-      - name: Find APK
+      - name: Build Android Debug APK (for testing)
+        run: |
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Find APKs
         if: always()
         run: |
-          echo "Searching for APK files..."
-          find . -name "*.apk" -type f 2>/dev/null || echo "No APKs found"
-          echo "---"
-          echo "Checking standard location..."
-          ls -la android/app/build/outputs/apk/release/ 2>/dev/null || echo "Standard release dir not found"
-          ls -la android/app/build/outputs/apk/ 2>/dev/null | head -20 || echo "APK output dir not found"
+          echo "=== Release APK ==="
+          find . -path "*/release/*.apk" -type f 2>/dev/null || echo "No release APKs found"
+          ls -la android/app/build/outputs/apk/release/ 2>/dev/null || echo "No release dir"
+          echo ""
+          echo "=== Debug APK ==="
+          find . -path "*/debug/*.apk" -type f 2>/dev/null || echo "No debug APKs found"
+          ls -la android/app/build/outputs/apk/debug/ 2>/dev/null || echo "No debug dir"
+          echo ""
+          echo "=== All APKs ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APKs at all"
 
-      - name: Upload APK
-        if: always()
+      - name: Upload Release APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
-          path: |
-            android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/apk/**/*.apk
+          path: android/app/build/outputs/apk/release/*.apk
           name: FreeGameHub-Release
+          if-no-files-found: warn
+
+      - name: Upload Debug APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          path: android/app/build/outputs/apk/debug/*.apk
+          name: FreeGameHub-Debug
           if-no-files-found: warn
