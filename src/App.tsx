@@ -566,6 +566,7 @@ export default function App() {
         searchTerm={searchTerm}
         language={language}
         totalSavings={totalSavings}
+        claimedCount={userStats.totalClaimed}
         onSearchChange={setSearchTerm}
         onClearSearch={handleClearSearch}
         onToggleLang={handleToggleLang}

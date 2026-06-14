@@ -7,6 +7,7 @@ interface HeaderProps {
   language: Language;
   games?: Game[];
   totalSavings?: string;
+  claimedCount?: number;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onToggleLang: () => void;
@@ -14,7 +15,7 @@ interface HeaderProps {
 }
 
 export default function Header({
-  searchTerm, language, games = [], totalSavings, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
+  searchTerm, language, games = [], totalSavings, claimedCount = 0, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -99,6 +100,14 @@ export default function Header({
               title={language === 'es' ? 'Valor total en juegos gratis' : 'Total value in free games'}
             >
               💰 {totalSavings}
+            </button>
+          )}
+          {claimedCount > 0 && (
+            <button
+              className="header-claimed-badge"
+              title={language === 'es' ? 'Juegos reclamados' : 'Claimed games'}
+            >
+              🎁 {claimedCount}
             </button>
           )}
           <button className="header-action lang-btn" onClick={onToggleLang} title={language === 'es' ? 'English' : 'Español'}>
