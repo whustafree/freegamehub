@@ -42,6 +42,10 @@ export default function GameCard({
     ? <span className="card-img-badge worth">{parsePrice(game.worth) >= 60 ? '🔥 ' : ''}{game.worth}</span>
     : null;
 
+  const worthValue = game.worth && game.worth !== 'N/A' && game.worth !== 'Pago'
+    ? parsePrice(game.worth)
+    : 0;
+
   // Touch handlers for swipe gestures
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
@@ -141,29 +145,34 @@ export default function GameCard({
           <span style={{ fontSize: '.58rem', color: 'var(--text-muted)', lineHeight: 1 }}>
             {game.platformName || game.platform}
           </span>
-        )}
-
-        <div className="card-meta">
-          <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
-          <div className="card-actions">
-            <button
-              className={`card-action${isFavorite ? ' fav' : ''}`}
-              onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}
-              title={isFavorite ? t('removeFav', language) : t('addFav', language)}
-            >
-              {isFavorite ? '❤️' : '🤍'}
-            </button>
-            <a
-              href={game.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="claim-btn"
-              onClick={e => e.stopPropagation()}
-            >
-              {t('reclaim', language)}
-            </a>
+        )}          <div className="card-meta">
+            <div className="card-meta-left">
+              <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
+              {worthValue > 0 && (
+                <span className="card-savings-label">
+                  💰{t('reclaim', language)} {game.worth}
+                </span>
+              )}
+            </div>
+            <div className="card-actions">
+              <button
+                className={`card-action${isFavorite ? ' fav' : ''}`}
+                onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}
+                title={isFavorite ? t('removeFav', language) : t('addFav', language)}
+              >
+                {isFavorite ? '❤️' : '🤍'}
+              </button>
+              <a
+                href={game.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="claim-btn"
+                onClick={e => { e.stopPropagation(); }}
+              >
+                🎮 {t('reclaim', language)}
+              </a>
+            </div>
           </div>
-        </div>
       </div>
     </article>
   );

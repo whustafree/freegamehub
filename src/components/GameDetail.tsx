@@ -332,7 +332,7 @@ export default function GameDetail({
           </div>
         )}
 
-        {/* Sticky Claim Bar - Play Store style */}
+        {/* Sticky Claim Bar */}
         <div className="detail-claim-bar">
           <button className="detail-claim-btn" onClick={handleClaim}>
             🎮 {t('reclaim', language)}
@@ -345,7 +345,7 @@ export default function GameDetail({
             onClick={handleWishlist}
             title={wishlistStatus ? t('gameWishlisted', language) : t('addWishlist', language)}
           >
-            {wishlistStatus ? '💾' : '💾'}
+            💾
           </button>
           <button className="detail-claim-btn secondary" onClick={handleShare} title={t('shareTitle', language)}>
             📤

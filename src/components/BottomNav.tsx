@@ -6,13 +6,11 @@ interface BottomNavProps {
   currentMode: Mode;
   viewMode: ViewMode;
   favoritesCount: number;
-  isFilterOpen: boolean;
   showFavoritesOnly: boolean;
   language: Language;
   multiSelectActive?: boolean;
   visible?: boolean;
   onModeChange: (mode: Mode) => void;
-  onToggleFilters: () => void;
   onToggleFavorites: () => void;
   onResetFilters: () => void;
   onToggleViewMode: () => void;
@@ -29,9 +27,9 @@ const MODES: { mode: Mode; icon: string; labelKey: 'navPC' | 'navAndroid' | 'nav
 ];
 
 export default function BottomNav({
-  currentMode, viewMode, favoritesCount, isFilterOpen, showFavoritesOnly, language,
+  currentMode, viewMode, favoritesCount, showFavoritesOnly, language,
   multiSelectActive, visible = true,
-  onModeChange, onToggleFilters, onToggleFavorites, onResetFilters, onToggleViewMode, onOpenStats,
+  onModeChange, onToggleFavorites, onResetFilters, onToggleViewMode, onOpenStats,
   onOpenSettings, onToggleMultiSelect
 }: BottomNavProps) {
   const [showOverflow, setShowOverflow] = useState(false);
@@ -67,15 +65,6 @@ export default function BottomNav({
           <span className="nav-btn-label">{t(labelKey, language)}</span>
         </button>
       ))}
-
-      <button
-        className={`nav-btn ${isFilterOpen ? 'active' : ''}`}
-        onClick={onToggleFilters}
-        title={t('navFilters', language)}
-      >
-        <span className="nav-btn-icon">⚙️</span>
-        <span className="nav-btn-label">{t('navFilters', language)}</span>
-      </button>
 
       <button
         className={`nav-btn ${showFavoritesOnly ? 'active' : ''}`}

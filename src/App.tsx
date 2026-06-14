@@ -7,7 +7,7 @@ import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, 
 import { useGames } from './hooks/useGames';
 import { useFilters } from './hooks/useFilters';
 import Header from './components/Header';
-import FilterPanel from './components/FilterPanel';
+
 import GameGrid from './components/GameGrid';
 import SkeletonGrid from './components/SkeletonGrid';
 import EmptyState from './components/EmptyState';
@@ -88,7 +88,6 @@ export default function App() {
   const [activeType, setActiveType] = useState<TypeFilter>('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showHiddenOnly, setShowHiddenOnly] = useState(false);
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // UI state
@@ -325,20 +324,16 @@ export default function App() {
   }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   // --- Handlers ---
-  const toggleFilters = useCallback(() => setIsFilterOpen(p => !p), []);
-  const closeFilters = useCallback(() => setIsFilterOpen(false), []);
   const handleClearSearch = useCallback(() => setSearchTerm(''), []);
 
   // Refs for back gesture handler (avoid re-registering listener)
   const selectedGameRef = useRef(selectedGame);
-  const isFilterOpenRef = useRef(isFilterOpen);
   const showStatsRef = useRef(showStats);
   const showSettingsRef = useRef(showSettings);
   const multiSelectActiveRef = useRef(multiSelectActive);
 
   // Sync refs on every render for the back gesture handler
   selectedGameRef.current = selectedGame;
-  isFilterOpenRef.current = isFilterOpen;
   showStatsRef.current = showStats;
   showSettingsRef.current = showSettings;
   multiSelectActiveRef.current = multiSelectActive;
@@ -349,20 +344,17 @@ export default function App() {
     setActiveStore('all');
     setShowFavoritesOnly(false);
     setShowHiddenOnly(false);
-    closeFilters();
-  }, [closeFilters]);
+  }, []);
 
   const handleToggleFavorites = useCallback(() => {
     setShowFavoritesOnly(p => { showToast(p ? t('favoritesOff', language) : t('favoritesOn', language), 'info'); return !p; });
     setShowHiddenOnly(false);
-    closeFilters();
-  }, [closeFilters, language]);
+  }, [language]);
 
   const handleToggleHidden = useCallback(() => {
     setShowHiddenOnly(p => { if (!p) showToast(t('hiddenOn', language), 'info'); return !p; });
     setShowFavoritesOnly(false);
-    closeFilters();
-  }, [closeFilters, language]);
+  }, [language]);
 
   const handleResetFilters = useCallback(() => {
     setSearchTerm('');
@@ -372,9 +364,9 @@ export default function App() {
     setActiveType('all');
     setShowFavoritesOnly(false);
     setShowHiddenOnly(false);
-    closeFilters();
+    setActiveCollectionFilter(null);
     showToast(t('filtersReset', language), 'info');
-  }, [closeFilters, language]);
+  }, [language]);
 
   const handleMarkAsViewed = useCallback((id: string) => markAsViewed(id), [markAsViewed]);
 
@@ -465,8 +457,6 @@ export default function App() {
         // Close modals in order of priority (using refs for fresh state)
         if (selectedGameRef.current) {
           handleCloseDetail();
-        } else if (isFilterOpenRef.current) {
-          closeFilters();
         } else if (showStatsRef.current) {
           handleCloseStats();
         } else if (showSettingsRef.current) {
@@ -475,7 +465,6 @@ export default function App() {
           setMultiSelectActive(false);
           setMultiSelectedIds([]);
         } else {
-          // No modals open - minimize app instead of exiting
           CapacitorApp.minimizeApp();
         }
       });
@@ -538,7 +527,6 @@ export default function App() {
         if (input && document.activeElement !== input) { e.preventDefault(); input.focus(); }
       }
       if (e.key === 'Escape') {
-        closeFilters();
         setSelectedGame(null);
         setShowStats(false);
         setShowSettings(false);
@@ -565,7 +553,7 @@ export default function App() {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [closeFilters, handleToggleViewMode, handleToggleMultiSelect, handleSurpriseMe, multiSelectActive, selectedGame]);
+  }, [handleToggleViewMode, handleToggleMultiSelect, handleSurpriseMe, multiSelectActive, selectedGame]);
 
   // --- Derived ---
   const isLoaded = !isLoading && !error;
@@ -629,9 +617,6 @@ export default function App() {
           <button className={`sort-chip ${sortMode === 'popular' ? 'active' : ''}`} onClick={() => setSortMode('popular')}>
             🔥 {t('sortPopular', language)}
           </button>
-          <button className={`sort-chip ${activeGenre !== 'all' ? 'active' : ''}`} onClick={toggleFilters}>
-            🏷️ {t('sortGenre', language)}
-          </button>
         </div>
       </div>
 
@@ -674,29 +659,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      <FilterPanel
-        currentMode={currentMode}
-        sortMode={sortMode}
-        activeGenre={activeGenre}
-        activeStore={activeStore}
-        activeType={activeType}
-        favoritesCount={favorites.length}
-        hiddenCount={hiddenGames.length}
-        showFavoritesOnly={showFavoritesOnly}
-        showHiddenOnly={showHiddenOnly}
-        isOpen={isFilterOpen}
-        language={language}
-        onModeChange={handleModeChange}
-        onSortChange={setSortMode}
-        onGenreChange={setActiveGenre}
-        onStoreChange={setActiveStore}
-        onTypeChange={setActiveType}
-        onToggleFavorites={handleToggleFavorites}
-        onToggleHidden={handleToggleHidden}
-        onResetFilters={handleResetFilters}
-        onClose={closeFilters}
-      />
 
       {/* Multi-select bar */}
       {multiSelectActive && multiSelectedIds.length > 0 && (
@@ -918,12 +880,10 @@ export default function App() {
         currentMode={currentMode}
         viewMode={viewMode}
         favoritesCount={favorites.length}
-        isFilterOpen={isFilterOpen}
         showFavoritesOnly={showFavoritesOnly}
         language={language}
         visible={navVisible}
         onModeChange={handleModeChange}
-        onToggleFilters={toggleFilters}
         onToggleFavorites={handleToggleFavorites}
         onResetFilters={handleResetFilters}
         onToggleViewMode={handleToggleViewMode}
