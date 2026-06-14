@@ -154,8 +154,6 @@ export const translations = {
     // Bottom nav
     navPC: 'PC',
     navAndroid: 'Android',
-    navConsole: 'Consolas',
-    navIos: 'iOS',
     navFilters: 'Filtros',
     navFav: 'Fav',
     navReset: 'Reset',
@@ -291,9 +289,9 @@ export const translations = {
 
     // Onboarding
     onboardingWelcome: '¡Bienvenido a FreeGameHub! 🎮',
-    onboardingWelcomeDesc: 'Descubre juegos gratis de Steam, Epic, GOG, consolas y más',
+    onboardingWelcomeDesc: 'Descubre juegos gratis de Steam, Epic, GOG, Android y más',
     onboardingPlatform: 'Cambia de plataforma',
-    onboardingPlatformDesc: 'Usa la barra inferior para cambiar entre PC, Android, Consolas e iOS',
+    onboardingPlatformDesc: 'Usa la barra inferior para cambiar entre PC y Android',
     onboardingFavorite: 'Guarda tus favoritos',
     onboardingFavoriteDesc: 'Toca el corazón en cualquier juego para añadirlo a tus favoritos',
     onboardingDetail: 'Toca cualquier juego',
@@ -470,8 +468,6 @@ export const translations = {
 
     navPC: 'PC',
     navAndroid: 'Android',
-    navConsole: 'Consoles',
-    navIos: 'iOS',
     navFilters: 'Filters',
     navFav: 'Fav',
     navReset: 'Reset',
@@ -598,9 +594,9 @@ export const translations = {
     achievementSavings1000Desc: 'Save $1,000 total',
 
     onboardingWelcome: 'Welcome to FreeGameHub! 🎮',
-    onboardingWelcomeDesc: 'Discover free games from Steam, Epic, GOG, consoles and more',
+    onboardingWelcomeDesc: 'Discover free games from Steam, Epic, GOG, Android and more',
     onboardingPlatform: 'Switch platforms',
-    onboardingPlatformDesc: 'Use the bottom bar to switch between PC, Android, Consoles and iOS',
+    onboardingPlatformDesc: 'Use the bottom bar to switch between PC and Android',
     onboardingFavorite: 'Save your favorites',
     onboardingFavoriteDesc: 'Tap the heart on any game to add it to your favorites',
     onboardingDetail: 'Tap any game',

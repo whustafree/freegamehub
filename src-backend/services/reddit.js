@@ -3,180 +3,162 @@ const logger = require('../utils/logger');
 
 class RedditService {
   constructor() {
-    this.oauthUrl = 'https://www.reddit.com/api/v1/access_token';
-    this.apiUrl = 'https://oauth.reddit.com';
     this.timeout = 10000;
-    this.accessToken = null;
-    this.tokenExpiresAt = 0;
-    
     this.clientId = process.env.REDDIT_CLIENT_ID;
     this.clientSecret = process.env.REDDIT_CLIENT_SECRET;
-    this.enabled = !!(this.clientId && this.clientSecret);
+    this.accessToken = null;
+    this.tokenExpiresAt = 0;
   }
 
   async getAccessToken() {
-    if (this.accessToken && Date.now() < this.tokenExpiresAt) {
-      return this.accessToken;
-    }
-
+    if (!this.clientId || !this.clientSecret) return null;
+    if (this.accessToken && Date.now() < this.tokenExpiresAt) return this.accessToken;
     try {
-      logger.info('Obteniendo token de acceso de Reddit...');
-      
-      const response = await axios.post(this.oauthUrl, 
+      const response = await axios.post('https://www.reddit.com/api/v1/access_token',
         'grant_type=client_credentials',
-        {
-          timeout: this.timeout,
-          auth: {
-            username: this.clientId,
-            password: this.clientSecret
-          },
-          headers: {
-            'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)',
-            'Content-Type': 'application/x-www-form-urlencoded'
-          }
-        }
+        { timeout: this.timeout, auth: { username: this.clientId, password: this.clientSecret },
+          headers: { 'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)', 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
-
       this.accessToken = response.data.access_token;
-      // Expirar 5 minutos antes para tener margen
       this.tokenExpiresAt = Date.now() + (response.data.expires_in - 300) * 1000;
-      
-      logger.success('Token de Reddit obtenido');
       return this.accessToken;
     } catch (err) {
-      logger.error('Error obteniendo token de Reddit', err);
       return null;
     }
   }
 
-  async fetchDeals(limit = 25) {
-    if (!this.enabled) {
-      logger.warn('Reddit no configurado. Agrega REDDIT_CLIENT_ID y REDDIT_CLIENT_SECRET en .env');
-      return [];
-    }
+  async fetchReddit(url) {
+    const headers = { 'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)' };
+    const token = await this.getAccessToken();
+    if (token) headers['Authorization'] = `bearer ${token}`;
+    return axios.get(url, { timeout: this.timeout, headers });
+  }
 
+  async fetchDeals(limit = 25) {
     try {
-      logger.info('Obteniendo ofertas de Reddit...');
+      logger.info('Obteniendo ofertas Android desde Reddit...');
       const startTime = Date.now();
 
-      const token = await this.getAccessToken();
-      if (!token) {
-        logger.warn('No se pudo obtener token de Reddit, saltando...');
-        return [];
-      }
+      // Fetch multiple subreddits for Android deals
+      const subreddits = [
+        `https://www.reddit.com/r/googleplaydeals/new.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/AndroidGaming/hot.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/FreeGameFindings/new.json?limit=${limit}&raw_json=1`,
+      ];
 
-      const response = await axios.get(`${this.apiUrl}/r/googleplaydeals/new.json`, {
-        params: { limit, raw_json: 1 },
-        timeout: this.timeout,
-        headers: {
-          'Authorization': `bearer ${token}`,
-          'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)'
+      const results = await Promise.allSettled(
+        subreddits.map(url => this.fetchReddit(url))
+      );
+
+      const allDeals = [];
+      results.forEach((result, idx) => {
+        if (result.status === 'fulfilled' && result.value?.data?.data?.children) {
+          const subName = subreddits[idx].split('/r/')[1].split('/')[0];
+          const posts = result.value.data.data.children
+            .filter(post => this.isValidDeal(post.data, subName))
+            .map(post => this.formatDeal(post.data));
+          allDeals.push(...posts);
         }
       });
 
-      const deals = response.data.data.children
-        .filter(post => this.isValidDeal(post.data))
-        .map(post => this.formatDeal(post.data));
+      // Deduplicate by title
+      const seen = new Set();
+      const unique = allDeals.filter(d => {
+        const key = d.title.toLowerCase().trim();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
 
-      logger.success(`Reddit: ${deals.length} ofertas obtenidas (${Date.now() - startTime}ms)`);
-      return deals;
+      logger.success(`Reddit: ${unique.length} ofertas Android obtenidas de ${subreddits.length} subreddits (${Date.now() - startTime}ms)`);
+      return unique;
 
     } catch (err) {
-      if (err.response?.status === 401) {
-        // Token expirado, limpiar y reintentar en la próxima ejecución
-        this.accessToken = null;
-        this.tokenExpiresAt = 0;
-      }
-      logger.error('Error fetching Reddit deals', err);
+      logger.error('Error fetching Reddit deals', err?.message || err);
       return [];
     }
   }
 
-  isValidDeal(post) {
-    const title = post.title.toLowerCase();
-    // Filtrar posts que sean apps o icon packs gratuitos
-    const isAppOrPack = title.includes('[app') || 
-                        title.includes('[icon pack') || 
-                        title.includes('[game');
-    const isFree = title.includes('free') || 
-                   title.includes('100%') || 
-                   title.includes('gratis');
-    return isAppOrPack && isFree;
+  isValidDeal(post, subName) {
+    if (post.over_18) return false;
+    const title = (post.title || '').toLowerCase();
+    const selfText = (post.selftext || '').toLowerCase();
+    const combined = `${title} ${selfText}`;
+
+    // For googleplaydeals, all posts are Android deals
+    if (subName === 'googleplaydeals') return true;
+
+    // For FreeGameFindings, check if it mentions Android/Play Store
+    if (subName === 'freegamefindings') {
+      const androidKeywords = ['android', 'google play', 'play store', 'gplay', 'apk', '.apk'];
+      if (!androidKeywords.some(k => combined.includes(k))) return false;
+    }
+
+    // For AndroidGaming, check for free/deal keywords
+    if (subName === 'androidgaming') {
+      const dealKeywords = ['free', '100% off', 'freebie', 'gratis', '$0', '0.00'];
+      if (!dealKeywords.some(k => combined.includes(k))) return false;
+    }
+
+    return true;
   }
 
   formatDeal(post) {
-    // Extraer imagen del post
-    let image = 'https://upload.wikimedia.org/wikipedia/commons/d/d7/Android_robot.svg';
-    
-    if (post.thumbnail && post.thumbnail.startsWith('http')) {
+    let image = 'https://play-lh.googleusercontent.com/f6o5Q0KUC7lKJ7j0Gk0v0k0v0k0v0k0v0k0v0k0v0';
+    if (post.thumbnail && post.thumbnail.startsWith('http') && !post.thumbnail.includes('default')) {
       image = post.thumbnail;
     } else if (post.preview?.images?.[0]?.source?.url) {
       image = post.preview.images[0].source.url.replace(/&amp;/g, '&');
     }
 
-    // Determinar tipo
-    const titleLower = post.title.toLowerCase();
-    const type = titleLower.includes('[app') ? 'App' : 
-                 titleLower.includes('[icon pack') ? 'Icon Pack' : 
-                 'Game';
+    const titleLower = (post.title || '').toLowerCase();
+    let type = 'Game';
+    if (titleLower.includes('[app')) type = 'App';
 
-    // Limpiar título
-    const title = post.title
-      .replace(/\[.*?\]/g, '')
-      .replace(/\(.*?\)/g, '')
-      .trim();
+    const title = (post.title || '')
+      .replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').trim();
 
     return {
       id: `rd-${post.id}`,
-      title: title,
-      description: this.extractDescription(post) || 'Oferta de Google Play',
+      title: title || 'Android App Deal',
+      description: post.selftext?.substring(0, 200) + '...' || 'Oferta temporal gratuita en Google Play Store',
       image: image,
-      url: post.url,
+      url: post.url || 'https://play.google.com/store/apps',
       platform: 'android',
       platformName: 'Play Store',
+      platformIcon: '📱',
+      category: 'android',
       endDate: this.extractEndDate(post.title),
       worth: this.extractPrice(post.title),
       type: type,
-      category: 'android',
       genre: 'other',
       source: 'reddit'
     };
   }
 
-  extractDescription(post) {
-    if (post.selftext && post.selftext.length > 10) {
-      return post.selftext.substring(0, 150) + '...';
-    }
-    return null;
-  }
-
   extractEndDate(title) {
-    // Buscar patrones como "until 01/31", "ends 31 Jan", etc.
+    if (!title) return null;
     const patterns = [
-      /until\s+(\d{1,2}[\/\.]\d{1,2})/i,
-      /ends?\s+(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*)/i
+      /until\s+(\d{1,2}[\/\.]\d{1,2}[\/\.]?\d{0,4})/i,
+      /ends?\s+(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*)/i,
     ];
-    
     for (const pattern of patterns) {
       const match = title.match(pattern);
       if (match) {
-        // Intentar parsear la fecha
         try {
           const date = new Date(match[1]);
-          if (!isNaN(date)) return date.toISOString();
-        } catch (e) {}
+          if (!isNaN(date.getTime())) return date.toISOString();
+        } catch (e) { /* ignore */ }
       }
     }
     return null;
   }
 
   extractPrice(title) {
-    // Buscar patrones como "$4.99", "was $9.99", etc.
-    const match = title.match(/\$?(\d+\.?\d*)/);
-    if (match) {
-      return `$${match[1]}`;
-    }
-    return 'Pago';
+    if (!title) return null;
+    const match = title.match(/\$(\d+\.?\d*)/);
+    if (match) return `$${match[1]}`;
+    return null;
   }
 }
 

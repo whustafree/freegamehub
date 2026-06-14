@@ -43,7 +43,7 @@ export interface StatsResponse {
 }
 
 // --- Modes & Filters ---
-export type Mode = 'pc' | 'android' | 'console' | 'ios';
+export type Mode = 'pc' | 'android';
 export type Theme = 'dark' | 'light' | 'amoled';
 export type AccentColor = 'red' | 'blue' | 'green' | 'purple' | 'amber' | 'cyan';
 export type SortMode = 'default' | 'price-desc' | 'ending-soon' | 'title' | 'popular';

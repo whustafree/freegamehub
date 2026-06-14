@@ -19,11 +19,9 @@ interface BottomNavProps {
   onToggleMultiSelect?: () => void;
 }
 
-const MODES: { mode: Mode; icon: string; labelKey: 'navPC' | 'navAndroid' | 'navConsole' | 'navIos' }[] = [
+const MODES: { mode: Mode; icon: string; labelKey: 'navPC' | 'navAndroid' }[] = [
   { mode: 'pc', icon: '🖥️', labelKey: 'navPC' },
   { mode: 'android', icon: '📱', labelKey: 'navAndroid' },
-  { mode: 'console', icon: '🎮', labelKey: 'navConsole' },
-  { mode: 'ios', icon: '🍎', labelKey: 'navIos' },
 ];
 
 export default function BottomNav({
