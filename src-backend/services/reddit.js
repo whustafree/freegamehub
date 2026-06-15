@@ -46,6 +46,7 @@ class RedditService {
         `https://www.reddit.com/r/FreeGameFindings/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/AppHookup/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/efreebies/new.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/AndroidApps/hot.json?limit=${limit}&raw_json=1`,
       ];
 
       const results = await Promise.allSettled(
@@ -112,6 +113,12 @@ class RedditService {
     if (subName === 'efreebies') {
       const androidKeywords = ['android', 'google play', 'play store', 'apk', 'mobile', 'app'];
       if (!androidKeywords.some(k => combined.includes(k))) return false;
+    }
+
+    // For AndroidApps, check for free/deal keywords
+    if (subName === 'androidapps') {
+      const dealKeywords = ['free', '100% off', 'freebie', 'gratis', 'sale', 'promo', 'discount', 'deal'];
+      if (!dealKeywords.some(k => combined.includes(k))) return false;
     }
 
     return true;
