@@ -42,11 +42,14 @@ class RedditService {
       // Fetch multiple subreddits for Android deals
       const subreddits = [
         `https://www.reddit.com/r/googleplaydeals/new.json?limit=${limit}&raw_json=1`,
-        `https://www.reddit.com/r/AndroidGaming/hot.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/AndroidGaming/hot.json?limit=${Math.min(limit, 15)}&raw_json=1`,
         `https://www.reddit.com/r/FreeGameFindings/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/AppHookup/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/efreebies/new.json?limit=${limit}&raw_json=1`,
-        `https://www.reddit.com/r/AndroidApps/hot.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/AndroidApps/hot.json?limit=${Math.min(limit, 15)}&raw_json=1`,
+        `https://www.reddit.com/r/AppSales/new.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/GameDeals/new.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/GameDealsFree/new.json?limit=${limit}&raw_json=1`,
       ];
 
       const results = await Promise.allSettled(
@@ -119,6 +122,28 @@ class RedditService {
     if (subName === 'androidapps') {
       const dealKeywords = ['free', '100% off', 'freebie', 'gratis', 'sale', 'promo', 'discount', 'deal'];
       if (!dealKeywords.some(k => combined.includes(k))) return false;
+    }
+
+    // For AppSales, filter for Android deals
+    if (subName === 'appsales') {
+      const androidKeywords = ['android', 'google play', 'play store', 'gplay', 'apk', 'mobile'];
+      const dealKeywords = ['free', '100% off', 'freebie', 'sale', 'promo', 'discount'];
+      if (!dealKeywords.some(k => combined.includes(k))) return false;
+      if (!androidKeywords.some(k => combined.includes(k))) return false;
+    }
+
+    // For GameDeals, filter for Android/Google Play + deal keywords
+    if (subName === 'gamedeals') {
+      const androidKeywords = ['android', 'google play', 'play store', 'gplay', 'apk', 'mobile'];
+      const dealKeywords = ['free', '100% off', 'sale', 'discount', 'giveaway', 'promo', 'coupon'];
+      if (!androidKeywords.some(k => combined.includes(k))) return false;
+      if (!dealKeywords.some(k => combined.includes(k))) return false;
+    }
+
+    // For GameDealsFree, filter for Android/Google Play
+    if (subName === 'gamedealsfree') {
+      const androidKeywords = ['android', 'google play', 'play store', 'gplay', 'apk', 'mobile'];
+      if (!androidKeywords.some(k => combined.includes(k))) return false;
     }
 
     return true;

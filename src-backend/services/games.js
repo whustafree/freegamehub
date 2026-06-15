@@ -3,6 +3,7 @@ const redditService = require('./reddit');
 const epicGamesService = require('./epicgames');
 const freeToGameService = require('./freetogame');
 const googlePlayService = require('./googleplay');
+const androidFeedsService = require('./androidfeeds');
 const telegramService = require('./telegram');
 const instagramService = require('./instagram');
 const cacheManager = require('../utils/cache');
@@ -41,7 +42,8 @@ class GamesService {
         redditService.fetchDeals(),
         epicGamesService.fetchFreeGames(),
         freeToGameService.fetchAll(),
-        googlePlayService.fetchAll()
+        googlePlayService.fetchAll(),
+        androidFeedsService.fetchAll()
       ]);
 
       // Combinar todos los resultados
