@@ -8,6 +8,7 @@ interface HeaderProps {
   games?: Game[];
   totalSavings?: string;
   claimedCount?: number;
+  platformCounts?: { pc: number; android: number };
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onToggleLang: () => void;
@@ -15,7 +16,7 @@ interface HeaderProps {
 }
 
 export default function Header({
-  searchTerm, language, games = [], totalSavings, claimedCount = 0, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
+  searchTerm, language, games = [], totalSavings, claimedCount = 0, platformCounts, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -94,6 +95,14 @@ export default function Header({
         </div>
 
         <div className="header-actions">
+          {platformCounts && (
+            <button
+              className="header-platform-badge"
+              title={language === 'es' ? 'Juegos por plataforma' : 'Games by platform'}
+            >
+              🖥️ {platformCounts.pc} · 📱{platformCounts.android}
+            </button>
+          )}
           {totalSavings && (
             <button
               className="header-savings-badge"

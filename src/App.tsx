@@ -550,6 +550,12 @@ export default function App() {
   const ptrPullDist = Math.max(0, ptrCurrentY.current - ptrStartY.current);
   const isPtrPulled = ptrPullDist > 80;
 
+  // Platform counts for header badge
+  const platformCounts = useMemo(() => ({
+    pc: games.filter(g => g.category === 'pc').length,
+    android: games.filter(g => g.category === 'android').length,
+  }), [games]);
+
   // Game ID set for collection filter
   const collectionFilteredGames = useMemo(() => {
     if (!activeCollectionFilter) return displayedGames;
@@ -567,6 +573,7 @@ export default function App() {
         language={language}
         totalSavings={totalSavings}
         claimedCount={userStats.totalClaimed}
+        platformCounts={platformCounts}
         onSearchChange={setSearchTerm}
         onClearSearch={handleClearSearch}
         onToggleLang={handleToggleLang}

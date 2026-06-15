@@ -176,6 +176,7 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 .header-action:active { background: rgba(255,255,255,0.06); }
 .lang-btn { font-weight: 700; font-size: .55rem; letter-spacing: .5px; text-transform: uppercase; }
 
+.header-platform-badge,
 .header-savings-badge,
 .header-claimed-badge {
   display: flex;
@@ -189,6 +190,11 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   font-family: inherit;
   white-space: nowrap;
   pointer-events: none;
+}
+.header-platform-badge {
+  background: rgba(10,132,255,0.1);
+  border: 0.5px solid rgba(10,132,255,0.15);
+  color: var(--blue);
 }
 .header-savings-badge {
   background: rgba(255,214,10,0.1);
