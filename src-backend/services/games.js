@@ -2,7 +2,6 @@ const gamerPowerService = require('./gamerpower');
 const redditService = require('./reddit');
 const epicGamesService = require('./epicgames');
 const freeToGameService = require('./freetogame');
-const googlePlayService = require('./googleplay');
 const androidFeedsService = require('./androidfeeds');
 const mmobombService = require('./mmobomb');
 const telegramService = require('./telegram');
@@ -43,7 +42,6 @@ class GamesService {
         redditService.fetchDeals(),
         epicGamesService.fetchFreeGames(),
         freeToGameService.fetchAll(),
-        googlePlayService.fetchAll(),
         androidFeedsService.fetchAll(),
         mmobombService.fetchAll()
       ]);
