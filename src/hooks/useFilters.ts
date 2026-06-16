@@ -12,11 +12,12 @@ interface UseFiltersProps {
   activeGenre: Genre;
   activeStore: StoreFilter;
   activeType: TypeFilter;
+  activeYear?: string;
 }
 
 export function useFilters({
   games, favorites, showFavoritesOnly,
-  currentMode, searchTerm, sortMode, activeGenre, activeStore, activeType
+  currentMode, searchTerm, sortMode, activeGenre, activeStore, activeType, activeYear
 }: UseFiltersProps) {
   return useMemo(() => {
     let filtered = games.filter(game => {
@@ -39,6 +40,22 @@ export function useFilters({
       if (searchTerm) {
         const text = `${game.title} ${game.description} ${game.platformName}`.toLowerCase();
         if (!text.includes(searchTerm.toLowerCase().trim())) return false;
+      }
+      if (activeYear && activeYear !== 'all') {
+        // Try to filter by endDate year (games that end this year)
+        if (game.endDate) {
+          const gameYear = new Date(game.endDate).getFullYear().toString();
+          if (activeYear === 'older') {
+            // 'older' = 2021 or before
+            const yearNum = parseInt(gameYear);
+            if (yearNum > 2021) return false;
+          } else if (gameYear !== activeYear) {
+            return false;
+          }
+        } else if (activeYear !== 'all') {
+          // Games without endDate: show only if 'all' or 'older' (no date = old)
+          if (activeYear !== 'older') return false;
+        }
       }
       return true;
     });

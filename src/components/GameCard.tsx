@@ -1,5 +1,6 @@
-import { useRef, useCallback } from 'react';
-import { Game, ViewMode, Language, Vote } from '../types';
+import { useRef, useCallback, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Game, ViewMode, Language } from '../types';
 import { getTimeInfo, parsePrice } from '../utils/format';
 import { t } from '../i18n';
 
@@ -9,7 +10,6 @@ interface GameCardProps {
   isFavorite: boolean;
   isViewed: boolean;
   isNew: boolean;
-  votes: Record<string, Vote>;
   viewMode: ViewMode;
   language: Language;
   multiSelectActive?: boolean;
@@ -21,13 +21,14 @@ interface GameCardProps {
 }
 
 export default function GameCard({
-  game, index, isFavorite, isViewed, isNew, votes, viewMode, language,
+  game, index, isFavorite, isViewed, isNew, viewMode, language,
   multiSelectActive, isMultiSelected,
   onToggleFavorite, onMarkAsViewed, onOpenDetail,
   onToggleMultiSelectGame
 }: GameCardProps) {
   const timeInfo = getTimeInfo(game.endDate, game.type);
-  const gameVotes = votes[game.id];
+  const [favoritePulse, setFavoritePulse] = useState(false);
+  const favTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isListView = viewMode === 'list';
 
   const cardRef = useRef<HTMLDivElement>(null);
@@ -49,8 +50,16 @@ export default function GameCard({
     onMarkAsViewed(game.id);
   }, [multiSelectActive, onToggleMultiSelectGame, game, onOpenDetail, onMarkAsViewed]);
 
+  const handleFavoriteClick = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onToggleFavorite(game.id);
+    setFavoritePulse(true);
+    if (favTimeoutRef.current) clearTimeout(favTimeoutRef.current);
+    favTimeoutRef.current = setTimeout(() => setFavoritePulse(false), 400);
+  }, [game.id, onToggleFavorite]);
+
   return (
-    <article
+    <motion.article
       ref={cardRef}
       className={[
         'game-card',
@@ -58,10 +67,25 @@ export default function GameCard({
         isNew ? 'new-game' : '',
         isListView ? 'list-view' : '',
         isMultiSelected ? 'multi-selected' : '',
+        isFavorite ? 'is-favorite' : '',
       ].filter(Boolean).join(' ')}
       data-id={game.id}
-      style={{ animationDelay: `${index * 0.04}s` }}
       onClick={handleClick}
+      tabIndex={0}
+      role="button"
+      aria-label={game.title}
+      layout
+      initial={{ opacity: 0, y: 16, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{
+        type: 'spring',
+        stiffness: 400,
+        damping: 30,
+        mass: 0.8,
+        delay: index * 0.035,
+      }}
+      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.96 }}
     >
       {/* Image */}
       <div className="card-img">
@@ -75,12 +99,21 @@ export default function GameCard({
           }}
         />
         {!isListView && (
-          <div className="card-img-badges">
-            {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
-            {worth}
-          </div>
+          <>
+            {/* Floating platform tag */}
+            <span className="card-platform-tag">
+              {game.platformIcon || '🎮'} {game.platformName || game.platform}
+            </span>
+            <div className="card-img-badges">
+              {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
+              {worth}
+            </div>
+          </>
         )}
       </div>
+
+      {/* Glow overlay on hover */}
+      <div className="card-glow-overlay" />
 
       {/* Body */}
       <div className="card-body">
@@ -91,35 +124,36 @@ export default function GameCard({
           <span style={{ fontSize: '.58rem', color: 'var(--text-muted)', lineHeight: 1 }}>
             {game.platformName || game.platform}
           </span>
-        )}          <div className="card-meta">
-            <div className="card-meta-left">
-              <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
-              {worthValue > 0 && (
-                <span className="card-savings-label">
-                  💰{t('reclaim', language)} {game.worth}
-                </span>
-              )}
-            </div>
-            <div className="card-actions">
-              <button
-                className={`card-action${isFavorite ? ' fav' : ''}`}
-                onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); }}
-                title={isFavorite ? t('removeFav', language) : t('addFav', language)}
-              >
-                {isFavorite ? '❤️' : '🤍'}
-              </button>
-              <a
-                href={game.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="claim-btn"
-                onClick={e => { e.stopPropagation(); }}
-              >
-                🎮 {t('reclaim', language)}
-              </a>
-            </div>
+        )}
+        <div className="card-meta">
+          <div className="card-meta-left">
+            <span className={`card-time ${timeInfo.className}`}>{timeInfo.text}</span>
+            {worthValue > 0 && (
+              <span className="card-savings-label">
+                💰{t('reclaim', language)} {game.worth}
+              </span>
+            )}
           </div>
+          <div className="card-actions">
+            <button
+              className={`card-action ${isFavorite ? 'fav' : ''} ${favoritePulse ? 'fav-pulse' : ''}`}
+              onClick={handleFavoriteClick}
+              title={isFavorite ? t('removeFav', language) : t('addFav', language)}
+            >
+              {isFavorite ? '❤️' : '🤍'}
+            </button>
+            <a
+              href={game.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="claim-btn"
+              onClick={e => { e.stopPropagation(); }}
+            >
+              🎮 {t('reclaim', language)}
+            </a>
+          </div>
+        </div>
       </div>
-    </article>
+    </motion.article>
   );
 }

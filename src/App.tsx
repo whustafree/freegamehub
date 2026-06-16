@@ -20,6 +20,8 @@ import StatsPanel from './components/StatsPanel';
 import Onboarding from './components/Onboarding';
 import SettingsPanel from './components/SettingsPanel';
 import TrendingSection from './components/TrendingSection';
+import HeroCarousel from './components/HeroCarousel';
+import FilterPanel from './components/FilterPanel';
 import { t } from './i18n';
 
 const ITEMS_PER_PAGE = 30;
@@ -86,8 +88,12 @@ export default function App() {
   const [activeGenre, setActiveGenre] = useState<Genre>('all');
   const [activeStore, setActiveStore] = useState<StoreFilter>('all');
   const [activeType, setActiveType] = useState<TypeFilter>('all');
+  const [activeYear, setActiveYear] = useState('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Filter panel state
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // UI state
   const [viewMode, setViewMode] = useState<ViewMode>(() => loadViewMode());
@@ -99,6 +105,11 @@ export default function App() {
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+
+  // Filter panel toggle
+  const handleToggleFilter = useCallback(() => {
+    setIsFilterOpen(p => !p);
+  }, []);
 
   // Surprise me
   const [surpriseResult, setSurpriseResult] = useState<{ game: Game; reason: string } | null>(null);
@@ -181,7 +192,7 @@ export default function App() {
   const filteredGames = useFilters({
     games, favorites, showFavoritesOnly,
     currentMode, searchTerm: debouncedSearch, sortMode,
-    activeGenre, activeStore, activeType
+    activeGenre, activeStore, activeType, activeYear
   });
 
   // Sort by popularity (votes)
@@ -740,6 +751,15 @@ export default function App() {
               </div>
             )}
 
+            {/* Hero Carousel */}
+            {!showFavoritesOnly && !multiSelectActive && sortedFiltered.length > 0 && (
+              <HeroCarousel
+                games={sortedFiltered}
+                language={language}
+                onOpenDetail={handleOpenDetail}
+              />
+            )}
+
             {/* Surprise Me Button */}
             {!showFavoritesOnly && !multiSelectActive && (
               <button className="surprise-btn" onClick={handleSurpriseMe}>
@@ -830,7 +850,6 @@ export default function App() {
               favorites={favorites}
               viewedGames={viewedGames}
               newGameIds={newGameIds}
-              votes={votes}
               viewMode={viewMode}
               language={language}
               showFavoritesOnly={showFavoritesOnly}
@@ -848,7 +867,6 @@ export default function App() {
               favorites={favorites}
               viewedGames={viewedGames}
               newGameIds={newGameIds}
-              votes={votes}
               viewMode={viewMode}
               language={language}
               multiSelectActive={multiSelectActive}
@@ -907,6 +925,7 @@ export default function App() {
         onOpenStats={handleOpenStats}
         onOpenSettings={handleOpenSettings}
         onToggleMultiSelect={handleToggleMultiSelect}
+        onToggleFilter={handleToggleFilter}
         multiSelectActive={multiSelectActive}
       />
 
@@ -963,6 +982,28 @@ export default function App() {
           onOpenCollectionGames={handleOpenCollectionGames}
         />
       )}
+
+      {/* Filter Panel */}
+      <FilterPanel
+        language={language}
+        isOpen={isFilterOpen}
+        searchTerm={searchTerm}
+        activeGenre={activeGenre}
+        activeStore={activeStore}
+        activeType={activeType}
+        activeYear={activeYear}
+        sortMode={sortMode}
+        showFavoritesOnly={showFavoritesOnly}
+        onClose={() => setIsFilterOpen(false)}
+        onSearchChange={setSearchTerm}
+        onGenreChange={setActiveGenre}
+        onStoreChange={setActiveStore}
+        onTypeChange={setActiveType}
+        onYearChange={setActiveYear}
+        onSortChange={setSortMode}
+        onToggleFavorites={handleToggleFavorites}
+        onReset={handleResetFilters}
+      />
 
       {/* Onboarding */}
       {onboardingStep !== 'done' && (

@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { Game, ViewMode, Language, Vote } from '../types';
+import { motion } from 'framer-motion';
+import { Game, ViewMode, Language } from '../types';
 import GameCard from './GameCard';
 
 interface GameGridProps {
@@ -7,7 +8,6 @@ interface GameGridProps {
   favorites: string[];
   viewedGames: string[];
   newGameIds: string[];
-  votes: Record<string, Vote>;
   viewMode: ViewMode;
   language: Language;
   multiSelectActive?: boolean;
@@ -74,7 +74,7 @@ function groupByPlatform(games: Game[]): GroupedGames[] {
 }
 
 export default function GameGrid({
-  games, favorites, viewedGames, newGameIds, votes, viewMode, language,
+  games, favorites, viewedGames, newGameIds, viewMode, language,
   multiSelectActive, multiSelectedIds,
   onToggleFavorite, onMarkAsViewed, onOpenDetail,
   onToggleMultiSelectGame,
@@ -88,8 +88,19 @@ export default function GameGrid({
 
   return (
     <div id="games-container">
-      {groupedGames.map(group => (
-        <section key={group.platform} className="platform-group">
+      {groupedGames.map((group, groupIdx) => (
+        <motion.section
+          key={group.platform}
+          className="platform-group"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: groupIdx * 0.04,
+            type: 'spring',
+            stiffness: 350,
+            damping: 28,
+          }}
+        >
           <div className="platform-header">
             <span className="platform-header-icon">{group.icon}</span>
             <h3 className="platform-header-name">{group.label}</h3>
@@ -104,7 +115,6 @@ export default function GameGrid({
                 isFavorite={favorites.includes(game.id)}
                 isViewed={viewedGames.includes(game.id)}
                 isNew={newGameIds.includes(game.id)}
-                votes={votes}
                 viewMode={viewMode}
                 language={language}
                 multiSelectActive={multiSelectActive}
@@ -116,7 +126,7 @@ export default function GameGrid({
               />
             ))}
           </div>
-        </section>
+        </motion.section>
       ))}
     </div>
   );

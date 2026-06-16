@@ -17,6 +17,7 @@ interface BottomNavProps {
   onOpenStats: () => void;
   onOpenSettings?: () => void;
   onToggleMultiSelect?: () => void;
+  onToggleFilter?: () => void;
 }
 
 const MODES: { mode: Mode; icon: string; labelKey: 'navPC' | 'navAndroid' }[] = [
@@ -28,7 +29,7 @@ export default function BottomNav({
   currentMode, viewMode, favoritesCount, showFavoritesOnly, language,
   multiSelectActive, visible = true,
   onModeChange, onToggleFavorites, onResetFilters, onToggleViewMode, onOpenStats,
-  onOpenSettings, onToggleMultiSelect
+  onOpenSettings, onToggleMultiSelect, onToggleFilter
 }: BottomNavProps) {
   const [showOverflow, setShowOverflow] = useState(false);
   const overflowRef = useRef<HTMLDivElement>(null);
@@ -104,6 +105,14 @@ export default function BottomNav({
             >
               <span>{multiSelectActive ? '✅' : '☑️'}</span>
               {t('multiSelect', language)}
+            </button>
+
+            <button
+              className="nav-overflow-item"
+              onClick={() => handleOverflowAction(() => { if (onToggleFilter) onToggleFilter(); })}
+            >
+              <span>🔍</span>
+              {t('filters', language)}
             </button>
 
             <button

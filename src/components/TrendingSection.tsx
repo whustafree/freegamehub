@@ -1,4 +1,4 @@
-import { Game, ViewMode, Language, Vote } from '../types';
+import { Game, ViewMode, Language } from '../types';
 import { t } from '../i18n';
 import GameCard from './GameCard';
 
@@ -7,7 +7,6 @@ interface TrendingSectionProps {
   favorites: string[];
   viewedGames: string[];
   newGameIds: string[];
-  votes: Record<string, Vote>;
   viewMode: ViewMode;
   language: Language;
   showFavoritesOnly: boolean;
@@ -22,7 +21,6 @@ export default function TrendingSection({
   favorites,
   viewedGames,
   newGameIds,
-  votes,
   viewMode,
   language,
   showFavoritesOnly,
@@ -64,7 +62,6 @@ export default function TrendingSection({
               isFavorite={favorites.includes(game.id)}
               isViewed={viewedGames.includes(game.id)}
               isNew={newGameIds.includes(game.id)}
-              votes={votes}
               viewMode={viewMode}
               language={language}
               onToggleFavorite={toggleFavorite}
