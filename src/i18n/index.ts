@@ -128,6 +128,9 @@ export const translations = {
     dlcs: 'DLCs',
     allStores: 'Todas',
 
+    // Offline
+    offline: 'Sin conexión — mostrando datos guardados 📡',
+
     // Toasts
     favoritesOn: 'Mostrando favoritos ❤️',
     favoritesOff: 'Favoritos desactivados',
@@ -444,6 +447,9 @@ export const translations = {
     apps: 'Apps',
     dlcs: 'DLCs',
     allStores: 'All stores',
+
+    // Offline
+    offline: 'Offline — showing cached data 📡',
 
     favoritesOn: 'Showing favorites ❤️',
     favoritesOff: 'Favorites off',

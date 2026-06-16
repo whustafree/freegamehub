@@ -55,6 +55,27 @@ export function getRelativeTime(timestamp: string | null): string {
   return date.toLocaleDateString('es-CL');
 }
 
+// --- Haptic feedback (works on Android APK) ---
+export function vibrate(pattern: number | number[] = 10): void {
+  if (navigator.vibrate) {
+    navigator.vibrate(pattern);
+  }
+}
+
+// Simple fuzzy match: returns true if all chars of query appear in order in text
+export function fuzzyMatch(text: string, query: string): boolean {
+  const lowerText = text.toLowerCase();
+  const lowerQuery = query.toLowerCase().trim();
+  if (lowerQuery.length === 0) return false;
+  let queryIdx = 0;
+  for (let i = 0; i < lowerText.length && queryIdx < lowerQuery.length; i++) {
+    if (lowerText[i] === lowerQuery[queryIdx]) {
+      queryIdx++;
+    }
+  }
+  return queryIdx === lowerQuery.length;
+}
+
 export const GENRE_KEYWORDS: Record<string, string[]> = {
   action: ['action', 'acción', 'combat', 'fight', 'shooter', 'fps', 'battle', 'war'],
   rpg: ['rpg', 'role', 'adventure', 'aventura', 'fantasy', 'medieval'],

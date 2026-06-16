@@ -1,6 +1,7 @@
-import { useState, useRef, useEffect } from 'react';
-import { Language, Game } from '../types';
+import { useState, useRef, useEffect, useMemo } from 'react';
+import { Language, Game, StoreFilter } from '../types';
 import { t } from '../i18n';
+import { fuzzyMatch } from '../utils/format';
 
 interface HeaderProps {
   searchTerm: string;
@@ -13,6 +14,19 @@ interface HeaderProps {
   onOpenDetail?: (game: Game) => void;
 }
 
+interface GroupedSuggestion {
+  platform: string;
+  icon: string;
+  games: Game[];
+}
+
+const PLATFORM_ICONS: Record<string, string> = {
+  steam: '🟦', epic: '🎯', gog: '🟣', itch: '🎨',
+  battlenet: '⚔️', origin: '💠', drm: '🔓',
+  ps5: '🎮', ps4: '🎮', 'xbox-series': '🎮', xbox: '🎮',
+  nintendo: '🎮', android: '📱', ios: '🍎', pc: '🖥️',
+};
+
 export default function Header({
   searchTerm, language, games = [], visible = true, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
 }: HeaderProps) {
@@ -20,11 +34,37 @@ export default function Header({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  const suggestions = searchTerm.length >= 2
-    ? games
-        .filter(g => g.title.toLowerCase().includes(searchTerm.toLowerCase()))
-        .slice(0, 5)
-    : [];
+  // Fuzzy search + group by platform
+  const groupedSuggestions = useMemo(() => {
+    if (searchTerm.length < 2) return [];
+    const query = searchTerm.toLowerCase().trim();
+    const matched = games.filter(g => {
+      const text = `${g.title} ${g.platformName} ${g.description}`.toLowerCase();
+      return fuzzyMatch(text, query);
+    }).slice(0, 20);
+
+    // Group by platform
+    const groups = new Map<string, Game[]>();
+    for (const game of matched) {
+      const key = game.platform || 'other';
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key)!.push(game);
+    }
+
+    const result: GroupedSuggestion[] = [];
+    for (const [platform, platformGames] of groups) {
+      result.push({
+        platform,
+        icon: PLATFORM_ICONS[platform] || platformGames[0]?.platformIcon || '🎮',
+        games: platformGames.slice(0, 5), // max 5 per platform
+      });
+    }
+    return result;
+  }, [games, searchTerm]);
+
+  const totalResults = useMemo(() => 
+    groupedSuggestions.reduce((acc, g) => acc + g.games.length, 0),
+  [groupedSuggestions]);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -63,29 +103,43 @@ export default function Header({
             <button className="header-search-clear" onClick={() => { onClearSearch(); setShowSuggestions(false); }}>✕</button>
           )}
 
-          {/* Search suggestions */}
-          {showSuggestions && suggestions.length > 0 && (
+          {/* Search suggestions with platform groups */}
+          {showSuggestions && groupedSuggestions.length > 0 && (
             <div className="search-suggestions" ref={suggestionsRef}>
-              {suggestions.map(g => (
-                <div
-                  key={g.id}
-                  className="search-suggestion-item"
-                  onClick={() => {
-                    onSearchChange(g.title);
-                    setShowSuggestions(false);
-                    if (onOpenDetail) {
-                      onOpenDetail(g);
-                    } else {
-                      const card = document.querySelector(`[data-id="${g.id}"]`);
-                      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
-                  }}
-                >
-                  <img src={g.image} alt="" className="search-suggestion-icon"
-                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                  />
-                  <span className="search-suggestion-text">{g.title}</span>
-                  <span className="search-suggestion-type">{g.platformName || g.platform}</span>
+              <div className="search-suggestions-header">
+                {totalResults} {language === 'es' ? 'resultados' : 'results'}
+                <span className="search-suggestions-hint">{language === 'es' ? '• Toca para abrir' : '• Tap to open'}</span>
+              </div>
+              {groupedSuggestions.map(group => (
+                <div key={group.platform} className="search-suggestion-group">
+                  <div className="search-suggestion-group-label">
+                    {group.icon} {group.games[0]?.platformName || group.platform}
+                    <span className="search-suggestion-group-count">{group.games.length}</span>
+                  </div>
+                  {group.games.map(g => (
+                    <div
+                      key={g.id}
+                      className="search-suggestion-item"
+                      onClick={() => {
+                        onSearchChange(g.title);
+                        setShowSuggestions(false);
+                        if (onOpenDetail) {
+                          onOpenDetail(g);
+                        } else {
+                          const card = document.querySelector(`[data-id="${g.id}"]`);
+                          if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                      }}
+                    >
+                      <img src={g.image} alt="" className="search-suggestion-icon"
+                        onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <span className="search-suggestion-text">{g.title}</span>
+                      {g.worth && g.worth !== 'N/A' && (
+                        <span className="search-suggestion-worth">💲{g.worth}</span>
+                      )}
+                    </div>
+                  ))}
                 </div>
               ))}
             </div>

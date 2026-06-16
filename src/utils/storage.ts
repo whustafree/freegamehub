@@ -143,3 +143,30 @@ export function saveOnboardingStep(s: OnboardingStep): void {
 // --- Multi Select ---
 export function loadMultiSelectIds(): string[] { return loadArray(KEYS.MULTISELECT); }
 export function saveMultiSelectIds(ids: string[]): void { saveArray(KEYS.MULTISELECT, ids); }
+
+// --- Games Cache (offline) ---
+const CACHE_KEY = 'fgh_games_cache_v1';
+const CACHE_META_KEY = 'fgh_games_cache_meta_v1';
+
+interface GamesCache {
+  games: import('../types').Game[];
+  timestamp: string;
+}
+
+export function saveGamesCache(games: import('../types').Game[]): void {
+  const cache: GamesCache = { games, timestamp: new Date().toISOString() };
+  localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+}
+
+export function loadGamesCache(): GamesCache | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as GamesCache;
+  } catch { return null; }
+}
+
+export function clearGamesCache(): void {
+  localStorage.removeItem(CACHE_KEY);
+  localStorage.removeItem(CACHE_META_KEY);
+}

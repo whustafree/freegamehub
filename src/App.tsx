@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game } from './types';
-import { parsePrice } from './utils/format';
+import { parsePrice, vibrate } from './utils/format';
 import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds } from './utils/storage';
 
 import { useGames } from './hooks/useGames';
@@ -105,9 +105,24 @@ export default function App() {
   const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
+  // Offline detection
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+  
+  useEffect(() => {
+    const goOnline = () => { setIsOffline(false); if (error) loadGames(); };
+    const goOffline = () => { setIsOffline(true); showToast(t('offline', language), 'info'); };
+    window.addEventListener('online', goOnline);
+    window.addEventListener('offline', goOffline);
+    return () => {
+      window.removeEventListener('online', goOnline);
+      window.removeEventListener('offline', goOffline);
+    };
+  }, [language, error, loadGames]);
+
   // Filter panel toggle
   const handleToggleFilter = useCallback(() => {
     setIsFilterOpen(p => !p);
+    vibrate(8);
   }, []);
 
   // Surprise me
@@ -632,6 +647,12 @@ export default function App() {
           </div>
         )}
 
+        {isOffline && (
+          <div className="offline-banner">
+            📡 {t('offline', language)}
+          </div>
+        )}
+
         {isLoaded && (
           <>
             {/* New Games Notification Banner */}
@@ -801,7 +822,9 @@ export default function App() {
         showFavoritesOnly={showFavoritesOnly}
         language={language}
         visible={navVisible}
+        activeStore={activeStore}
         onModeChange={handleModeChange}
+        onStoreChange={setActiveStore}
         onToggleFavorites={handleToggleFavorites}
         onResetFilters={handleResetFilters}
         onToggleViewMode={handleToggleViewMode}

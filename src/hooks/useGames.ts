@@ -12,6 +12,7 @@ import {
   loadActivityLog, saveActivityLog,
   loadAchievements, saveAchievements,
   loadOnboardingStep, saveOnboardingStep,
+  saveGamesCache, loadGamesCache,
 } from '../utils/storage';
 import { parsePrice } from '../utils/format';
 
@@ -105,20 +106,35 @@ export function useGames() {
     setActivityLog(prev => [entry, ...prev.slice(0, 499)]);
   }, []);
 
-  // --- Load games ---
+  // --- Load games (with offline cache) ---
   const loadGames = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
       const isNative = Capacitor.isNativePlatform();
       const apiBase = isNative ? 'https://gameradar-iota.vercel.app' : '';
-      const res = await fetch(`${apiBase}/api/free-games`);
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const res = await fetch(`${apiBase}/api/free-games`, { signal: controller.signal });
+      clearTimeout(timeoutId);
       if (!res.ok) throw new Error('Error en la API');
       const data: GamesResponse = await res.json();
       setGames(data.games || []);
       setLastUpdated(data.lastUpdated || null);
+      // Save to cache
+      if (data.games && data.games.length > 0) {
+        saveGamesCache(data.games);
+      }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      // Try loading from cache on error
+      const cached = loadGamesCache();
+      if (cached && cached.games.length > 0) {
+        setGames(cached.games);
+        setLastUpdated(cached.timestamp);
+        setError(null);
+      } else {
+        setError(err instanceof Error ? err.message : 'Error desconocido');
+      }
     } finally {
       setIsLoading(false);
     }
