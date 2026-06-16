@@ -6,6 +6,7 @@ interface HeaderProps {
   searchTerm: string;
   language: Language;
   games?: Game[];
+  visible?: boolean;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onToggleLang: () => void;
@@ -13,7 +14,7 @@ interface HeaderProps {
 }
 
 export default function Header({
-  searchTerm, language, games = [], onSearchChange, onClearSearch, onToggleLang, onOpenDetail
+  searchTerm, language, games = [], visible = true, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -37,7 +38,7 @@ export default function Header({
   }, []);
 
   return (
-    <header className="app-header">
+    <header className={`app-header ${!visible ? 'header-hidden' : ''}`}>
       <div className="header-inner">
         <div className="header-brand">
           <div className="header-brand-icon">🎮</div>

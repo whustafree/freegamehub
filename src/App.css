@@ -90,7 +90,9 @@ input, textarea { user-select: text; -webkit-user-select: text; }
   display: flex;
   align-items: center;
   padding: 0 .5rem 0 .85rem;
+  transition: transform .35s var(--ease);
 }
+.app-header.header-hidden { transform: translateY(-110%); }
 .header-inner {
   width: 100%;
   max-width: 1280px;

@@ -120,6 +120,7 @@ export default function App() {
 
   // Auto-hide nav on scroll
   const [navVisible, setNavVisible] = useState(true);
+  const [headerVisible, setHeaderVisible] = useState(true);
   const lastScrollY = useRef(0);
   const scrollTimer = useRef<number | null>(null);
 
@@ -476,7 +477,7 @@ export default function App() {
     };
   }, []); // Empty deps = register once, never re-register
 
-  // --- Auto-hide nav on scroll (mobile native feel) ---
+  // --- Auto-hide nav & header on scroll (mobile native feel) ---
   useEffect(() => {
     const main = mainRef.current;
     if (!main) return;
@@ -484,17 +485,20 @@ export default function App() {
     const handleScroll = () => {
       const currentY = main.scrollTop;
       if (currentY > 50 && currentY > lastScrollY.current) {
-        // Scrolling down -> hide nav
+        // Scrolling down -> hide nav & header
         setNavVisible(false);
+        setHeaderVisible(false);
       } else if (currentY < lastScrollY.current - 10 || currentY < 50) {
-        // Scrolling up or at top -> show nav
+        // Scrolling up or at top -> show nav & header
         setNavVisible(true);
+        setHeaderVisible(true);
       }
       lastScrollY.current = currentY;
       
       // Show nav when scrolling up or at top
       if (currentY < 50) {
         setNavVisible(true);
+        setHeaderVisible(true);
       }
     };
     
@@ -535,6 +539,7 @@ export default function App() {
       }
       if (e.key === 'g' && e.ctrlKey) { e.preventDefault(); handleToggleViewMode(); }
       if (e.key === 'm' && e.ctrlKey) { e.preventDefault(); handleToggleMultiSelect(); }
+      if (e.key === 'k' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setIsFilterOpen(p => !p); }
       if (e.key === 's' && e.ctrlKey) { e.preventDefault(); setShowSurprise(p => !p); handleSurpriseMe(); }
       // Arrow keys to navigate cards
       const cards = document.querySelectorAll<HTMLElement>('.game-card[data-id]');
@@ -573,6 +578,7 @@ export default function App() {
       <Header
         searchTerm={searchTerm}
         language={language}
+        visible={headerVisible}
         onSearchChange={setSearchTerm}
         onClearSearch={handleClearSearch}
         onToggleLang={handleToggleLang}
