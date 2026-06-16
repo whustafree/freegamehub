@@ -39,14 +39,14 @@ class RedditService {
       logger.info('Obteniendo ofertas Android desde Reddit...');
       const startTime = Date.now();
 
-      // Fetch multiple subreddits for Android deals
+      // Fetch multiple subreddits for Android deals (solo 'new' para ofertas activas)
       const subreddits = [
         `https://www.reddit.com/r/googleplaydeals/new.json?limit=${limit}&raw_json=1`,
-        `https://www.reddit.com/r/AndroidGaming/hot.json?limit=${Math.min(limit, 15)}&raw_json=1`,
         `https://www.reddit.com/r/FreeGameFindings/new.json?limit=${limit}&raw_json=1`,
+        `https://www.reddit.com/r/AndroidGaming/new.json?limit=${Math.min(limit, 15)}&raw_json=1`,
         `https://www.reddit.com/r/AppHookup/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/efreebies/new.json?limit=${limit}&raw_json=1`,
-        `https://www.reddit.com/r/AndroidApps/hot.json?limit=${Math.min(limit, 15)}&raw_json=1`,
+        `https://www.reddit.com/r/AndroidApps/new.json?limit=${Math.min(limit, 15)}&raw_json=1`,
         `https://www.reddit.com/r/AppSales/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/GameDeals/new.json?limit=${limit}&raw_json=1`,
         `https://www.reddit.com/r/GameDealsFree/new.json?limit=${limit}&raw_json=1`,
@@ -159,40 +159,70 @@ class RedditService {
 
     const titleLower = (post.title || '').toLowerCase();
     let type = 'Game';
-    if (titleLower.includes('[app')) type = 'App';
+    if (titleLower.includes('[app') || titleLower.includes('(app') || titleLower.includes('app,')) type = 'App';
 
-    const title = (post.title || '')
-      .replace(/\[.*?\]/g, '').replace(/\(.*?\)/g, '').trim();
+    // Better title cleaning: remove tags, brackets, common prefixes
+    let title = (post.title || '')
+      .replace(/\[.*?\]/g, '')
+      .replace(/\(.*?\)/g, '')
+      .replace(/^\s*(?:100% off|FREE|Freebie|Deal|Sale|Giveaway|App|Game)\s*[:-]\s*/i, '')
+      .replace(/&amp;/g, '&')
+      .trim();
+
+    // Detect actual platform from URL if it's a Play Store link
+    let platform = 'android';
+    let platformName = 'Play Store';
+    let platformIcon = '📱';
+    let category = 'android';
+
+    const postUrl = post.url || '';
+    if (postUrl.includes('play.google.com')) {
+      platform = 'android';
+      platformName = 'Play Store';
+      platformIcon = '📱';
+      category = 'android';
+    } else if (postUrl.includes('apps.apple.com') || postUrl.includes('itunes.apple.com')) {
+      platform = 'ios';
+      platformName = 'App Store';
+      platformIcon = '🍎';
+      category = 'ios';
+    } else if (postUrl.includes('steampowered.com') || postUrl.includes('store.steampowered.com')) {
+      platform = 'steam';
+      platformName = 'Steam';
+      platformIcon = '🟦';
+      category = 'pc';
+    }
 
     return {
       id: `rd-${post.id}`,
-      title: title || 'Android App Deal',
-      description: post.selftext?.substring(0, 200) + '...' || 'Oferta temporal gratuita en Google Play Store',
+      title: title || 'App Deal',
+      description: post.selftext?.substring(0, 200) + '...' || 'Oferta temporal gratuita',
       image: image,
       url: post.url || 'https://play.google.com/store/apps',
-      platform: 'android',
-      platformName: 'Play Store',
-      platformIcon: '📱',
-      category: 'android',
-      endDate: this.extractEndDate(post.title),
-      worth: this.extractPrice(post.title),
+      platform: platform,
+      platformName: platformName,
+      platformIcon: platformIcon,
+      category: category,
+      endDate: this.extractEndDate(post.title, post.selftext),
+      worth: this.extractPrice(titleLower),
       type: type,
       genre: 'other',
       source: 'reddit'
     };
   }
 
-  extractEndDate(title) {
-    if (!title) return null;
+  extractEndDate(title, selfText) {
+    const text = `${title || ''} ${selfText || ''}`;
     const patterns = [
-      /until\s+(\d{1,2}[\/\.]\d{1,2}[\/\.]?\d{0,4})/i,
-      /ends?\s+(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*)/i,
+      /(?:until|ends?|expires?|válido hasta|finaliza)\s*(?::|)\s*(\d{1,2})[\/\s\.](\d{1,2})[\/\s\.]?(\d{2,4})/i,
+      /(?:until|ends?|válido hasta|finaliza)\s*(?::|)\s*(\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s*,?\s*(\d{4})?)/i,
+      /(\d{1,2})\s*(?:day|día)s?\s*(?:left|restantes)/i,
     ];
     for (const pattern of patterns) {
-      const match = title.match(pattern);
+      const match = text.match(pattern);
       if (match) {
         try {
-          const date = new Date(match[1]);
+          const date = new Date(match[0]);
           if (!isNaN(date.getTime())) return date.toISOString();
         } catch (e) { /* ignore */ }
       }
@@ -200,10 +230,32 @@ class RedditService {
     return null;
   }
 
-  extractPrice(title) {
-    if (!title) return null;
-    const match = title.match(/\$(\d+\.?\d*)/);
-    if (match) return `$${match[1]}`;
+  extractPrice(text) {
+    if (!text) return null;
+    // Try to extract price like $4.99, 4,99€, 3.99 USD, etc.
+    const patterns = [
+      /\$(\d+\.?\d*)/,
+      /(\d+[.,]\d+)\s*(?:€|eur|usd)/i,
+      /(?:was|precio|original|before|normally|valía)\s*(?::|)\s*\$?(\d+\.?\d*)/i,
+      /(?:\$|€)(\d+\.?\d*)\s*(?:→|->|⇒|➡️|➡|>)\s*(?:0|free|gratis)/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = text.match(pattern);
+      if (match) {
+        const price = match[1] || match[0];
+        const numPrice = parseFloat(price.replace(',', '.'));
+        if (!isNaN(numPrice) && numPrice > 0 && numPrice < 1000) {
+          return `$${numPrice.toFixed(2)}`;
+        }
+      }
+    }
+    
+    // Special case: "100% off" - no price info but clearly a deal
+    if (text.includes('100%') || text.includes('gratis') || text.includes('freebie')) {
+      return null; // No original price known
+    }
+    
     return null;
   }
 }
