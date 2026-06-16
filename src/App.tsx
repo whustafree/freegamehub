@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game } from './types';
-import { getRelativeTime, formatCurrency, parsePrice } from './utils/format';
+import { parsePrice } from './utils/format';
 import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds } from './utils/storage';
 
 import { useGames } from './hooks/useGames';
@@ -555,16 +555,8 @@ export default function App() {
 
   // --- Derived ---
   const isLoaded = !isLoading && !error;
-  const formatTime = getRelativeTime(lastUpdated);
-  const totalSavings = formatCurrency(savings);
   const ptrPullDist = Math.max(0, ptrCurrentY.current - ptrStartY.current);
   const isPtrPulled = ptrPullDist > 80;
-
-  // Platform counts for header badge
-  const platformCounts = useMemo(() => ({
-    pc: games.filter(g => g.category === 'pc').length,
-    android: games.filter(g => g.category === 'android').length,
-  }), [games]);
 
   // Game ID set for collection filter
   const collectionFilteredGames = useMemo(() => {
@@ -581,117 +573,12 @@ export default function App() {
       <Header
         searchTerm={searchTerm}
         language={language}
-        totalSavings={totalSavings}
-        claimedCount={userStats.totalClaimed}
-        platformCounts={platformCounts}
         onSearchChange={setSearchTerm}
         onClearSearch={handleClearSearch}
         onToggleLang={handleToggleLang}
         onOpenDetail={handleOpenDetail}
         games={games}
       />
-
-      {/* Unified Top Bar */}
-      <div className="top-bar">
-        <div className="top-bar-inner">
-          <div className="top-stat">
-            🎮 <strong>{visibleGamesCount}</strong> {t('gamesCount', language)}
-          </div>
-          <div className="top-stat">
-            💰 <strong>{totalSavings}</strong>
-          </div>
-          <div className="top-stat">
-            ❤️ <strong>{favorites.length}</strong>
-          </div>
-          <div className="top-stat">
-            ⏰ {formatTime}
-          </div>
-
-          <div className="top-divider" />
-
-          <button className={`sort-chip ${sortMode === 'default' ? 'active' : ''}`} onClick={() => setSortMode('default')}>
-            {t('sortRecent', language)}
-          </button>
-          <button className={`sort-chip ${sortMode === 'price-desc' ? 'active' : ''}`} onClick={() => setSortMode('price-desc')}>
-            {t('sortPrice', language)}
-          </button>
-          <button className={`sort-chip ${sortMode === 'ending-soon' ? 'active' : ''}`} onClick={() => setSortMode('ending-soon')}>
-            {t('sortEnding', language)}
-          </button>
-          <button className={`sort-chip ${sortMode === 'title' ? 'active' : ''}`} onClick={() => setSortMode('title')}>
-            {t('sortAZ', language)}
-          </button>
-          <button className={`sort-chip ${sortMode === 'popular' ? 'active' : ''}`} onClick={() => setSortMode('popular')}>
-            🔥 {t('sortPopular', language)}
-          </button>
-        </div>
-      </div>
-
-      {/* Android Type Sub-nav - visible en modo Android */}
-      {currentMode === 'android' && !showFavoritesOnly && !multiSelectActive && (
-        <div className="pc-store-nav">
-          <div className="pc-store-nav-inner">
-            <button
-              className={`store-chip ${activeType === 'all' ? 'active' : ''}`}
-              onClick={() => setActiveType('all')}
-            >
-              {t('all', language)}
-            </button>
-            <button
-              className={`store-chip ${activeType === 'game' ? 'active' : ''}`}
-              onClick={() => setActiveType('game')}
-            >
-              🎮 {t('games', language)}
-            </button>
-            <button
-              className={`store-chip ${activeType === 'app' ? 'active' : ''}`}
-              onClick={() => setActiveType('app')}
-            >
-              📱 {t('apps', language)}
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* PC Store Sub-nav - visible solo en modo PC */}
-      {currentMode === 'pc' && !showFavoritesOnly && !multiSelectActive && (
-        <div className="pc-store-nav">
-          <div className="pc-store-nav-inner">
-            <button
-              className={`store-chip ${activeStore === 'all' && activeType !== 'all' ? '' : activeStore === 'all' ? 'active' : ''}`}
-              onClick={() => { setActiveStore('all'); setActiveType('all'); }}
-            >
-              {t('storeAll', language)}
-            </button>
-            {[
-              { store: 'steam' as StoreFilter, icon: '🟦', label: 'Steam' },
-              { store: 'epic' as StoreFilter, icon: '🎯', label: 'Epic' },
-              { store: 'gog' as StoreFilter, icon: '🟣', label: 'GOG' },
-              { store: 'itch' as StoreFilter, icon: '🎨', label: 'Itch.io' },
-              { store: 'battlenet' as StoreFilter, icon: '⚔️', label: 'Battle.net' },
-              { store: 'origin' as StoreFilter, icon: '💠', label: 'Origin' },
-              { store: 'drm' as StoreFilter, icon: '🔓', label: 'DRM-Free' },
-              { store: 'pc' as StoreFilter, icon: '🖥️', label: 'PC' },
-            ].map(s => (
-              <button
-                key={s.store}
-                className={`store-chip ${activeStore === s.store ? 'active' : ''}`}
-                onClick={() => { setActiveStore(s.store); setActiveType('all'); }}
-              >
-                {s.icon} {s.label}
-              </button>
-            ))}
-            <div className="store-nav-divider" />
-            <button
-              className={`store-chip special ${activeType === 'game' ? 'active' : ''}`}
-              onClick={() => { setActiveType(activeType === 'game' ? 'all' : 'game'); setActiveStore('steam'); }}
-              title={t('storeFreeWeekend', language)}
-            >
-              🎉 {language === 'es' ? 'Finde gratis' : 'Weekend'}
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Multi-select bar */}
       {multiSelectActive && multiSelectedIds.length > 0 && (
