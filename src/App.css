@@ -451,6 +451,41 @@ input, textarea { user-select: text; -webkit-user-select: text; }
 }
 .card-desc { display: none; }
 
+/* === PLAY STORE METADATA === */
+.card-ps-meta {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .2rem 0 .25rem;
+  flex-wrap: wrap;
+}
+.card-ps-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: .12rem;
+  font-size: .48rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+.card-ps-meta .card-rating small {
+  font-size: .45rem;
+  color: var(--gold);
+  font-weight: 600;
+  margin-left: .05rem;
+}
+.card-ps-meta .card-installs {
+  background: rgba(255,255,255,0.04);
+  padding: .05rem .2rem;
+  border-radius: 4px;
+  font-size: .45rem;
+}
+.card-ps-meta .card-publisher {
+  font-size: .45rem;
+  max-width: 80px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .card-meta {
   display: flex;
   align-items: center;

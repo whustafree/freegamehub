@@ -131,11 +131,40 @@ class GamesService {
     return score;
   }
 
-  getGames() {
-    return {
+  /**
+   * Get games with optional timeout waiting for initial load.
+   * Si el cache está vacío y hay una actualización en curso,
+   * espera hasta `timeoutMs` milisegundos por si llegan datos.
+   */
+  async getGames(timeoutMs = 0) {
+    const data = {
       games: cacheManager.getGames(),
       lastUpdated: cacheManager.getLastUpdated()
     };
+
+    // Si ya hay juegos o no hay timeout, responder inmediato
+    if (data.games.length > 0 || timeoutMs <= 0) {
+      return data;
+    }
+
+    // Hay una actualización en curso? Esperar con timeout
+    if (this._pendingUpdate) {
+      try {
+        await Promise.race([
+          this._pendingUpdate,
+          new Promise(resolve => setTimeout(resolve, timeoutMs))
+        ]);
+      } catch (e) {
+        // Ignorar errores del pending update
+      }
+      // Re-verificar cache después de esperar
+      return {
+        games: cacheManager.getGames(),
+        lastUpdated: cacheManager.getLastUpdated()
+      };
+    }
+
+    return data;
   }
 
   getStats() {

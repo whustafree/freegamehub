@@ -1,5 +1,3 @@
-const puppeteer = require('puppeteer');
-const gplay = require('google-play-scraper');
 const logger = require('../utils/logger');
 
 /**
@@ -9,18 +7,31 @@ const logger = require('../utils/logger');
  * La página carga dinámicamente (JS), por eso usamos Puppeteer.
  * Luego cada app se enriquece con google-play-scraper para obtener
  * nombre, imagen, precio original, rating, etc.
+ *
+ * IMPORTANTE: Puppeteer y google-play-scraper se importan con require()
+ * DINÁMICO dentro de fetchAll() para evitar que el módulo explote al
+ * ser importado en Vercel (donde no hay Chrome binary).
  */
 class NotengoSueltoService {
   constructor() {
     this.url = 'https://www.notengosuelto.com/apps-de-pago-gratis-android';
     this.timeout = 25000;
-    this.maxApps = 10; // limitado para no exceder timeout de Vercel
+    this.maxApps = 10;
   }
 
   async fetchAll() {
     // Puppeteer no funciona en Vercel (no hay Chrome binary)
     if (process.env.VERCEL) {
       logger.warn('NotengoSuelto: Puppeteer no disponible en Vercel, saltando');
+      return [];
+    }
+
+    let puppeteer, gplay;
+    try {
+      puppeteer = require('puppeteer');
+      gplay = require('google-play-scraper');
+    } catch (e) {
+      logger.warn(`NotengoSuelto: no se pudieron cargar dependencias (${e?.message || e})`);
       return [];
     }
 

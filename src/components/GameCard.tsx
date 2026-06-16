@@ -33,6 +33,7 @@ export default function GameCard({
 
   const cardRef = useRef<HTMLDivElement>(null);
 
+  const showPlayStoreMeta = game.rating && game.installs;
   const worth = game.worth && game.worth !== 'N/A' && game.worth !== 'Pago'
     ? <span className="card-img-badge worth">{parsePrice(game.worth) >= 60 ? '🔥 ' : ''}{game.worth}</span>
     : null;
@@ -124,6 +125,20 @@ export default function GameCard({
           <span style={{ fontSize: '.58rem', color: 'var(--text-muted)', lineHeight: 1 }}>
             {game.platformName || game.platform}
           </span>
+        )}
+        {showPlayStoreMeta && (
+          <div className="card-ps-meta">
+            <span className="card-rating" title={`${game.rating?.toFixed(1)} ⭐`}>
+              {'⭐'.repeat(Math.round(game.rating || 0))}
+              <small>{game.rating?.toFixed(1)}</small>
+            </span>
+            {game.installs && (
+              <span className="card-installs">{game.installs}</span>
+            )}
+            {game.publisher && (
+              <span className="card-publisher">{game.publisher}</span>
+            )}
+          </div>
         )}
         <div className="card-meta">
           <div className="card-meta-left">

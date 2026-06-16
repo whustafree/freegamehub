@@ -15,6 +15,12 @@ export interface Game {
   status?: string;
   instructions?: string;
   genre?: string;
+  // Play Store enriched data (from notengosuelto scraper)
+  publisher?: string;
+  developer?: string;
+  rating?: number;
+  ratingsCount?: number;
+  installs?: string;
 }
 
 export interface GamesResponse {
