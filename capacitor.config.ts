@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli'
 
 const config: CapacitorConfig = {
-  appId: 'com.freegamehub.app',
-  appName: 'FreeGameHub',
+  appId: 'com.gameradar.app',
+  appName: 'GameRadar',
   webDir: 'dist',
   server: {
     androidScheme: 'https',

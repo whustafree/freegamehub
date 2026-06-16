@@ -1,13 +1,13 @@
 /**
- * FreeGameHub Service Worker v3.0
+ * GameRadar Service Worker v3.0
  * Estrategia: Cache First para Vite assets, Network First para API
  * Offline support para juegos guardados
  */
 
-const CACHE_NAME = 'freegamehub-v3';
-const STATIC_CACHE = 'fgh-static-v3';
-const API_CACHE = 'fgh-api-v3';
-const IMAGE_CACHE = 'fgh-images-v3';
+const CACHE_NAME = 'gameradar-v3';
+const STATIC_CACHE = 'grd-static-v3';
+const API_CACHE = 'grd-api-v3';
+const IMAGE_CACHE = 'grd-images-v3';
 
 // Instalación: Cachear el shell mínimo
 self.addEventListener('install', (event) => {
@@ -26,7 +26,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) =>
       Promise.all(
         cacheNames
-          .filter((name) => name.startsWith('freegamehub-') || (name.startsWith('fgh-') && !name.includes('v3')))
+          .filter((name) => name.startsWith('gameradar-') || (name.startsWith('grd-') && !name.includes('v3')))
           .map((name) => caches.delete(name))
       )
     ).then(() => self.clients.claim())
@@ -124,7 +124,7 @@ self.addEventListener('push', (event) => {
   if (!event.data) return;
   const data = event.data.json();
   event.waitUntil(
-    self.registration.showNotification('FreeGameHub', {
+    self.registration.showNotification('GameRadar', {
       body: data.body || '¡Nuevos juegos gratuitos disponibles!',
       icon: '/vite.svg',
       tag: 'new-games',

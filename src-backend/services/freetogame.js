@@ -15,7 +15,7 @@ class FreeToGameService {
       const response = await axios.get(`${this.baseUrl}/games?platform=windows`, {
         timeout: this.timeout,
         headers: {
-          'User-Agent': 'FreeGameHub/2.0'
+          'User-Agent': 'GameRadar/2.1'
         }
       });
 

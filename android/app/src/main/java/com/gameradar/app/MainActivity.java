@@ -1,4 +1,4 @@
-package com.freegamehub.app;
+package com.gameradar.app;
 
 import com.getcapacitor.BridgeActivity;
 

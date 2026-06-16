@@ -1,7 +1,7 @@
-# Render Blueprint para FreeGameHub v2.0
+# Render Blueprint para GameRadar v2.1
 services:
   - type: web
-    name: freegamehub
+    name: gameradar
     env: node
     buildCommand: npm install
     startCommand: npm start
@@ -15,7 +15,7 @@ services:
       - key: TELEGRAM_CHAT_ID
         sync: false
       - key: APP_URL
-        value: https://freegamehub.onrender.com
+        value: https://gameradar.onrender.com
       - key: UPDATE_INTERVAL_HOURS
         value: 4
     healthCheckPath: /api/health

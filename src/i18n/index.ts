@@ -289,7 +289,7 @@ export const translations = {
     achievementSavings1000Desc: 'Acumula $1,000 en ahorro',
 
     // Onboarding
-    onboardingWelcome: '¡Bienvenido a FreeGameHub! 🎮',
+    onboardingWelcome: '¡Bienvenido a GameRadar! 🎮',
     onboardingWelcomeDesc: 'Descubre juegos gratis de Steam, Epic, GOG, Android y más',
     onboardingPlatform: 'Cambia de plataforma',
     onboardingPlatformDesc: 'Usa la barra inferior para cambiar entre PC y Android',
@@ -324,7 +324,7 @@ export const translations = {
     // Deep link / share
     shareGameLink: 'Compartir enlace',
     gameUrlCopied: 'Enlace del juego copiado',
-    inviteText: '¡Únete a FreeGameHub y descubre juegos gratis!',
+    inviteText: '¡Únete a GameRadar y descubre nuevos juegos!',
   },
 
   en: {
@@ -595,7 +595,7 @@ export const translations = {
     achievementSavings1000: 'Tycoon',
     achievementSavings1000Desc: 'Save $1,000 total',
 
-    onboardingWelcome: 'Welcome to FreeGameHub! 🎮',
+    onboardingWelcome: 'Welcome to GameRadar! 🎮',
     onboardingWelcomeDesc: 'Discover free games from Steam, Epic, GOG, Android and more',
     onboardingPlatform: 'Switch platforms',
     onboardingPlatformDesc: 'Use the bottom bar to switch between PC and Android',
@@ -627,7 +627,7 @@ export const translations = {
 
     shareGameLink: 'Share link',
     gameUrlCopied: 'Game link copied',
-    inviteText: 'Join FreeGameHub and discover free games!',
+    inviteText: 'Join GameRadar and discover new games!',
   },
 };
 

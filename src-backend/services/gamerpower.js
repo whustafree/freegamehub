@@ -41,7 +41,7 @@ class GamerPowerService {
       const response = await axios.get(`${this.baseUrl}?platform=${platform}`, {
         timeout: this.timeout,
         headers: {
-          'User-Agent': 'FreeGameHub/2.0'
+          'User-Agent': 'GameRadar/2.1'
         }
       });
 

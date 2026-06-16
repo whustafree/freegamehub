@@ -57,7 +57,7 @@ class MMOBombService {
     try {
       const response = await axios.get(`${this.baseUrl}/giveaways`, {
         timeout: this.timeout,
-        headers: { 'User-Agent': 'FreeGameHub/2.0' },
+        headers: { 'User-Agent': 'GameRadar/2.1' },
       });
 
       if (!Array.isArray(response.data)) return [];
@@ -83,7 +83,7 @@ class MMOBombService {
     try {
       const response = await axios.get(`${this.baseUrl}/games?platform=pc`, {
         timeout: this.timeout,
-        headers: { 'User-Agent': 'FreeGameHub/2.0' },
+        headers: { 'User-Agent': 'GameRadar/2.1' },
       });
 
       if (!Array.isArray(response.data)) return [];

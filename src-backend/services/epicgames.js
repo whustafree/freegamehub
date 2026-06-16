@@ -20,7 +20,7 @@ class EpicGamesService {
           allowCountries: 'CL'
         },
         headers: {
-          'User-Agent': 'FreeGameHub/2.0'
+          'User-Agent': 'GameRadar/2.1'
         }
       });
 

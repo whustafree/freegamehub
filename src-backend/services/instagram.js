@@ -224,7 +224,7 @@ class InstagramService {
     lines.push('');
 
     // Hashtags
-    lines.push('#FreeGames #JuegosGratis #FreeGameHub');
+    lines.push('#GameRadar #Juegos #DescubreJuegos');
     if (game.platform) {
       const platformTag = this.platformToHashtag(game.platform);
       if (platformTag) lines.push(platformTag);
@@ -238,7 +238,7 @@ class InstagramService {
     // Instagram tiene un límite de 2200 caracteres para captions
     if (caption.length > 2200) {
       // Truncar inteligentemente
-      return caption.substring(0, 2150) + '...\n#FreeGames #FreeGameHub';
+      return caption.substring(0, 2150) + '...\n#GameRadar #JuegosGratis';
     }
 
     return caption;
@@ -291,18 +291,18 @@ class InstagramService {
 
     try {
       const caption = [
-        '🤖 ¡FreeGameHub está en línea!',
+        '🤖 ¡GameRadar está en línea!',
         '',
         'Este es un mensaje de prueba para verificar',
         'la integración con Instagram.',
         '',
         '🎮 Listo para publicar juegos gratis automáticamente.',
         '',
-        '#FreeGameHub #Test #JuegosGratis'
+        '#GameRadar #Test #JuegosGratis'
       ].join('\n');
 
       // Usar un placeholder HTTPS estable — placehold.co es más confiable que via.placeholder.com
-      const testImageUrl = 'https://placehold.co/1080x1080/1a1a2e/ef4444?text=FreeGameHub';
+      const testImageUrl = 'https://placehold.co/1080x1080/1a1a2e/ef4444?text=GameRadar';
 
       const container = await this.createMediaContainer(testImageUrl, caption);
       if (!container?.id) return false;

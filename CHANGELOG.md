@@ -1,4 +1,4 @@
-# Changelog - FreeGameHub
+# Changelog - GameRadar
 
 ## v2.0.0 (2026-01-30)
 

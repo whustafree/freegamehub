@@ -1,7 +1,7 @@
 {
-  "name": "FreeGameHub - Juegos Gratis",
-  "short_name": "FreeGameHub",
-  "description": "Descubre los mejores juegos gratuitos para PC, Android y más. Actualizado diariamente.",
+  "name": "GameRadar - Descubre Juegos",
+  "short_name": "GameRadar",
+  "description": "Descubre los mejores juegos de todas las plataformas. Actualizado diariamente.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0f1a",

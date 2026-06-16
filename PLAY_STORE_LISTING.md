@@ -1,20 +1,20 @@
-# Google Play Store Listing - FreeGameHub
+# Google Play Store Listing - GameRadar
 
 ## Información básica
 
-**Nombre de la app:** FreeGameHub
+**Nombre de la app:** GameRadar
 **Idioma:** Español
 **Breve descripción (80 caracteres máx.):**
-Busca ofertas de juegos gratis de Epic Games, Steam y GOG.
+Descubre juegos de Epic Games, Steam, GOG, Android y más plataformas.
 
 **Descripción completa:**
 ---
-FreeGameHub es una aplicación que reúne en un solo lugar los juegos gratuitos disponibles en Epic Games, Steam, GOG y otras plataformas.
+GameRadar es una aplicación que reúne en un solo lugar los juegos disponibles en Epic Games, Steam, GOG, Android y otras plataformas.
 
 **Características:**
 
-• **Juegos gratis actualizados:** Consulta los juegos gratuitos disponibles de múltiples fuentes.
-• **Notificaciones:** Recibe avisos cuando un nuevo juego gratis está disponible.
+• **Juegos actualizados:** Consulta los juegos disponibles de múltiples fuentes.
+• **Notificaciones:** Recibe avisos cuando un nuevo juego está disponible.
 • **Filtros:** Busca por plataforma, género y fecha.
 • **Modo oscuro:** Interfaz con tema oscuro.
 • **Multi-idioma:** Disponible en español e inglés.
@@ -22,13 +22,13 @@ FreeGameHub es una aplicación que reúne en un solo lugar los juegos gratuitos 
 
 **Categorías de juegos:**
 - Juegos de diversas plataformas
-- Ofertas por tiempo limitado
-- Próximos lanzamientos gratuitos
+- Novedades y lanzamientos
+- Próximos lanzamientos
 
 ---
 
 **Categoría:** Juegos > Utilidades
-**Etiquetas:** juegos gratis, epic games, ofertas, juegos, videojuegos
+**Etiquetas:** juegos, epic games, steam, gog, android, videojuegos
 
 ## Gráficos requeridos
 
@@ -43,7 +43,7 @@ FreeGameHub es una aplicación que reúne en un solo lugar los juegos gratuitos 
 
 Crear un banner horizontal con:
 - Fondo degradado oscuro
-- Logo de FreeGameHub centrado
+- Logo de GameRadar centrado
 - Capturas representativas del contenido de la aplicación
 
 ## Política de Privacidad
@@ -64,6 +64,6 @@ Datos que la app recopila:
 
 ## URLs necesarias
 
-- **Página web:** https://freegamehub.onrender.com
+- **Página web:** https://gameradar.onrender.com
 - **Política de privacidad:** [URL de tu política de privacidad]
 - **Correo de contacto:** [tu-email@ejemplo.com]

@@ -50,15 +50,15 @@ jobs:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/freegamehub-release.keystore 2>/dev/null && echo "Keystore created" || echo "WARNING: Invalid base64"
+            echo "$KEYSTORE_BASE64" | base64 -d > android/gameradar-release.keystore 2>/dev/null && echo "Keystore created" || echo "WARNING: Invalid base64"
           fi
 
       - name: Build Android (AAB + APKs)
         run: |
           cd android
           chmod +x gradlew
-          if [ -f freegamehub-release.keystore ]; then
-            export KEYSTORE_PATH="$GITHUB_WORKSPACE/android/freegamehub-release.keystore"
+          if [ -f gameradar-release.keystore ]; then
+            export KEYSTORE_PATH="$GITHUB_WORKSPACE/android/gameradar-release.keystore"
             export KEYSTORE_PASSWORD="${{ secrets.KEYSTORE_PASSWORD }}"
             export KEY_ALIAS="${{ secrets.KEY_ALIAS }}"
             export KEY_PASSWORD="${{ secrets.KEY_PASSWORD }}"
@@ -70,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: android/app/build/outputs/bundle/release/*.aab
-          name: FreeGameHub-AAB
+          name: GameRadar-AAB
           if-no-files-found: warn
 
       - name: Upload Release APK
@@ -78,7 +78,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: android/app/build/outputs/apk/release/*.apk
-          name: FreeGameHub-Release
+          name: GameRadar-Release
           if-no-files-found: warn
 
       - name: Upload Debug APK
@@ -86,5 +86,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           path: android/app/build/outputs/apk/debug/*.apk
-          name: FreeGameHub-Debug
+          name: GameRadar-Debug
           if-no-files-found: warn

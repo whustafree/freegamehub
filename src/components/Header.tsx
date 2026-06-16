@@ -44,7 +44,7 @@ export default function Header({
       <div className="header-inner">
         <div className="header-brand">
           <div className="header-brand-icon">🎮</div>
-          <span className="header-brand-text">FreeGameHub</span>
+          <span className="header-brand-text">GameRadar</span>
         </div>
 
         <div className="header-search">

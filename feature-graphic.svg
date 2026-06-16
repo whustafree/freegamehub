@@ -19,13 +19,13 @@
   <circle cx="512" cy="160" r="60" fill="url(#accent)" opacity="0.06" />
   
   <!-- App name -->
-  <text x="512" y="150" font-family="Arial,sans-serif" font-size="72" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">FreeGameHub</text>
+  <text x="512" y="150" font-family="Arial,sans-serif" font-size="72" font-weight="bold" fill="#FFFFFF" text-anchor="middle" letter-spacing="4">GameRadar</text>
   
   <!-- Subtle separator line -->
   <rect x="350" y="172" width="324" height="2" rx="1" fill="url(#accent)" opacity="0.5" />
   
   <!-- Description -->
-  <text x="512" y="220" font-family="Arial,sans-serif" font-size="18" fill="#8899aa" text-anchor="middle" letter-spacing="2">Juegos gratuitos de múltiples plataformas</text>
+  <text x="512" y="220" font-family="Arial,sans-serif" font-size="18" fill="#8899aa" text-anchor="middle" letter-spacing="2">Descubre juegos de todas las plataformas</text>
   
   <!-- Platform icons -->
   <rect x="310" y="255" width="120" height="36" rx="18" fill="#1a2332" stroke="#2a3a4f" stroke-width="1" />
@@ -57,5 +57,5 @@
   <rect x="724" y="398" width="60" height="14" rx="4" fill="#00E676" opacity="0.3" />
   
   <!-- Footer -->
-  <text x="512" y="478" font-family="Arial,sans-serif" font-size="12" fill="#444" text-anchor="middle">freegamehub.onrender.com</text>
+  <text x="512" y="478" font-family="Arial,sans-serif" font-size="12" fill="#444" text-anchor="middle">gameradar.onrender.com</text>
 </svg>

@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">FreeGameHub</string>
-    <string name="title_activity_main">FreeGameHub</string>
-    <string name="package_name">com.freegamehub.app</string>
-    <string name="custom_url_scheme">com.freegamehub.app</string>
+    <string name="app_name">GameRadar</string>
+    <string name="title_activity_main">GameRadar</string>
+    <string name="package_name">com.gameradar.app</string>
+    <string name="custom_url_scheme">com.gameradar.app</string>
 </resources>

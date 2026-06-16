@@ -1,5 +1,5 @@
 /**
- * FreeGameHub v2.0 - Vercel Serverless Entry Point
+ * GameRadar v2.1 - Vercel Serverless Entry Point
  * 
  * Este archivo adapta la app Express para funcionar como 
  * función serverless en Vercel.

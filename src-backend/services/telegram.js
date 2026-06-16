@@ -40,7 +40,7 @@ class TelegramService {
       message += `<i>...y ${newGames.length - limit} juegos más</i>\n`;
     }
     
-    message += `\n👀 <a href="${config.app.url}">Ver Todos en FreeGameHub</a>`;
+    message += `\n👀 <a href="${config.app.url}">Ver Todos en GameRadar</a>`;
 
     try {
       await axios.post(`https://api.telegram.org/bot${this.token}/sendMessage`, {
@@ -66,7 +66,7 @@ class TelegramService {
     try {
       await axios.post(`https://api.telegram.org/bot${this.token}/sendMessage`, {
         chat_id: this.chatId,
-        text: '🤖 <b>FreeGameHub</b> está en línea!',
+        text: '🤖 <b>GameRadar</b> está en línea!',
         parse_mode: 'HTML'
       });
       logger.success('Mensaje de prueba enviado');

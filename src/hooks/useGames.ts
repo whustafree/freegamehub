@@ -111,7 +111,7 @@ export function useGames() {
     setError(null);
     try {
       const isNative = Capacitor.isNativePlatform();
-      const apiBase = isNative ? 'https://freegamehub.vercel.app' : '';
+      const apiBase = isNative ? 'https://gameradar.vercel.app' : '';
       const res = await fetch(`${apiBase}/api/free-games`);
       if (!res.ok) throw new Error('Error en la API');
       const data: GamesResponse = await res.json();

@@ -17,7 +17,7 @@ class RedditService {
       const response = await axios.post('https://www.reddit.com/api/v1/access_token',
         'grant_type=client_credentials',
         { timeout: this.timeout, auth: { username: this.clientId, password: this.clientSecret },
-          headers: { 'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)', 'Content-Type': 'application/x-www-form-urlencoded' } }
+          headers: { 'User-Agent': 'GameRadar/2.1 (by /u/whustafree)', 'Content-Type': 'application/x-www-form-urlencoded' } }
       );
       this.accessToken = response.data.access_token;
       this.tokenExpiresAt = Date.now() + (response.data.expires_in - 300) * 1000;
@@ -28,7 +28,7 @@ class RedditService {
   }
 
   async fetchReddit(url) {
-    const headers = { 'User-Agent': 'FreeGameHub/2.0 (by /u/whustafree)' };
+    const headers = { 'User-Agent': 'GameRadar/2.1 (by /u/whustafree)' };
     const token = await this.getAccessToken();
     if (token) headers['Authorization'] = `bearer ${token}`;
     return axios.get(url, { timeout: this.timeout, headers });

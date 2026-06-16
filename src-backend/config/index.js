@@ -17,7 +17,7 @@ module.exports = {
   },
   
   app: {
-    url: process.env.APP_URL || 'https://freegamehub.onrender.com',
+    url: process.env.APP_URL || 'https://gameradar.onrender.com',
     updateIntervalHours: parseInt(process.env.UPDATE_INTERVAL_HOURS) || 4
   },
   

@@ -45,7 +45,7 @@ export default function StatsPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `freegamehub-stats-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `gameradar-stats-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(t('dataExported', language), 'success');
@@ -54,7 +54,7 @@ export default function StatsPanel({
 
   const handleExportText = () => {
     const lines = [
-      `FreeGameHub Stats - ${new Date().toLocaleDateString()}`,
+      `GameRadar Stats - ${new Date().toLocaleDateString()}`,
       `────────────────────────`,
       `${t('totalClaimed', language)}: ${userStats.totalClaimed}`,
       `${t('totalSavingsStats', language)}: $${userStats.totalSavings.toFixed(2)}`,
@@ -72,7 +72,7 @@ export default function StatsPanel({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `freegamehub-stats-${new Date().toISOString().slice(0, 10)}.txt`;
+    a.download = `gameradar-stats-${new Date().toISOString().slice(0, 10)}.txt`;
     a.click();
     URL.revokeObjectURL(url);
     showToast(t('dataExported', language), 'success');

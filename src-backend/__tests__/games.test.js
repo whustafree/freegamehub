@@ -1,5 +1,5 @@
 /**
- * Backend Tests — FreeGameHub
+ * Backend Tests — GameRadar
  * Run with: npm run test:backend
  * These tests validate utilities, services and middleware.
  */

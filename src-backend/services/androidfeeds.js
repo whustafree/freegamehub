@@ -37,7 +37,7 @@ class AndroidFeedsService {
         try {
           const response = await axios.get(feed.url, {
             timeout: this.timeout,
-            headers: { 'User-Agent': 'FreeGameHub/2.0' },
+            headers: { 'User-Agent': 'GameRadar/2.1' },
           });
 
           if (!response.data) continue;

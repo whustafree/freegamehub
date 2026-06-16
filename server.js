@@ -52,7 +52,7 @@ if (!process.env.VERCEL) {
 
 // Iniciar servidor
 app.listen(config.port, () => {
-  logger.success(`🚀 FreeGameHub v2.0 iniciado en puerto ${config.port}`);
+  logger.success(`🚀 GameRadar v2.1 iniciado en puerto ${config.port}`);
   logger.info(`Modo: ${config.nodeEnv}`);
   logger.info(`Telegram: ${config.telegram.enabled ? '✅ Activado' : '❌ Desactivado'}`);
   logger.info(`Actualización automática: cada ${config.app.updateIntervalHours} horas`);

@@ -1,4 +1,4 @@
-# 🎮 FreeGameHub v2.1
+# 🎮 GameRadar v2.1
 
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev/)
@@ -6,9 +6,9 @@
 [![Vite](https://img.shields.io/badge/Vite-6-646CFF.svg)](https://vitejs.dev/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> **Plataforma PWA para descubrir juegos gratuitos** — React + TypeScript + Vite frontend, Express backend, multiplataforma con Capacitor.
+> **Plataforma PWA para descubrir juegos** — React + TypeScript + Vite frontend, Express backend, multiplataforma con Capacitor.
 
-![FreeGameHub Preview](https://via.placeholder.com/800x400?text=FreeGameHub+Preview)
+![GameRadar Preview](https://via.placeholder.com/800x400?text=GameRadar+Preview)
 
 ## ✨ Características
 
@@ -73,8 +73,8 @@
 
 ```bash
 # Clonar
-git clone https://github.com/whustafree/freegamehub.git
-cd freegamehub
+git clone https://github.com/whustafree/gameradar.git
+cd gameradar
 
 # Instalar dependencias
 npm install
@@ -91,7 +91,7 @@ npm start      # Backend (Express) en :3000
 ## 📁 Estructura del Proyecto
 
 ```
-freegamehub/
+gameradar/
 ├── src/                    # Frontend React + TypeScript
 │   ├── components/         # 14 componentes (GameCard, GameDetail, etc.)
 │   ├── hooks/              # Custom hooks (useGames, useFilters)
