@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { Mode, ViewMode, Language, StoreFilter } from '../types';
 import { t } from '../i18n';
 import { vibrate } from '../utils/format';
@@ -116,8 +117,8 @@ export default function BottomNav({
             )}
           </button>
 
-          {/* Platform dropdown when PC is selected */}
-          {mode === 'pc' && showPlatformPicker && currentMode === 'pc' && (
+          {/* Platform dropdown when PC is selected — rendered via Portal to body */}
+          {mode === 'pc' && showPlatformPicker && currentMode === 'pc' && createPortal(
             <>
               <div className="platform-dropdown-backdrop" onClick={() => setShowPlatformPicker(false)} />
               <div className="platform-dropdown">
@@ -136,7 +137,8 @@ export default function BottomNav({
                   </button>
                 ))}
               </div>
-            </>
+            </>,
+            document.body
           )}
         </div>
       ))}

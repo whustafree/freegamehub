@@ -6,6 +6,28 @@ import { t } from '../i18n';
 import { useSwipeGesture, createRipple } from '../hooks/useSwipeGesture';
 import { showToast } from './Toast';
 
+// --- Web Share API ---
+async function shareGame(game: Game, language: Language) {
+  const shareData = {
+    title: game.title,
+    text: language === 'es'
+      ? `🎮 ¡${game.title} gratis! Ahorra $${game.worth || '??'} en ${game.platformName || game.platform}`
+      : `🎮 ${game.title} is free! Save $${game.worth || '??'} on ${game.platformName || game.platform}`,
+    url: game.url,
+  };
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+    } else {
+      await navigator.clipboard.writeText(
+        `${shareData.text}\n${game.url}`
+      );
+      showToast(language === 'es' ? '📋 Enlace copiado al portapapeles' : '📋 Link copied to clipboard', 'success');
+    }
+  } catch { /* user cancelled */ }
+  vibrate(10);
+}
+
 interface GameCardProps {
   game: Game;
   index: number;
@@ -242,6 +264,9 @@ export default function GameCard({
             </button>
             <button className="nav-overflow-item" onClick={e => { e.stopPropagation(); window.open(game.url, '_blank'); setContextMenu(null); }}>
               🎮 {t('reclaim', language)}
+            </button>
+            <button className="nav-overflow-item" onClick={e => { e.stopPropagation(); shareGame(game, language); setContextMenu(null); }}>
+              📤 {t('shareTitle', language)}
             </button>
             <button className="nav-overflow-item" onClick={e => { e.stopPropagation(); setContextMenu(null); if (onToggleMultiSelectGame) onToggleMultiSelectGame(game.id); }}>
               ☑️ {t('multiSelect', language)}

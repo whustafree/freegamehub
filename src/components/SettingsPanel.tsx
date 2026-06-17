@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Language, UserCollection, UserStats, ActivityEntry, Achievement, Theme, AccentColor } from '../types';
 import { t } from '../i18n';
 import { urlBase64ToUint8Array } from '../utils/format';
@@ -99,6 +99,21 @@ export default function SettingsPanel({
     if (Notification.permission === 'granted') return 'subscribed';
     return 'unsubscribed';
   });
+  const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
+
+  // Fetch VAPID public key from backend
+  useEffect(() => {
+    if (pushStatus === 'loading' || pushStatus === 'unsupported') return;
+    fetch('/api/vapid-public-key')
+      .then(r => r.json())
+      .then(data => {
+        if (data.publicKey) setVapidPublicKey(data.publicKey);
+      })
+      .catch(() => {
+        // Fallback: use hardcoded key as backup
+        setVapidPublicKey('BEl62iUYgUy0g0N1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0');
+      });
+  }, [pushStatus]);
 
   const unlockedCount = achievements.filter(a => a.unlockedAt).length;
   const totalCount = achievements.length;
@@ -347,16 +362,22 @@ export default function SettingsPanel({
                   showToast(language === 'es' ? '🔔 Notificaciones activadas' : '🔔 Notifications enabled', 'success');
                   // Registrar suscripción en el backend
                   try {
+                    if (!vapidPublicKey) {
+                      showToast(language === 'es' ? 'Clave VAPID no disponible' : 'VAPID key not available', 'error');
+                      setPushStatus('unsubscribed');
+                      return;
+                    }
                     const sw = await navigator.serviceWorker.ready;
                     const sub = await sw.pushManager.subscribe({
                       userVisibleOnly: true,
-                      applicationServerKey: urlBase64ToUint8Array('BEl62iUYgUy0g0N1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0'),
+                      applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
                     });
                     await fetch('/api/subscribe-push', {
                       method: 'POST',
                       headers: { 'Content-Type': 'application/json' },
                       body: JSON.stringify({ subscription: sub.toJSON(), platforms: ['pc', 'android'] }),
                     });
+                    showToast(language === 'es' ? '✅ Suscripción registrada' : '✅ Subscription registered', 'success');
                   } catch (e) {
                     // Push subscription failed silently - notification permission still granted
                   }
