@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Language, UserCollection, UserStats, ActivityEntry, Achievement } from '../types';
 import { t } from '../i18n';
+import { urlBase64ToUint8Array } from '../utils/format';
 import { showToast } from './Toast';
 
 interface SettingsPanelProps {
@@ -73,6 +74,11 @@ export default function SettingsPanel({
   const [newColName, setNewColName] = useState('');
   const [newColDesc, setNewColDesc] = useState('');
   const [newColEmoji, setNewColEmoji] = useState('📁');
+  const [pushStatus, setPushStatus] = useState<'unsupported' | 'unsubscribed' | 'subscribed' | 'loading'>(() => {
+    if (!('Notification' in window)) return 'unsupported';
+    if (Notification.permission === 'granted') return 'subscribed';
+    return 'unsubscribed';
+  });
 
   const unlockedCount = achievements.filter(a => a.unlockedAt).length;
   const totalCount = achievements.length;
@@ -243,6 +249,65 @@ export default function SettingsPanel({
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* 🔔 Notificaciones Push */}
+        <div style={{ marginTop: '0.5rem', padding: '0.5rem', background: 'rgba(255,255,255,0.02)', borderRadius: 'var(--radius)', border: '0.5px solid var(--card-border)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.3rem' }}>
+            <span style={{ fontSize: '0.9rem' }}>🔔</span>
+            <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+              {language === 'es' ? 'Notificaciones de juegos nuevos' : 'New game notifications'}
+            </span>
+          </div>
+          <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem', lineHeight: 1.4 }}>
+            {language === 'es'
+              ? 'Recibe una alerta cuando haya nuevos juegos gratis disponibles en tu plataforma favorita.'
+              : 'Get alerted when new free games are available on your favorite platform.'}
+          </div>
+          {pushStatus === 'unsupported' && (
+            <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              {language === 'es' ? 'Las notificaciones no están disponibles en este navegador.' : 'Notifications not available in this browser.'}
+            </div>
+          )}              {pushStatus === 'unsubscribed' && (
+            <button className="filter-btn primary" onClick={async () => {
+              setPushStatus('loading');
+              try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                  setPushStatus('subscribed');
+                  showToast(language === 'es' ? '🔔 Notificaciones activadas' : '🔔 Notifications enabled', 'success');
+                  // Registrar suscripción en el backend
+                  try {
+                    const sw = await navigator.serviceWorker.ready;
+                    const sub = await sw.pushManager.subscribe({
+                      userVisibleOnly: true,
+                      applicationServerKey: urlBase64ToUint8Array('BEl62iUYgUy0g0N1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0'),
+                    });
+                    await fetch('/api/subscribe-push', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ subscription: sub.toJSON(), platforms: ['pc', 'android'] }),
+                    });
+                  } catch (e) {
+                    // Push subscription failed silently - notification permission still granted
+                  }
+                } else {
+                  setPushStatus('unsubscribed');
+                  showToast(language === 'es' ? 'Notificaciones denegadas' : 'Notifications denied', 'info');
+                }
+              } catch {
+                setPushStatus('unsubscribed');
+              }
+            }} style={{ width: '100%', padding: '0.35rem', fontSize: '0.7rem' }}>
+              🔔 {language === 'es' ? 'Activar notificaciones' : 'Enable notifications'}
+            </button>
+          )}
+          {pushStatus === 'subscribed' && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.65rem', color: 'var(--green)' }}>
+              <span>✅</span>
+              <span>{language === 'es' ? 'Notificaciones activadas' : 'Notifications enabled'}</span>
             </div>
           )}
         </div>

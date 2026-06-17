@@ -13,6 +13,7 @@ import GameGrid from './components/GameGrid';
 import SkeletonGrid from './components/SkeletonGrid';
 import EmptyState from './components/EmptyState';
 import Footer from './components/Footer';
+import { motion } from 'framer-motion';
 import ToastContainer, { showToast } from './components/Toast';
 import BottomNav from './components/BottomNav';
 import GameCard from './components/GameCard';
@@ -657,13 +658,51 @@ export default function App() {
 
         {isLoaded && (
           <>
-            {/* New Games Notification Banner */}
+            {/* 🆕 Widget de juegos nuevos - Banner mejorado */}
             {showNewGamesBanner && newGameIds.length > 0 && (
-              <div className="notification-banner" onClick={() => { setShowNewGamesBanner(false); handleResetFilters(); }}>
-                <span>🆕</span>
-                <span>{newGameIds.length} {language === 'es' ? 'nuevos juegos disponibles' : 'new games available'}!</span>
-                <button className="notification-banner-close" onClick={e => { e.stopPropagation(); setShowNewGamesBanner(false); }}>✕</button>
-              </div>
+              <motion.div 
+                className="notification-banner" 
+                onClick={() => { setShowNewGamesBanner(false); }}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                style={{ 
+                  background: 'linear-gradient(135deg, var(--accent), var(--accent-dark))',
+                  padding: '0.55rem 0.75rem',
+                  borderRadius: 'var(--radius-lg)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  marginBottom: '0.75rem',
+                  boxShadow: '0 4px 16px var(--accent-glow)',
+                }}
+              >
+                <span style={{ fontSize: '1.2rem', animation: 'pulse 1.5s infinite' }}>🆕</span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: '0.82rem' }}>
+                    {newGameIds.length} {language === 'es' ? 'nuevos juegos' : 'new games'}!
+                  </div>
+                  <div style={{ fontSize: '0.62rem', opacity: 0.85 }}>
+                    {language === 'es' ? 'Toca para verlos' : 'Tap to view them'}
+                  </div>
+                </div>
+                <div style={{
+                  background: 'rgba(255,255,255,0.2)',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                }}>
+                  {newGameIds.length}
+                </div>
+                <button className="notification-banner-close" onClick={e => { e.stopPropagation(); setShowNewGamesBanner(false); }} style={{ background: 'rgba(255,255,255,0.15)' }}>✕</button>
+              </motion.div>
             )}
 
             {/* Surprise Me Button */}

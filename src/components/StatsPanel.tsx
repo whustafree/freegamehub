@@ -186,15 +186,80 @@ export default function StatsPanel({
             </>
           )}
 
-          {/* Simple bar chart for savings (using CSS bars for a chart-like display) */}
+          {/* 📊 Dashboard de ahorros — Gráfico de barras mejorado */}
           {userStats.totalSavings > 0 && (
             <>
               <span className="chart-title" style={{ marginTop: '0.75rem' }}>
-                💰 {t('totalSavingsStats', language)} {userStats.totalClaimed > 0 ? `(${language === 'es' ? 'promedio' : 'avg'}: $${(userStats.totalSavings / userStats.totalClaimed).toFixed(0)}/juego)` : ''}
+                💰 {t('totalSavingsStats', language)}
+                <span style={{ fontSize: '0.62rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.3rem' }}>
+                  {language === 'es' ? 'promedio' : 'avg'} ${(userStats.totalSavings / Math.max(userStats.totalClaimed, 1)).toFixed(0)}/juego
+                </span>
               </span>
-              <div className="chart-container" style={{ height: '50px', display: 'flex', alignItems: 'flex-end', gap: '0.3rem' }}>
-                {/* Simple representation of savings milestones */}
-                {[100, 500, 1000].map(milestone => {
+              
+              {/* Savings goal progress */}
+              <div style={{ marginBottom: '0.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.2rem' }}>
+                  <span>${userStats.totalSavings.toFixed(0)} {language === 'es' ? 'ahorrados' : 'saved'}</span>
+                  <span>{language === 'es' ? 'Meta' : 'Goal'}: $1,000</span>
+                </div>
+                <div style={{ height: '10px', background: 'var(--card-border)', borderRadius: '5px', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    width: `${Math.min((userStats.totalSavings / 1000) * 100, 100)}%`,
+                    background: 'linear-gradient(90deg, var(--accent), var(--gold))',
+                    borderRadius: '5px',
+                    transition: 'width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    boxShadow: '0 0 8px var(--accent-glow)',
+                  }} />
+                </div>
+              </div>
+
+              {/* Savings by platform */}
+              {Object.keys(userStats.gamesPerPlatform).length > 0 && (
+                <>
+                  <span className="chart-title" style={{ fontSize: '0.5rem', marginTop: '0.5rem' }}>
+                    📱 {language === 'es' ? 'Ahorros por plataforma' : 'Savings by platform'}
+                  </span>
+                  <div className="chart-container" style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    {Object.entries(userStats.gamesPerPlatform)
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 5)
+                      .map(([platform, count]) => {
+                        const maxCount = Math.max(...Object.values(userStats.gamesPerPlatform), 1);
+                        const pct = (count / maxCount) * 100;
+                        return (
+                          <div key={platform} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.65rem' }}>
+                            <span style={{ width: '60px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0, color: 'var(--text-secondary)' }}>
+                              {platform}
+                            </span>
+                            <div style={{
+                              flex: '1',
+                              height: '12px',
+                              background: 'var(--card-border)',
+                              borderRadius: '6px',
+                              overflow: 'hidden',
+                            }}>
+                              <div style={{
+                                height: '100%',
+                                width: `${pct}%`,
+                                background: 'linear-gradient(90deg, var(--accent), var(--accent-light))',
+                                borderRadius: '6px',
+                                transition: 'width 0.5s var(--ease)',
+                              }} />
+                            </div>
+                            <span style={{ flexShrink: 0, color: 'var(--text-muted)', fontSize: '0.55rem', minWidth: '24px', textAlign: 'right' }}>
+                              {count}
+                            </span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </>
+              )}
+
+              {/* Simple bar chart for savings (using CSS bars for a chart-like display) */}
+              <div className="chart-container" style={{ height: '50px', display: 'flex', alignItems: 'flex-end', gap: '0.3rem', marginTop: '0.35rem' }}>
+                {[100, 500, 1000, 2500, 5000].map(milestone => {
                   const achieved = userStats.totalSavings >= milestone;
                   const pct = Math.min((userStats.totalSavings / milestone) * 100, 100);
                   return (
@@ -210,7 +275,7 @@ export default function StatsPanel({
                         transition: 'height 0.5s var(--ease)',
                         boxShadow: achieved ? '0 0 6px var(--accent-glow)' : 'none',
                       }} />
-                      <span style={{ fontSize: '0.55rem', color: achieved ? 'var(--gold)' : 'var(--text-muted)' }}>
+                      <span style={{ fontSize: '0.5rem', color: achieved ? 'var(--gold)' : 'var(--text-muted)' }}>
                         ${milestone}
                       </span>
                     </div>

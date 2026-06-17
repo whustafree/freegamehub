@@ -123,6 +123,116 @@ router.post('/test-instagram', async (req, res) => {
   }
 });
 
+// GET /api/docs — API pública documentada
+router.get('/docs', (req, res) => {
+  res.json({
+    success: true,
+    api: {
+      name: 'GameRadar API',
+      version: '2.1.0',
+      description: 'API pública de GameRadar - Descubre juegos gratis de Steam, Epic, GOG, Android y más',
+      documentation: 'https://github.com/whustafree/freegamehub',
+      endpoints: [
+        {
+          path: '/api/free-games',
+          method: 'GET',
+          description: 'Obtener todos los juegos gratis disponibles',
+          params: [],
+          response: {
+            success: 'boolean',
+            games: 'Game[]',
+            count: 'number',
+            lastUpdated: 'string (ISO 8601)'
+          },
+          example: 'curl https://gameradar-iota.vercel.app/api/free-games'
+        },
+        {
+          path: '/api/free-games?platform=android',
+          method: 'GET',
+          description: 'Filtrar juegos por plataforma (android o pc)',
+          params: [{ name: 'platform', type: 'string', options: ['android', 'pc'] }],
+          example: 'curl https://gameradar-iota.vercel.app/api/free-games?platform=android'
+        },
+        {
+          path: '/api/stats',
+          method: 'GET',
+          description: 'Estadísticas del servidor',
+          response: {
+            success: 'boolean',
+            currentGames: 'number',
+            totalScans: 'number',
+            alertsSent: 'number',
+            uptimeFormatted: 'string'
+          },
+          example: 'curl https://gameradar-iota.vercel.app/api/stats'
+        },
+        {
+          path: '/api/health',
+          method: 'GET',
+          description: 'Health check del servidor',
+          example: 'curl https://gameradar-iota.vercel.app/api/health'
+        },
+        {
+          path: '/api/docs',
+          method: 'GET',
+          description: 'Esta documentación',
+        },
+      ],
+      gameSchema: {
+        id: 'string (único)',
+        title: 'string',
+        description: 'string',
+        worth: 'string (precio original o null)',
+        image: 'string (URL)',
+        url: 'string (URL de la tienda)',
+        platform: 'string (android | steam | epic | gog | etc)',
+        platformName: 'string',
+        category: 'string (android | pc)',
+        endDate: 'string (ISO 8601 o null)',
+        source: 'string (gamerpower | fdroid | reddit | epicgames | etc)',
+        genre: 'string',
+        rating: 'number (opcional)',
+        installs: 'string (opcional)',
+        publisher: 'string (opcional)',
+        license: 'string (opcional - solo F-Droid)',
+      },
+      rateLimiting: '60 requests per minute por IP',
+      caching: 'Los datos se actualizan cada 4 horas via cron job',
+    },
+    generatedAt: new Date().toISOString(),
+  });
+});
+
+// POST /api/subscribe-push — Suscripción a notificaciones push
+let pushSubscriptions = [];
+
+router.post('/subscribe-push', (req, res) => {
+  try {
+    const { subscription, platforms } = req.body;
+    if (!subscription || !subscription.endpoint) {
+      return res.status(400).json({ success: false, error: 'Suscripción inválida' });
+    }
+    
+    // Guardar suscripción con plataforma
+    const existing = pushSubscriptions.findIndex(s => s.endpoint === subscription.endpoint);
+    if (existing >= 0) {
+      pushSubscriptions[existing] = { ...subscription, platforms: platforms || ['pc', 'android'], updatedAt: new Date().toISOString() };
+    } else {
+      pushSubscriptions.push({ ...subscription, platforms: platforms || ['pc', 'android'], createdAt: new Date().toISOString() });
+    }
+    
+    // Mantener solo las últimas 100 suscripciones
+    if (pushSubscriptions.length > 100) {
+      pushSubscriptions = pushSubscriptions.slice(-100);
+    }
+    
+    res.json({ success: true, message: 'Suscripción registrada' });
+  } catch (err) {
+    logger.error('Error en /api/subscribe-push', err);
+    res.status(500).json({ success: false, error: 'Error registrando suscripción' });
+  }
+});
+
 // GET /api/health
 router.get('/health', (req, res) => {
   res.json({
