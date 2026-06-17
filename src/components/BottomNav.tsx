@@ -117,26 +117,55 @@ export default function BottomNav({
             )}
           </button>
 
-          {/* Platform dropdown when PC is selected — rendered via Portal to body with flexbox centering */}
+          {/* Platform dropdown via Portal - centering wrapper + fade only animation */}
           {mode === 'pc' && showPlatformPicker && currentMode === 'pc' && createPortal(
             <>
               <div className="platform-dropdown-backdrop" onClick={() => setShowPlatformPicker(false)} />
-              <div className="platform-dropdown-wrap">
-                <div className="platform-dropdown">
-                  <div className="platform-dropdown-header">
+              {/* Outer wrapper: handles centering via transform - NO animation that overrides transform */}
+              <div style={{
+                position: 'fixed',
+                left: '50%',
+                bottom: 'calc(var(--nav-h) + 0.75rem)',
+                transform: 'translateX(-50%)',
+                zIndex: 250,
+                pointerEvents: 'none',
+              }}>
+                {/* Inner div: animated with opacity only - no transform conflict */}
+                <div style={{
+                  minWidth: '200px',
+                  maxWidth: 'calc(100vw - 1.5rem)',
+                  width: 'max-content',
+                  maxHeight: 'min(60vh, calc(100vh - var(--nav-h) - 2rem))',
+                  overflowY: 'auto',
+                  overscrollBehavior: 'contain',
+                  WebkitOverflowScrolling: 'touch',
+                  background: 'var(--glass-bg)',
+                  backdropFilter: 'blur(var(--glass-blur))',
+                  border: '0.5px solid var(--glass-border)',
+                  borderRadius: 'var(--radius-lg)',
+                  padding: '0.35rem 0.35rem 0.6rem',
+                  boxShadow: 'var(--shadow-xl)',
+                  animation: 'fadeIn 0.2s var(--ease-spring)',
+                  pointerEvents: 'all',
+                }}>
+                  <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.5px', fontWeight: 600, padding: '0.25rem 0.5rem 0.2rem', borderBottom: '0.5px solid var(--card-border)', marginBottom: '0.15rem' }}>
                     {language === 'es' ? 'Seleccionar tienda' : 'Select store'}
                   </div>
-                  {PLATFORM_OPTIONS.map(p => (
-                    <button
-                      key={p.store}
-                      className={`platform-dropdown-item ${activeStore === p.store ? 'active' : ''}`}
-                      onClick={() => handlePlatformSelect(p.store)}
-                    >
-                      <span>{p.icon}</span>
-                      <span>{p.label}</span>
-                      {activeStore === p.store && <span className="platform-dropdown-check">✓</span>}
-                    </button>
-                  ))}
+                  {PLATFORM_OPTIONS.map(p => {
+                    const isActive = activeStore === p.store;
+                    return (
+                      <button
+                        key={p.store}
+                        className="platform-dropdown-item"
+                        data-active={isActive}
+                        onClick={() => handlePlatformSelect(p.store)}
+                      >
+                        <span>{p.icon}</span>
+                        <span>{p.label}</span>
+                        {isActive && <span style={{ marginLeft: 'auto', fontSize: '0.55rem' }}>✓</span>}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </>,
