@@ -1543,13 +1543,23 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 /* === PLATFORM DROPDOWN === */
 .nav-btn-wrapper { position: relative; }
 
-.platform-dropdown {
+/* Flexbox wrapper that centers the dropdown without using transform */
+.platform-dropdown-wrap {
   position: fixed;
-  bottom: calc(var(--nav-h) + .75rem);
-  left: 50%;
-  transform: translateX(-50%);
+  inset: 0;
+  top: 0;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  padding-bottom: calc(var(--nav-h) + 0.75rem);
+  pointer-events: none;
+  z-index: 250;
+}
+
+.platform-dropdown {
   min-width: 200px;
   max-width: calc(100vw - 1.5rem);
+  width: auto;
   max-height: min(60vh, calc(100vh - var(--nav-h) - 2rem));
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -1562,7 +1572,8 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
   padding: .35rem;
   box-shadow: var(--shadow-xl);
   animation: overflowIn .25s var(--ease-spring);
-  z-index: 250;
+  pointer-events: all;
+  margin: 0 auto;
 }
 .platform-dropdown::after {
   content: '';
@@ -1610,14 +1621,20 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 }
 
 @media (min-width: 1024px) {
+  .platform-dropdown-wrap {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: calc(var(--nav-h) + 0.75rem);
+    pointer-events: none;
+  }
   .platform-dropdown {
-    position: absolute;
-    bottom: calc(100% + .5rem);
-    left: 50%;
-    transform: translateX(-50%);
     min-width: 170px;
     max-height: none;
     max-width: none;
+    pointer-events: all;
   }
 }
 
@@ -2709,6 +2726,27 @@ main {
     transition-duration: .01ms !important;
   }
 }
+
+/* === COMPACT MODE === */
+.compact-mode .game-card { min-height: 120px; }
+.compact-mode .game-card .card-img { padding-bottom: 40%; }
+.compact-mode .game-card .card-body { padding: .3rem .4rem .4rem; gap: .15rem; }
+.compact-mode .game-card .card-title { font-size: .7rem; -webkit-line-clamp: 1; }
+.compact-mode .game-card .card-time { font-size: .45rem; padding: .05rem .2rem; }
+.compact-mode .game-card .card-savings-label { font-size: .45rem; }
+.compact-mode .game-card .card-actions .card-action { width: 20px; height: 20px; font-size: .5rem; }
+.compact-mode .game-card .claim-btn { font-size: .5rem; padding: .15rem .35rem; }
+.compact-mode .game-card .card-meta { padding-top: .15rem; }
+.compact-mode .game-card .card-platform-tag { font-size: .42rem; padding: .05rem .25rem; }
+.compact-mode .game-card .card-img-badge { font-size: .4rem; padding: .05rem .2rem; }
+.compact-mode .game-card .card-ps-meta { display: none; }
+.compact-mode .game-card.list-view { min-height: 56px; max-height: 64px; }
+.compact-mode .game-card.list-view .card-img { width: 72px; }
+.compact-mode .game-card.list-view .card-title { font-size: .65rem; }
+.compact-mode .game-card.list-view .card-body { padding: .25rem .4rem; }
+.compact-mode .card-img-badges .card-img-badge.new-badge { font-size: .35rem; padding: .02rem .15rem; }
+.compact-mode .section-scroll .game-card { min-width: 140px; max-width: 160px; }
+.compact-mode .games-grid { gap: .45rem; }
 
 /* Container queries for adaptive cards */
 @container (min-width: 300px) {

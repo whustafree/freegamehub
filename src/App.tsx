@@ -139,8 +139,42 @@ export default function App() {
   }, [language]);
 
   // Theme & Accent Color
-  const [currentTheme, setCurrentTheme] = useState<Theme>(() => loadTheme());
+  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
+    const saved = loadTheme();
+    if (saved === 'dark' || saved === 'light' || saved === 'amoled') return saved;
+    // Si no hay tema guardado, auto-detectar
+    return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  });
   const [accentColor, setAccentColor] = useState<AccentColor>(() => loadAccentColor());
+  const [autoTheme, setAutoTheme] = useState(false);
+
+  // Auto theme: escuchar prefers-color-scheme
+  useEffect(() => {
+    if (!autoTheme) return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent | MediaQueryList) => {
+      const theme: Theme = e.matches ? 'dark' : 'light';
+      setCurrentTheme(theme);
+    };
+    handler(mq);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, [autoTheme]);
+
+  const handleToggleAutoTheme = useCallback(() => {
+    setAutoTheme(p => {
+      if (!p) {
+        // Activar auto: detectar y aplicar
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setCurrentTheme(prefersDark ? 'dark' : 'light');
+        showToast(language === 'es' ? '🌗 Tema automático activado' : '🌗 Auto theme enabled', 'success');
+      } else {
+        showToast(language === 'es' ? 'Tema manual' : 'Manual theme', 'info');
+      }
+      return !p;
+    });
+    vibrate(6);
+  }, [language]);
 
   // Apply theme, accent & seasonal theme to HTML element
   useEffect(() => {
@@ -160,6 +194,12 @@ export default function App() {
   // Persist theme
   useEffect(() => { saveTheme(currentTheme); }, [currentTheme]);
   useEffect(() => { saveAccentColor(accentColor); }, [accentColor]);
+
+  // Compact mode
+  const [compactMode, setCompactMode] = useState(false);
+  useEffect(() => {
+    document.documentElement.classList.toggle('compact-mode', compactMode);
+  }, [compactMode]);
 
   // PWA Install
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -642,6 +682,15 @@ export default function App() {
     vibrate(6);
   }, []);
 
+  // --- Compact mode toggle button in sidebar ---
+  const handleToggleCompact = useCallback(() => {
+    setCompactMode(p => {
+      showToast(p ? (language === 'es' ? 'Modo normal' : 'Normal mode') : (language === 'es' ? '📦 Modo compacto' : '📦 Compact mode'), 'info');
+      return !p;
+    });
+    vibrate(6);
+  }, [language]);
+
   // --- Keyboard shortcuts ---
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -662,6 +711,19 @@ export default function App() {
       if (e.key === 'm' && e.ctrlKey) { e.preventDefault(); handleToggleMultiSelect(); }
       if (e.key === 'k' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); setIsFilterOpen(p => !p); }
       if (e.key === 's' && e.ctrlKey) { e.preventDefault(); setShowSurprise(p => !p); handleSurpriseMe(); }
+      // Alt+1..0 to load filter presets
+      if (e.altKey && /^[0-9]$/.test(e.key)) {
+        const idx = parseInt(e.key) - 1;
+        const presets = loadFilterPresets();
+        if (presets[idx]) {
+          e.preventDefault();
+          handleLoadPreset(presets[idx]);
+        }
+      }
+      // Alt+T to toggle auto theme
+      if (e.altKey && e.key === 't') { e.preventDefault(); handleToggleAutoTheme(); }
+      // Alt+C to toggle compact mode
+      if (e.altKey && e.key === 'c') { e.preventDefault(); handleToggleCompact(); }
       // Arrow keys to navigate cards
       const cards = document.querySelectorAll<HTMLElement>('.game-card[data-id]');
       if ((e.key === 'ArrowLeft' || e.key === 'ArrowRight') && cards.length > 0 && !selectedGame) {
@@ -677,7 +739,7 @@ export default function App() {
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [handleToggleViewMode, handleToggleMultiSelect, handleSurpriseMe, multiSelectActive, selectedGame]);
+  }, [handleToggleViewMode, handleToggleMultiSelect, handleSurpriseMe, handleLoadPreset, handleToggleAutoTheme, handleToggleCompact, multiSelectActive, selectedGame]);
 
   // --- Derived ---
   const isLoaded = !isLoading && !error;
@@ -977,10 +1039,27 @@ export default function App() {
                 <button
                   className="filter-btn secondary"
                   onClick={handleSavePreset}
-                  style={{ width: '100%', marginBottom: '0.5rem', fontSize: '0.62rem', padding: '0.3rem' }}
+                  style={{ width: '100%', marginBottom: '0.3rem', fontSize: '0.62rem', padding: '0.3rem' }}
                 >
-                  💾 {language === 'es' ? 'Guardar filtros actuales' : 'Save current filters'}
+                  💾 {language === 'es' ? 'Guardar filtros' : 'Save filters'}
+                  <span style={{ fontSize: '0.45rem', opacity: 0.5, marginLeft: '0.2rem' }}>Alt+1</span>
                 </button>
+                <div style={{ display: 'flex', gap: '0.25rem', marginBottom: '0.5rem' }}>
+                  <button
+                    className={`filter-btn ${compactMode ? 'primary' : 'secondary'}`}
+                    onClick={handleToggleCompact}
+                    style={{ flex: 1, fontSize: '0.55rem', padding: '0.2rem' }}
+                  >
+                    📦 {language === 'es' ? 'Compacto' : 'Compact'}
+                  </button>
+                  <button
+                    className={`filter-btn ${autoTheme ? 'primary' : 'secondary'}`}
+                    onClick={handleToggleAutoTheme}
+                    style={{ flex: 1, fontSize: '0.55rem', padding: '0.2rem' }}
+                  >
+                    🌗 Auto
+                  </button>
+                </div>
                 <div className="filter-group">
                   <span className="filter-label">{t('sortBy', language)}</span>
                   <div className="filter-chips">
