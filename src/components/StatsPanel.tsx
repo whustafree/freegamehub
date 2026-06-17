@@ -1,8 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useEffect } from 'react';
 import { Language, UserStats, Game, Vote, GameReactions, WishlistStatus, UserCollection, ActivityEntry, Achievement } from '../types';
 import { t } from '../i18n';
 import { parsePrice } from '../utils/format';
 import { showToast } from './Toast';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 interface StatsPanelProps {
   userStats: UserStats;
@@ -90,6 +93,111 @@ export default function StatsPanel({
 
   const unlockedAchievements = achievements.filter(a => a.unlockedAt).length;
   const totalAchievements = achievements.length;
+
+  // Chart.js refs
+  const platformChartRef = useRef<HTMLCanvasElement>(null);
+  const savingsChartRef = useRef<HTMLCanvasElement>(null);
+  const genreChartRef = useRef<HTMLCanvasElement>(null);
+  const chartInstances = useRef<Chart[]>([]);
+
+  // Platform donut chart
+  useEffect(() => {
+    if (!platformChartRef.current || !globalStats.platformCount) return;
+    const ctx = platformChartRef.current.getContext('2d');
+    if (!ctx) return;
+    
+    const entries = Object.entries(globalStats.platformCount)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6);
+    
+    const colors = [
+      'hsl(120, 70%, 40%)', 'hsl(0, 70%, 50%)', 'hsl(215, 70%, 50%)',
+      'hsl(270, 60%, 50%)', 'hsl(40, 90%, 50%)', 'hsl(180, 70%, 40%)',
+    ];
+    
+    const chart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: entries.map(([p]) => p),
+        datasets: [{
+          data: entries.map(([, c]) => c),
+          backgroundColor: colors.slice(0, entries.length),
+          borderColor: 'transparent',
+          borderWidth: 2,
+          hoverOffset: 8,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'bottom',
+            labels: { color: '#8a8a96', font: { size: 10 }, padding: 8 },
+          }
+        },
+        cutout: '65%',
+      }
+    });
+    chartInstances.current.push(chart);
+    return () => { chart.destroy(); };
+  }, [globalStats.platformCount]);
+
+  // Savings bar chart
+  useEffect(() => {
+    if (!savingsChartRef.current) return;
+    const ctx = savingsChartRef.current.getContext('2d');
+    if (!ctx) return;
+    
+    const milestones = [100, 500, 1000, 2500, 5000];
+    const chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: milestones.map(m => `$${m}`),
+        datasets: [{
+          label: '',
+          data: milestones.map(m => Math.min(userStats.totalSavings / m, 1) * 100),
+          backgroundColor: milestones.map(m => userStats.totalSavings >= m
+            ? 'hsl(40, 90%, 50%)' : 'rgba(255,255,255,0.08)'),
+          borderRadius: 4,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        scales: {
+          y: { display: false, max: 100 },
+          x: {
+            ticks: { color: '#505060', font: { size: 9 } },
+            grid: { display: false },
+          }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const milestone = milestones[ctx.dataIndex];
+                return `${userStats.totalSavings >= milestone ? '✅' : '⏳'} $${Math.min(userStats.totalSavings, milestone).toFixed(0)} / $${milestone}`;
+              }
+            }
+          }
+        }
+      }
+    });
+    chartInstances.current.push(chart);
+    return () => { chart.destroy(); };
+  }, [userStats.totalSavings]);
+
+  // Clear charts on unmount
+  useEffect(() => {
+    return () => {
+      chartInstances.current.forEach(c => c.destroy());
+      chartInstances.current = [];
+    };
+  }, []);
 
   return (
     <div className="filter-overlay open" onClick={onClose} style={{ zIndex: 400 }}>
@@ -182,6 +290,30 @@ export default function StatsPanel({
                     </div>
                   );
                 })}
+              </div>
+            </>
+          )}
+
+          {/* 📊 Chart.js - Plataformas (Dona) */}
+          {Object.keys(globalStats.platformCount).length > 0 && (
+            <>
+              <span className="chart-title" style={{ marginTop: '0.5rem' }}>
+                📱 {language === 'es' ? 'Juegos por plataforma' : 'Games by platform'}
+              </span>
+              <div className="chart-js-wrapper">
+                <canvas ref={platformChartRef} style={{ maxHeight: '180px' }} />
+              </div>
+            </>
+          )}
+
+          {/* 📊 Chart.js - Metas de ahorro (Barras) */}
+          {userStats.totalSavings > 0 && (
+            <>
+              <span className="chart-title" style={{ marginTop: '0.5rem' }}>
+                💰 {language === 'es' ? 'Metas de ahorro' : 'Savings goals'}
+              </span>
+              <div className="chart-js-wrapper">
+                <canvas ref={savingsChartRef} style={{ maxHeight: '140px' }} />
               </div>
             </>
           )}

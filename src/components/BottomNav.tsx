@@ -118,22 +118,25 @@ export default function BottomNav({
 
           {/* Platform dropdown when PC is selected */}
           {mode === 'pc' && showPlatformPicker && currentMode === 'pc' && (
-            <div className="platform-dropdown">
-              <div className="platform-dropdown-header">
-                {language === 'es' ? 'Seleccionar tienda' : 'Select store'}
+            <>
+              <div className="platform-dropdown-backdrop" onClick={() => setShowPlatformPicker(false)} />
+              <div className="platform-dropdown">
+                <div className="platform-dropdown-header">
+                  {language === 'es' ? 'Seleccionar tienda' : 'Select store'}
+                </div>
+                {PLATFORM_OPTIONS.map(p => (
+                  <button
+                    key={p.store}
+                    className={`platform-dropdown-item ${activeStore === p.store ? 'active' : ''}`}
+                    onClick={() => handlePlatformSelect(p.store)}
+                  >
+                    <span>{p.icon}</span>
+                    <span>{p.label}</span>
+                    {activeStore === p.store && <span className="platform-dropdown-check">✓</span>}
+                  </button>
+                ))}
               </div>
-              {PLATFORM_OPTIONS.map(p => (
-                <button
-                  key={p.store}
-                  className={`platform-dropdown-item ${activeStore === p.store ? 'active' : ''}`}
-                  onClick={() => handlePlatformSelect(p.store)}
-                >
-                  <span>{p.icon}</span>
-                  <span>{p.label}</span>
-                  {activeStore === p.store && <span className="platform-dropdown-check">✓</span>}
-                </button>
-              ))}
-            </div>
+            </>
           )}
         </div>
       ))}

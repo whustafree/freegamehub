@@ -91,6 +91,87 @@ export const GENRE_KEYWORDS: Record<string, string[]> = {
  * Convierte una clave VAPID base64 URL-safe a Uint8Array
  * para usar con la Push API del navegador.
  */
+// --- UI Sounds (Web Audio API) ---
+let audioCtx: AudioContext | null = null;
+
+function getAudioCtx(): AudioContext {
+  if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+  return audioCtx;
+}
+
+/** Play a simple UI sound effect */
+export function playSound(type: 'click' | 'success' | 'error' | 'favorite' | 'swipe') {
+  try {
+    const ctx = getAudioCtx();
+    if (ctx.state === 'suspended') ctx.resume();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0.08, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+    
+    switch (type) {
+      case 'click':
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(600, now + 0.05);
+        osc.type = 'sine';
+        osc.start(now);
+        osc.stop(now + 0.05);
+        break;
+      case 'success':
+        osc.frequency.setValueAtTime(523, now);
+        osc.frequency.setValueAtTime(659, now + 0.1);
+        osc.frequency.setValueAtTime(784, now + 0.2);
+        osc.type = 'sine';
+        gain.gain.setValueAtTime(0.1, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.start(now);
+        osc.stop(now + 0.4);
+        break;
+      case 'error':
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+        osc.type = 'sawtooth';
+        osc.start(now);
+        osc.stop(now + 0.2);
+        break;
+      case 'favorite':
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.1);
+        osc.type = 'sine';
+        osc.start(now);
+        osc.stop(now + 0.12);
+        break;
+      case 'swipe':
+        osc.frequency.setValueAtTime(400, now);
+        osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+        osc.type = 'triangle';
+        osc.start(now);
+        osc.stop(now + 0.08);
+        break;
+    }
+  } catch { /* Audio not available */ }
+}
+
+// --- Seasonal Theme ---
+export function getSeasonalTheme(): string | null {
+  const now = new Date();
+  const month = now.getMonth();
+  const day = now.getDate();
+  
+  // Christmas: Dec 15 - Jan 6
+  if ((month === 11 && day >= 15) || (month === 0 && day <= 6)) return 'christmas';
+  // Halloween: Oct 20 - Oct 31
+  if (month === 9 && day >= 20) return 'halloween';
+  // New Year: Jan 1 - Jan 3
+  if (month === 0 && day <= 3) return 'newyear';
+  
+  return null;
+}
+
 export function urlBase64ToUint8Array(base64String: string): Uint8Array {
   const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
   const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');

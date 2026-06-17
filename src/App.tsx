@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game, LicenseFilter, Theme, AccentColor } from './types';
 import { t } from './i18n';
-import { parsePrice, vibrate } from './utils/format';
+import { parsePrice, vibrate, getSeasonalTheme, playSound } from './utils/format';
 import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds, loadTheme, saveTheme, loadAccentColor, saveAccentColor } from './utils/storage';
 
 import { useGames } from './hooks/useGames';
@@ -107,10 +107,13 @@ export default function App() {
   const [currentTheme, setCurrentTheme] = useState<Theme>(() => loadTheme());
   const [accentColor, setAccentColor] = useState<AccentColor>(() => loadAccentColor());
 
-  // Apply theme & accent to HTML element
+  // Apply theme, accent & seasonal theme to HTML element
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', currentTheme);
     document.documentElement.setAttribute('data-accent', accentColor);
+    const seasonal = getSeasonalTheme();
+    if (seasonal) document.documentElement.setAttribute('data-seasonal', seasonal);
+    else document.documentElement.removeAttribute('data-seasonal');
     const metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) {
       if (currentTheme === 'amoled') metaTheme.setAttribute('content', '#000000');
@@ -172,6 +175,7 @@ export default function App() {
   const handleToggleFilter = useCallback(() => {
     setIsFilterOpen(p => !p);
     vibrate(8);
+    playSound('click');
   }, []);
 
   // Surprise me
@@ -420,7 +424,7 @@ export default function App() {
   }, []);
 
   const handleToggleFavorites = useCallback(() => {
-    setShowFavoritesOnly(p => { showToast(p ? t('favoritesOff', language) : t('favoritesOn', language), 'info'); return !p; });
+    setShowFavoritesOnly(p => { showToast(p ? t('favoritesOff', language) : t('favoritesOn', language), 'info'); playSound(p ? 'click' : 'favorite'); return !p; });
   }, [language]);
 
   const handleResetFilters = useCallback(() => {
