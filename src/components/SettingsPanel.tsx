@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Language, UserCollection, UserStats, ActivityEntry, Achievement, Theme, AccentColor } from '../types';
 import { t } from '../i18n';
 import { urlBase64ToUint8Array } from '../utils/format';
 import { showToast } from './Toast';
+import { exportAllData, importAllData, AppBackup, loadTags, saveTags, addTag, removeTag, GameTag } from '../utils/storage';
 
 interface SettingsPanelProps {
   language: Language;
@@ -21,7 +22,7 @@ interface SettingsPanelProps {
   onChangeAccent?: (color: AccentColor) => void;
 }
 
-type Tab = 'collections' | 'activity' | 'achievements';
+type Tab = 'collections' | 'activity' | 'achievements' | 'tags' | 'data';
 
 const EMOJIS = ['📁', '🎮', '🕹️', '⭐', '💎', '🔥', '🎯', '👾', '🎲', '🏆', '💿', '🎪'];
 
@@ -83,6 +84,8 @@ const ACCENTS: { value: AccentColor; label: string }[] = [
   { value: 'cyan', label: 'Cyan' },
 ];
 
+const TAG_COLORS = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
+
 export default function SettingsPanel({
   language, collections, activityLog, achievements, userStats,
   games, currentTheme, accentColor, onClose,
@@ -101,6 +104,15 @@ export default function SettingsPanel({
   });
   const [vapidPublicKey, setVapidPublicKey] = useState<string | null>(null);
 
+  // Tags state
+  const [tags, setTags] = useState<GameTag[]>(() => loadTags());
+  const [newTagName, setNewTagName] = useState('');
+  const [newTagColor, setNewTagColor] = useState('#22c55e');
+
+  // Export/Import state
+  const [importing, setImporting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   // Fetch VAPID public key from backend
   useEffect(() => {
     if (pushStatus === 'loading' || pushStatus === 'unsupported') return;
@@ -110,7 +122,6 @@ export default function SettingsPanel({
         if (data.publicKey) setVapidPublicKey(data.publicKey);
       })
       .catch(() => {
-        // Fallback: use hardcoded key as backup
         setVapidPublicKey('BEl62iUYgUy0g0N1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0lHy1v0');
       });
   }, [pushStatus]);
@@ -129,12 +140,67 @@ export default function SettingsPanel({
     if (navigator.vibrate) navigator.vibrate(10);
   };
 
+  // --- Tag handlers ---
+  const handleAddTag = () => {
+    if (!newTagName.trim()) return;
+    const updated = addTag(newTagName.trim(), newTagColor);
+    setTags(updated);
+    setNewTagName('');
+    showToast(language === 'es' ? '🏷️ Tag creado' : '🏷️ Tag created', 'success');
+  };
+
+  const handleRemoveTag = (id: string) => {
+    const updated = removeTag(id);
+    setTags(updated);
+    showToast(language === 'es' ? '🗑️ Tag eliminado' : '🗑️ Tag deleted', 'info');
+  };
+
+  // --- Export/Import handlers ---
+  const handleExport = () => {
+    try {
+      const data = exportAllData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gameradar-backup-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast(language === 'es' ? '📦 Backup exportado' : '📦 Backup exported', 'success');
+    } catch {
+      showToast(language === 'es' ? 'Error al exportar' : 'Export error', 'error');
+    }
+  };
+
+  const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImporting(true);
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target?.result as string) as AppBackup;
+        const errors = importAllData(data);
+        if (errors.length > 0) {
+          showToast(language === 'es' ? `⚠️ Errores: ${errors.length}` : `⚠️ Errors: ${errors.length}`, 'error');
+        } else {
+          showToast(language === 'es' ? '✅ Datos importados. Recarga la app.' : '✅ Data imported. Reload the app.', 'success');
+        }
+      } catch {
+        showToast(language === 'es' ? '❌ Archivo inválido' : '❌ Invalid file', 'error');
+      }
+      setImporting(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div className="filter-overlay open" onClick={onClose} style={{ zIndex: 400 }}>
       <div className="filter-sheet open" onClick={e => e.stopPropagation()} style={{ maxHeight: '85vh' }}>
         <div className="filter-handle" />            <div className="filter-head">
           <h3 className="filter-title">
-            {tab === 'collections' ? '📁' : tab === 'activity' ? '📋' : '🏆'} {t('myStats', language)}
+            {tab === 'collections' ? '📁' : tab === 'activity' ? '📋' : tab === 'achievements' ? '🏆' : tab === 'tags' ? '🏷️' : '📦'} {t('myStats', language)}
           </h3>
           <button className="filter-close" onClick={onClose}>✕</button>
         </div>
@@ -144,6 +210,8 @@ export default function SettingsPanel({
           <button className={`filter-chip ${tab === 'collections' ? 'active' : ''}`} onClick={() => setTab('collections')}>📁 {t('collections', language)}</button>
           <button className={`filter-chip ${tab === 'activity' ? 'active' : ''}`} onClick={() => setTab('activity')}>📋 {t('activityLog', language)}</button>
           <button className={`filter-chip ${tab === 'achievements' ? 'active' : ''}`} onClick={() => setTab('achievements')}>🏆 {t('achievements', language)} ({unlockedCount}/{totalCount})</button>
+          <button className={`filter-chip ${tab === 'tags' ? 'active' : ''}`} onClick={() => setTab('tags')}>🏷️ {language === 'es' ? 'Tags' : 'Tags'}</button>
+          <button className={`filter-chip ${tab === 'data' ? 'active' : ''}`} onClick={() => setTab('data')}>📦 {language === 'es' ? 'Datos' : 'Data'}</button>
         </div>
 
         <div className="filter-body">
@@ -153,7 +221,6 @@ export default function SettingsPanel({
               <span style={{ fontSize: '0.85rem' }}>🎨</span>
               <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>{t('theme', language)}</span>
             </div>
-            {/* Theme selector */}
             <div className="filter-chips" style={{ marginBottom: '0.35rem' }}>
               {THEMES.map(th => (
                 <button
@@ -165,7 +232,6 @@ export default function SettingsPanel({
                 </button>
               ))}
             </div>
-            {/* Accent color selector */}
             <span style={{ fontSize: '0.5rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.6px', fontWeight: 600, display: 'block', marginBottom: '0.25rem' }}>
               {t('accentColor', language)}
             </span>
@@ -195,7 +261,7 @@ export default function SettingsPanel({
           </div>
 
           {/* Stats summary visible in all tabs */}
-          {tab !== 'achievements' && (
+          {tab !== 'achievements' && tab !== 'tags' && tab !== 'data' && (
             <div className="stats-grid" style={{ marginBottom: '0.25rem' }}>
               <div className="stat-card">
                 <div className="stat-value">{userStats.totalClaimed}</div>
@@ -333,6 +399,150 @@ export default function SettingsPanel({
               ))}
             </div>
           )}
+
+          {/* TAGS TAB */}
+          {tab === 'tags' && (
+            <div style={{ padding: 0 }}>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.5rem', lineHeight: 1.4 }}>
+                {language === 'es'
+                  ? 'Crea tags personalizados y asígnalos a juegos desde el GameDetail.'
+                  : 'Create custom tags and assign them to games from the GameDetail.'}
+              </div>
+
+              {/* Add new tag */}
+              <div style={{ display: 'flex', gap: '0.3rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+                <input
+                  className="collection-form-input"
+                  style={{ flex: 1, minWidth: '100px', fontSize: '0.65rem', padding: '0.3rem 0.5rem' }}
+                  placeholder={language === 'es' ? 'Nombre del tag...' : 'Tag name...'}
+                  value={newTagName}
+                  onChange={e => setNewTagName(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleAddTag(); }}
+                />
+                <div style={{ display: 'flex', gap: '0.15rem', alignItems: 'center' }}>
+                  {TAG_COLORS.map(c => (
+                    <button
+                      key={c}
+                      onClick={() => setNewTagColor(c)}
+                      style={{
+                        width: '22px', height: '22px', borderRadius: '50%',
+                        background: c, border: newTagColor === c ? '2px solid var(--text)' : '2px solid transparent',
+                        cursor: 'pointer', padding: 0,
+                      }}
+                    />
+                  ))}
+                </div>
+                <button className="filter-btn primary" onClick={handleAddTag} style={{ fontSize: '0.6rem', padding: '0.3rem 0.5rem', flexShrink: 0 }}>
+                  ➕
+                </button>
+              </div>
+
+              {/* Tag list */}
+              {tags.length === 0 ? (
+                <div className="collections-empty">
+                  {language === 'es' ? 'No hay tags aún. Crea uno arriba.' : 'No tags yet. Create one above.'}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  {tags.map(t => (
+                    <div key={t.id} style={{
+                      display: 'flex', alignItems: 'center', gap: '0.4rem',
+                      padding: '0.35rem 0.5rem', background: 'var(--bg-hover)',
+                      borderRadius: 'var(--radius)', border: '0.5px solid var(--card-border)',
+                    }}>
+                      <span style={{
+                        width: '10px', height: '10px', borderRadius: '50%',
+                        background: t.color, flexShrink: 0,
+                      }} />
+                      <span style={{ flex: 1, fontSize: '0.72rem', fontWeight: 500 }}>{t.name}</span>
+                      <button
+                        onClick={() => handleRemoveTag(t.id)}
+                        style={{
+                          background: 'none', border: 'none', color: 'var(--text-muted)',
+                          cursor: 'pointer', fontSize: '0.6rem', padding: '0.15rem',
+                        }}
+                      >✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* DATA TAB (Export/Import) */}
+          {tab === 'data' && (
+            <div style={{ padding: 0 }}>
+              <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
+                {language === 'es'
+                  ? 'Exporta tus datos (favoritos, colecciones, presets, tags, estadísticas) como backup o impórtalos desde otro dispositivo.'
+                  : 'Export your data (favorites, collections, presets, tags, stats) as backup or import from another device.'}
+              </div>
+
+              {/* Export */}
+              <div style={{
+                padding: '0.5rem', background: 'var(--bg-hover)',
+                borderRadius: 'var(--radius)', border: '0.5px solid var(--card-border)',
+                marginBottom: '0.5rem',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.78rem' }}>📦</span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+                    {language === 'es' ? 'Exportar Backup' : 'Export Backup'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                  {language === 'es'
+                    ? 'Descarga un archivo JSON con todos tus datos de GameRadar.'
+                    : 'Download a JSON file with all your GameRadar data.'}
+                </div>
+                <button className="filter-btn primary" onClick={handleExport} style={{ fontSize: '0.65rem', padding: '0.35rem' }}>
+                  📥 {language === 'es' ? 'Exportar' : 'Export'}
+                </button>
+              </div>
+
+              {/* Import */}
+              <div style={{
+                padding: '0.5rem', background: 'var(--bg-hover)',
+                borderRadius: 'var(--radius)', border: '0.5px solid var(--card-border)',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.78rem' }}>📥</span>
+                  <span style={{ fontSize: '0.72rem', fontWeight: 600 }}>
+                    {language === 'es' ? 'Importar Backup' : 'Import Backup'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.55rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                  {language === 'es'
+                    ? 'Selecciona un archivo .json exportado previamente. Sobrescribirá tus datos actuales.'
+                    : 'Select a previously exported .json file. Will overwrite your current data.'}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".json"
+                  onChange={handleImport}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  className="filter-btn secondary"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importing}
+                  style={{ fontSize: '0.65rem', padding: '0.35rem' }}
+                >
+                  {importing
+                    ? (language === 'es' ? '⏳ Importando...' : '⏳ Importing...')
+                    : `📂 ${language === 'es' ? 'Seleccionar archivo' : 'Select file'}`}
+                </button>
+              </div>
+
+              {/* Warning */}
+              <div style={{ fontSize: '0.5rem', color: 'var(--text-muted)', marginTop: '0.5rem', opacity: 0.6 }}>
+                ⚠️ {language === 'es'
+                  ? 'La importación sobrescribe todos tus datos locales. Se recomienda recargar la app después de importar.'
+                  : 'Importing overwrites all your local data. Reload the app after importing.'}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* 🔔 Notificaciones Push */}
@@ -360,7 +570,6 @@ export default function SettingsPanel({
                 if (permission === 'granted') {
                   setPushStatus('subscribed');
                   showToast(language === 'es' ? '🔔 Notificaciones activadas' : '🔔 Notifications enabled', 'success');
-                  // Registrar suscripción en el backend
                   try {
                     if (!vapidPublicKey) {
                       showToast(language === 'es' ? 'Clave VAPID no disponible' : 'VAPID key not available', 'error');
@@ -379,7 +588,7 @@ export default function SettingsPanel({
                     });
                     showToast(language === 'es' ? '✅ Suscripción registrada' : '✅ Subscription registered', 'success');
                   } catch (e) {
-                    // Push subscription failed silently - notification permission still granted
+                    // Push subscription failed silently
                   }
                 } else {
                   setPushStatus('unsubscribed');

@@ -104,6 +104,42 @@ export default function App() {
   const [newGameIds, setNewGameIds] = useState<string[]>(() => loadNewGameIds());
   const [lastVisit, setLastVisit] = useState<string | null>(() => loadLastVisit());
 
+  // PWA update notification (after language declaration)
+  const [swUpdateAvailable, setSwUpdateAvailable] = useState(false);
+  const [swRegistration, setSwRegistration] = useState<ServiceWorkerRegistration | null>(null);
+  const languageRef = useRef(language);
+  languageRef.current = language;
+
+  useEffect(() => {
+    if (!('serviceWorker' in navigator)) return;
+    let cancelled = false;
+    navigator.serviceWorker.ready.then(reg => {
+      if (cancelled) return;
+      setSwRegistration(reg);
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              if (cancelled) return;
+              setSwUpdateAvailable(true);
+              const msg = languageRef.current === 'es' ? '🔄 Nueva versión disponible' : '🔄 New version available';
+              showToast(msg, 'info');
+            }
+          });
+        }
+      });
+    });
+    return () => { cancelled = true; };
+  }, []); // Only register once
+
+  const handleSWUpdate = useCallback(() => {
+    if (swRegistration?.waiting) {
+      swRegistration.waiting.postMessage({ type: 'SKIP_WAITING' });
+      window.location.reload();
+    }
+  }, [swRegistration]);
+
   // Filter presets handlers (after language declaration)
   const handleSavePreset = useCallback(() => {
     const presets = loadFilterPresets();
@@ -1182,6 +1218,24 @@ export default function App() {
           </button>
         )}
       </main>
+
+      {/* PWA Update Banner */}
+      {swUpdateAvailable && (
+        <div className="pwa-install-banner" style={{ borderColor: 'var(--accent)' }}>
+          <div className="pwa-install-icon" style={{ background: 'var(--accent)' }}>🔄</div>
+          <div className="pwa-install-info">
+            <div className="pwa-install-title">
+              {language === 'es' ? 'Nueva versión disponible' : 'New version available'}
+            </div>
+            <div className="pwa-install-desc">
+              {language === 'es' ? 'Actualiza para obtener las últimas mejoras' : 'Update for the latest improvements'}
+            </div>
+          </div>
+          <button className="pwa-install-btn" onClick={handleSWUpdate}>
+            🔄 {language === 'es' ? 'Actualizar' : 'Update'}
+          </button>
+        </div>
+      )}
 
       {/* PWA Install Banner */}
       {showPWAInstall && (

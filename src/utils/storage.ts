@@ -258,6 +258,135 @@ export function updateProfile(username: string, savings: number, claimed: number
   saveProfiles(profiles);
 }
 
+// --- Tags (custom user labels for games) ---
+const TAGS_KEY = 'fgh_tags_v1';
+
+export interface GameTag {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export function loadTags(): GameTag[] {
+  try { return JSON.parse(localStorage.getItem(TAGS_KEY) || '[]'); }
+  catch { return []; }
+}
+
+export function saveTags(tags: GameTag[]): void {
+  localStorage.setItem(TAGS_KEY, JSON.stringify(tags));
+}
+
+export function addTag(name: string, color: string): GameTag[] {
+  const tags = loadTags();
+  if (tags.some(t => t.name.toLowerCase() === name.toLowerCase())) return tags;
+  const newTag: GameTag = { id: Date.now().toString(), name, color };
+  tags.push(newTag);
+  saveTags(tags);
+  return tags;
+}
+
+export function removeTag(id: string): GameTag[] {
+  const tags = loadTags().filter(t => t.id !== id);
+  saveTags(tags);
+  return tags;
+}
+
+// --- Game-to-Tags mapping ---
+const GAME_TAGS_KEY = 'fgh_game_tags_v1';
+
+export function loadGameTags(): Record<string, string[]> {
+  try { return JSON.parse(localStorage.getItem(GAME_TAGS_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+export function saveGameTags(mapping: Record<string, string[]>): void {
+  localStorage.setItem(GAME_TAGS_KEY, JSON.stringify(mapping));
+}
+
+export function toggleGameTag(gameId: string, tagId: string): Record<string, string[]> {
+  const mapping = loadGameTags();
+  if (!mapping[gameId]) mapping[gameId] = [];
+  const idx = mapping[gameId].indexOf(tagId);
+  if (idx >= 0) {
+    mapping[gameId].splice(idx, 1);
+    if (mapping[gameId].length === 0) delete mapping[gameId];
+  } else {
+    mapping[gameId].push(tagId);
+  }
+  saveGameTags(mapping);
+  return mapping;
+}
+
+// --- Export / Import ---
+export interface AppBackup {
+  version: number;
+  exportedAt: string;
+  favorites: string[];
+  viewedGames: string[];
+  wishlist: Record<string, WishlistStatus>;
+  votes: Record<string, Vote>;
+  reactions: Record<string, GameReactions>;
+  theme: Theme;
+  accentColor: AccentColor;
+  viewMode: ViewMode;
+  language: Language;
+  stats: UserStats;
+  collections: UserCollection[];
+  activityLog: ActivityEntry[];
+  achievements: Achievement[];
+  filterPresets: FilterPreset[];
+  tags: GameTag[];
+  gameTags: Record<string, string[]>;
+}
+
+export function exportAllData(): AppBackup {
+  return {
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    favorites: loadFavorites(),
+    viewedGames: loadViewedGames(),
+    wishlist: loadWishlist(),
+    votes: loadVotes(),
+    reactions: loadReactions(),
+    theme: loadTheme(),
+    accentColor: loadAccentColor(),
+    viewMode: loadViewMode(),
+    language: loadLanguage(),
+    stats: loadUserStats(),
+    collections: loadCollections(),
+    activityLog: loadActivityLog(),
+    achievements: loadAchievements(),
+    filterPresets: loadFilterPresets(),
+    tags: loadTags(),
+    gameTags: loadGameTags(),
+  };
+}
+
+export function importAllData(data: AppBackup): string[] {
+  const errors: string[] = [];
+  try {
+    if (data.favorites) saveFavorites(data.favorites);
+    if (data.viewedGames) saveViewedGames(data.viewedGames);
+    if (data.wishlist) saveWishlist(data.wishlist);
+    if (data.votes) saveVotes(data.votes);
+    if (data.reactions) saveReactions(data.reactions);
+    if (data.theme) saveTheme(data.theme);
+    if (data.accentColor) saveAccentColor(data.accentColor);
+    if (data.viewMode) saveViewMode(data.viewMode);
+    if (data.language) saveLanguage(data.language);
+    if (data.stats) saveUserStats(data.stats);
+    if (data.collections) saveCollections(data.collections);
+    if (data.activityLog) saveActivityLog(data.activityLog);
+    if (data.achievements) saveAchievements(data.achievements);
+    if (data.filterPresets) saveFilterPresets(data.filterPresets);
+    if (data.tags) saveTags(data.tags);
+    if (data.gameTags) saveGameTags(data.gameTags);
+  } catch (e: any) {
+    errors.push(e?.message || 'Unknown import error');
+  }
+  return errors;
+}
+
 // --- Games Cache (offline) ---
 const CACHE_KEY = 'fgh_games_cache_v1';
 const CACHE_META_KEY = 'fgh_games_cache_meta_v1';

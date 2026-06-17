@@ -1,8 +1,9 @@
-import { useMemo, useState, useRef, useCallback } from 'react';
+import { useMemo, useState, useRef, useCallback, useEffect } from 'react';
 import { Game, Vote, Language, WishlistStatus, GameReactions, EmojiReaction } from '../types';
 import { t } from '../i18n';
 import { getTimeInfo, playSound } from '../utils/format';
 import { showToast } from './Toast';
+import { loadTags, toggleGameTag, loadGameTags, GameTag } from '../utils/storage';
 
 interface GameDetailProps {
   game: Game;
@@ -71,6 +72,20 @@ export default function GameDetail({
   };
 
   const [showCompare, setShowCompare] = useState(false);
+
+  // --- Tags ---
+  const [gameTags, setGameTags] = useState<string[]>(() => {
+    const mapping = loadGameTags();
+    return mapping[game.id] || [];
+  });
+  const [showTagPicker, setShowTagPicker] = useState(false);
+  const allTags = useMemo(() => loadTags(), [showTagPicker]);
+
+  const handleToggleTag = useCallback((tagId: string) => {
+    const updated = toggleGameTag(game.id, tagId);
+    setGameTags(updated[game.id] || []);
+    if (navigator.vibrate) navigator.vibrate(6);
+  }, [game.id]);
 
   const handleShare = async () => {
     const shareData = {
@@ -282,6 +297,93 @@ export default function GameDetail({
                 );
               })}
             </div>
+          </div>
+
+          {/* Tags section */}
+          <div className="detail-section">
+            <span className="detail-section-label" style={{ display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+              🏷️ {language === 'es' ? 'Tags' : 'Tags'}
+              <button
+                onClick={() => setShowTagPicker(p => !p)}
+                style={{
+                  background: 'none', border: 'none', color: 'var(--accent-light)',
+                  cursor: 'pointer', fontSize: '0.55rem', fontFamily: 'inherit',
+                  textDecoration: 'underline', textUnderlineOffset: '2px',
+                }}
+              >
+                {showTagPicker ? (language === 'es' ? '✕ cerrar' : '✕ close') : (language === 'es' ? '+ añadir' : '+ add')}
+              </button>
+            </span>
+            {/* Applied tags */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem', marginBottom: showTagPicker ? '0.35rem' : 0 }}>
+              {gameTags.map(tagId => {
+                const tag = allTags.find(t => t.id === tagId);
+                if (!tag) return null;
+                return (
+                  <span key={tag.id} style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
+                    padding: '0.12rem 0.4rem', borderRadius: 'var(--radius-full)',
+                    background: tag.color + '22', border: `0.5px solid ${tag.color}44`,
+                    color: tag.color, fontSize: '0.58rem', fontWeight: 600,
+                  }}>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: tag.color, display: 'inline-block' }} />
+                    {tag.name}
+                    <button
+                      onClick={() => handleToggleTag(tag.id)}
+                      style={{
+                        background: 'none', border: 'none', color: 'inherit',
+                        cursor: 'pointer', fontSize: '0.5rem', padding: 0, lineHeight: 1,
+                        opacity: 0.5,
+                      }}
+                    >✕</button>
+                  </span>
+                );
+              })}
+              {gameTags.length === 0 && !showTagPicker && (
+                <span style={{ fontSize: '0.58rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  {language === 'es' ? 'Sin tags' : 'No tags'}
+                </span>
+              )}
+            </div>
+            {/* Tag picker */}
+            {showTagPicker && (
+              <div style={{
+                display: 'flex', flexWrap: 'wrap', gap: '0.25rem',
+                padding: '0.35rem', background: 'var(--bg-hover)',
+                borderRadius: 'var(--radius-sm)',
+              }}>
+                {allTags.length === 0 ? (
+                  <span style={{ fontSize: '0.55rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                    {language === 'es' ? 'Crea tags en Ajustes > Tags' : 'Create tags in Settings > Tags'}
+                  </span>
+                ) : allTags.map(tag => {
+                  const isApplied = gameTags.includes(tag.id);
+                  return (
+                    <button
+                      key={tag.id}
+                      onClick={() => handleToggleTag(tag.id)}
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: '0.2rem',
+                        padding: '0.2rem 0.45rem', borderRadius: 'var(--radius-full)',
+                        background: isApplied ? tag.color + '33' : 'transparent',
+                        border: isApplied ? `0.5px solid ${tag.color}66` : '0.5px solid var(--card-border)',
+                        color: isApplied ? tag.color : 'var(--text-secondary)',
+                        fontSize: '0.58rem', fontWeight: 500,
+                        cursor: 'pointer', fontFamily: 'inherit',
+                        transition: 'all 0.15s var(--ease)',
+                      }}
+                    >
+                      <span style={{
+                        width: '6px', height: '6px', borderRadius: '50%',
+                        background: tag.color, display: 'inline-block',
+                      }} />
+                      {tag.name}
+                      {isApplied && <span style={{ fontSize: '0.45rem', marginLeft: '0.1rem' }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {/* Voting */}
