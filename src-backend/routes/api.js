@@ -4,6 +4,7 @@ const gamesService = require('../services/games');
 const telegramService = require('../services/telegram');
 const instagramService = require('../services/instagram');
 const pushService = require('../services/push');
+const vapidService = require('../services/vapid');
 const logger = require('../utils/logger');
 
 // GET /api/free-games
@@ -266,6 +267,17 @@ router.get('/push-subscriptions', (req, res) => {
   } catch (err) {
     logger.error('Error en /api/push-subscriptions', err);
     res.status(500).json({ success: false, error: 'Error obteniendo suscripciones' });
+  }
+});
+
+// GET /api/vapid-public-key — Clave pública VAPID para push notifications
+router.get('/vapid-public-key', (req, res) => {
+  try {
+    const key = vapidService.getPublicKey();
+    res.json({ success: true, publicKey: key });
+  } catch (err) {
+    logger.error('Error en /api/vapid-public-key', err);
+    res.status(500).json({ success: false, error: 'Error obteniendo clave VAPID' });
   }
 });
 

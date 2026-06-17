@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 const logger = require('../utils/logger');
+const vapidService = require('./vapid');
 
 const SUBSCRIPTIONS_FILE = path.join(__dirname, '..', '..', 'data', 'push-subscriptions.json');
 
@@ -63,58 +63,23 @@ function getSubscriptions() {
 }
 
 /**
- * Envía una notificación push a una suscripción usando la Web Push API
- * via HTTPS POST directo al endpoint del proveedor push.
+ * Envía una notificación push a una suscripción usando web-push
+ * con cifrado VAPID (encriptación ECDH estándar del protocolo Web Push).
  */
 async function sendPushToSubscription(subscription, payload) {
   const { endpoint, keys } = subscription;
   if (!endpoint || !keys) return false;
 
-  try {
-    const url = new URL(endpoint);
-    const data = JSON.stringify(payload);
-    const options = {
-      hostname: url.hostname,
-      port: 443,
-      path: url.pathname + url.search,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(data),
-        'TTL': '86400',
-        'Urgency': 'normal',
-      },
-    };
+  const result = await vapidService.sendPush(subscription, payload);
 
-    return new Promise((resolve) => {
-      const req = https.request(options, (res) => {
-        let body = '';
-        res.on('data', chunk => body += chunk);
-        res.on('end', () => {
-          if (res.statusCode >= 200 && res.statusCode < 300) {
-            resolve(true);
-          } else if (res.statusCode === 410) {
-            // Subscription expired or unsubscribed, remove it
-            removeSubscription(endpoint);
-            logger.info('Push subscription removed (410 Gone):', endpoint.slice(0, 50));
-            resolve(false);
-          } else {
-            logger.warn(`Push send returned ${res.statusCode}:`, body.slice(0, 100));
-            resolve(false);
-          }
-        });
-      });
-      req.on('error', (err) => {
-        logger.error('Push send error:', err.message);
-        resolve(false);
-      });
-      req.write(data);
-      req.end();
-    });
-  } catch (err) {
-    logger.error('Push send exception:', err.message);
+  if (result.expired) {
+    // Subscription expired, clean it up
+    removeSubscription(endpoint);
+    logger.info('Push subscription removed (expired):', endpoint.slice(0, 50));
     return false;
   }
+
+  return result.success;
 }
 
 /**

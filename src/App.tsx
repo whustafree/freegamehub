@@ -13,7 +13,7 @@ import GameGrid from './components/GameGrid';
 import SkeletonGrid from './components/SkeletonGrid';
 import EmptyState from './components/EmptyState';
 import Footer from './components/Footer';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ToastContainer, { showToast } from './components/Toast';
 import BottomNav from './components/BottomNav';
 import GameCard from './components/GameCard';
@@ -729,8 +729,15 @@ export default function App() {
           />
         )}
 
+        <AnimatePresence mode="wait">
         {isLoaded && (
-          <>
+          <motion.div
+            key={currentMode}
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.25, ease: 'easeInOut' }}
+          >
             {/* 🆕 Widget de juegos nuevos - Banner mejorado */}
             {showNewGamesBanner && newGameIds.length > 0 && (
               <motion.div 
@@ -964,8 +971,9 @@ export default function App() {
                 )}
               </div>
             </div>
-          </>
+          </motion.div>
         )}
+        </AnimatePresence>
 
         {/* Infinite scroll sentinel */}
         {hasMore && <div ref={sentinelRef} className="infinite-sentinel" />}
