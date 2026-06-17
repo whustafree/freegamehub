@@ -8,9 +8,11 @@ interface HeaderProps {
   language: Language;
   games?: Game[];
   visible?: boolean;
+  currentTheme?: string;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onToggleLang: () => void;
+  onToggleTheme?: () => void;
   onOpenDetail?: (game: Game) => void;
 }
 
@@ -28,7 +30,8 @@ const PLATFORM_ICONS: Record<string, string> = {
 };
 
 export default function Header({
-  searchTerm, language, games = [], visible = true, onSearchChange, onClearSearch, onToggleLang, onOpenDetail
+  searchTerm, language, games = [], visible = true, currentTheme = 'dark',
+  onSearchChange, onClearSearch, onToggleLang, onToggleTheme, onOpenDetail
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -147,6 +150,11 @@ export default function Header({
         </div>
 
         <div className="header-actions">
+          {onToggleTheme && (
+            <button className="theme-toggle-btn" onClick={onToggleTheme} title={currentTheme === 'light' ? (language === 'es' ? 'Modo oscuro' : 'Dark mode') : (language === 'es' ? 'Cambiar tema' : 'Switch theme')}>
+              {currentTheme === 'light' ? '🌙' : currentTheme === 'amoled' ? '🕶️' : '🌗'}
+            </button>
+          )}
           <button className="header-action lang-btn" onClick={onToggleLang} title={language === 'es' ? 'English' : 'Español'}>
             {language === 'es' ? 'EN' : 'ES'}
           </button>

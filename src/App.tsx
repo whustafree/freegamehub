@@ -1,9 +1,9 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
-import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game, LicenseFilter } from './types';
+import { Mode, SortMode, Genre, TypeFilter, StoreFilter, ViewMode, Language, Game, LicenseFilter, Theme, AccentColor } from './types';
 import { t } from './i18n';
 import { parsePrice, vibrate } from './utils/format';
-import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds } from './utils/storage';
+import { loadViewMode, saveViewMode, loadLanguage, saveLanguage, loadLastVisit, saveLastVisit, loadNewGameIds, saveNewGameIds, loadTheme, saveTheme, loadAccentColor, saveAccentColor } from './utils/storage';
 
 import { useGames } from './hooks/useGames';
 import { useFilters } from './hooks/useFilters';
@@ -23,6 +23,7 @@ import Onboarding from './components/Onboarding';
 import SettingsPanel from './components/SettingsPanel';
 import TrendingSection from './components/TrendingSection';
 import FilterPanel from './components/FilterPanel';
+import ActiveFiltersBar from './components/ActiveFiltersBar';
 
 const ITEMS_PER_PAGE = 30;
 
@@ -101,6 +102,52 @@ export default function App() {
   const [language, setLanguage] = useState<Language>(() => loadLanguage());
   const [newGameIds, setNewGameIds] = useState<string[]>(() => loadNewGameIds());
   const [lastVisit, setLastVisit] = useState<string | null>(() => loadLastVisit());
+
+  // Theme & Accent Color
+  const [currentTheme, setCurrentTheme] = useState<Theme>(() => loadTheme());
+  const [accentColor, setAccentColor] = useState<AccentColor>(() => loadAccentColor());
+
+  // Apply theme & accent to HTML element
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    document.documentElement.setAttribute('data-accent', accentColor);
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      if (currentTheme === 'amoled') metaTheme.setAttribute('content', '#000000');
+      else if (currentTheme === 'light') metaTheme.setAttribute('content', '#f5f5f7');
+      else metaTheme.setAttribute('content', '#0a0a0a');
+    }
+  }, [currentTheme, accentColor]);
+
+  // Persist theme
+  useEffect(() => { saveTheme(currentTheme); }, [currentTheme]);
+  useEffect(() => { saveAccentColor(accentColor); }, [accentColor]);
+
+  // PWA Install
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [showPWAInstall, setShowPWAInstall] = useState(false);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowPWAInstall(true);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handlePWAInstall = useCallback(() => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      setDeferredPrompt(null);
+      setShowPWAInstall(false);
+    });
+  }, [deferredPrompt]);
+
+  const handleDismissPWA = useCallback(() => {
+    setShowPWAInstall(false);
+  }, []);
 
   // Modals
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -591,15 +638,15 @@ export default function App() {
 
   return (
     <>
-      <div className="bg-glow" />
-
-      <Header
+      <div className="bg-glow" />        <Header
         searchTerm={searchTerm}
         language={language}
         visible={headerVisible}
+        currentTheme={currentTheme}
         onSearchChange={setSearchTerm}
         onClearSearch={handleClearSearch}
         onToggleLang={handleToggleLang}
+        onToggleTheme={() => setCurrentTheme(p => p === 'dark' ? 'amoled' : p === 'amoled' ? 'light' : 'dark')}
         onOpenDetail={handleOpenDetail}
         games={games}
       />
@@ -654,6 +701,26 @@ export default function App() {
           <div className="offline-banner">
             📡 {t('offline', language)}
           </div>
+        )}
+
+        {/* Active filters bar */}
+        {isLoaded && !multiSelectActive && (
+          <ActiveFiltersBar
+            searchTerm={searchTerm}
+            activeGenre={activeGenre}
+            activeStore={activeStore}
+            activeType={activeType}
+            activeLicense={activeLicense}
+            sortMode={sortMode}
+            showFavoritesOnly={showFavoritesOnly}
+            language={language}
+            onClearSearch={() => setSearchTerm('')}
+            onResetAll={handleResetFilters}
+            onRemoveGenre={() => setActiveGenre('all')}
+            onRemoveStore={() => setActiveStore('all')}
+            onRemoveType={() => setActiveType('all')}
+            onRemoveLicense={() => setActiveLicense('all')}
+          />
         )}
 
         {isLoaded && (
@@ -911,6 +978,25 @@ export default function App() {
           <EmptyState language={language} onReset={handleResetFilters} />
         )}
       </main>
+
+      {/* PWA Install Banner */}
+      {showPWAInstall && (
+        <div className="pwa-install-banner">
+          <div className="pwa-install-icon">🎮</div>
+          <div className="pwa-install-info">
+            <div className="pwa-install-title">
+              {language === 'es' ? 'Instala GameRadar' : 'Install GameRadar'}
+            </div>
+            <div className="pwa-install-desc">
+              {language === 'es' ? 'Añade a tu pantalla de inicio' : 'Add to your home screen'}
+            </div>
+          </div>
+          <button className="pwa-install-btn" onClick={handlePWAInstall}>
+            📲 {language === 'es' ? 'Instalar' : 'Install'}
+          </button>
+          <button className="pwa-install-close" onClick={handleDismissPWA}>✕</button>
+        </div>
+      )}
 
       <Footer language={language} />
       <ToastContainer />

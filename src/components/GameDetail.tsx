@@ -195,6 +195,22 @@ export default function GameDetail({
               <span className={`detail-info-value card-time ${timeInfo.className}`} style={{ fontSize: '0.75rem' }}>
                 {timeInfo.text}
               </span>
+              {game.endDate && (() => {
+                const end = new Date(game.endDate).getTime();
+                const now = Date.now();
+                const total = end - now;
+                if (total <= 0) return null;
+                // Estimate total duration as 7 days from now
+                const pct = Math.max(5, Math.min(100, (total / (7 * 86400000)) * 100));
+                return (
+                  <div className="time-progress-bar" style={{ marginTop: '0.15rem' }}>
+                    <div
+                      className={`time-progress-fill ${total < 86400000 ? 'urgent' : ''}`}
+                      style={{ width: `${100 - pct}%` }}
+                    />
+                  </div>
+                );
+              })()}
             </div>
           </div>
 

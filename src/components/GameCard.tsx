@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState } from 'react';
+import { useRef, useCallback, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Game, ViewMode, Language } from '../types';
 import { getTimeInfo, parsePrice } from '../utils/format';
@@ -32,6 +32,27 @@ export default function GameCard({
   const isListView = viewMode === 'list';
 
   const cardRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [favParticles, setFavParticles] = useState<{ id: number; x: number; y: number; emoji: string }[]>([]);
+  
+  // 3D Tilt effect on desktop
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    const card = cardRef.current;
+    if (!card || window.matchMedia('(hover: none)').matches) return;
+    const rect = card.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    const rotateY = x * 8;
+    const rotateX = -y * 8;
+    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+  }, []);
+  
+  const handleMouseLeave = useCallback(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = '';
+  }, []);
 
   const showPlayStoreMeta = game.rating && game.installs;
   const worth = game.worth && game.worth !== 'N/A' && game.worth !== 'Pago'
@@ -57,7 +78,20 @@ export default function GameCard({
     setFavoritePulse(true);
     if (favTimeoutRef.current) clearTimeout(favTimeoutRef.current);
     favTimeoutRef.current = setTimeout(() => setFavoritePulse(false), 400);
-  }, [game.id, onToggleFavorite]);
+    
+    // Burst particles
+    if (!isFavorite) {
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const particles = Array.from({ length: 6 }, (_, i) => ({
+        id: Date.now() + i,
+        x: (Math.random() - 0.5) * 60,
+        y: (Math.random() - 0.5) * 60,
+        emoji: ['❤️', '⭐', '✨', '💖', '🔥', '🎯'][i],
+      }));
+      setFavParticles(particles);
+      setTimeout(() => setFavParticles([]), 700);
+    }
+  }, [game.id, onToggleFavorite, isFavorite]);
 
   return (
     <motion.article
@@ -72,6 +106,8 @@ export default function GameCard({
       ].filter(Boolean).join(' ')}
       data-id={game.id}
       onClick={handleClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       tabIndex={0}
       role="button"
       aria-label={game.title}
