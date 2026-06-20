@@ -156,6 +156,41 @@ export function playSound(type: 'click' | 'success' | 'error' | 'favorite' | 'sw
   } catch { /* Audio not available */ }
 }
 
+/** Obtiene el tiempo relativo desde una fecha hasta ahora */
+export function getRelativeDate(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMin < 1) return 'Hace un momento';
+  if (diffMin < 60) return `Hace ${diffMin} min`;
+  if (diffHours < 24) return `Hace ${diffHours} h`;
+  if (diffDays < 7) return `Hace ${diffDays} día${diffDays > 1 ? 's' : ''}`;
+  if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} sem`;
+  return date.toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+}
+
+export function getRelativeDateEn(dateStr: string | null | undefined): string {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMin < 1) return 'Just now';
+  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} wk ago`;
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' });
+}
+
 // --- Seasonal Theme ---
 export function getSeasonalTheme(): string | null {
   const now = new Date();

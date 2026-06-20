@@ -204,6 +204,7 @@ class RedditService {
       platformIcon: platformIcon,
       category: category,
       endDate: this.extractEndDate(post.title, post.selftext),
+      startDate: post.created_utc ? new Date(post.created_utc * 1000).toISOString() : null,
       worth: this.extractPrice(titleLower),
       type: type,
       genre: 'other',

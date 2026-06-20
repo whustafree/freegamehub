@@ -47,7 +47,18 @@ class CacheManager {
   }
 
   setGames(games) {
-    this.data.games = games;
+    // Ordenar por startDate descendente (más nuevos primero)
+    // Si no tiene startDate, usar endDate descendente como fallback
+    // Si no tiene ninguna fecha, dejar al final
+    const sorted = [...games].sort((a, b) => {
+      const aDate = a.startDate || a.endDate;
+      const bDate = b.startDate || b.endDate;
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    });
+    this.data.games = sorted;
     this.data.lastUpdated = new Date().toISOString();
     this.save();
   }

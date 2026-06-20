@@ -63,7 +63,20 @@ export function useFilters({
       return true;
     });
 
+    const sortByDateDesc = (a: Game, b: Game) => {
+      const aDate = a.startDate || a.endDate;
+      const bDate = b.startDate || b.endDate;
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return new Date(bDate).getTime() - new Date(aDate).getTime();
+    };
+
     switch (sortMode) {
+      case 'recent':
+      case 'default':
+        filtered.sort(sortByDateDesc);
+        break;
       case 'price-desc':
         filtered.sort((a, b) => parsePrice(b.worth) - parsePrice(a.worth));
         break;
@@ -77,12 +90,6 @@ export function useFilters({
       case 'title':
         filtered.sort((a, b) => a.title.localeCompare(b.title));
         break;
-      default:
-        filtered.sort((a, b) => {
-          if (a.endDate && !b.endDate) return -1;
-          if (!a.endDate && b.endDate) return 1;
-          return 0;
-        });
     }
 
     return filtered;

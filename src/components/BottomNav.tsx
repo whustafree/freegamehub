@@ -9,6 +9,8 @@ interface BottomNavProps {
   viewMode: ViewMode;
   favoritesCount: number;
   showFavoritesOnly: boolean;
+  showRecentOnly?: boolean;
+  recentCount?: number;
   language: Language;
   multiSelectActive?: boolean;
   visible?: boolean;
@@ -16,6 +18,7 @@ interface BottomNavProps {
   onModeChange: (mode: Mode) => void;
   onStoreChange?: (store: StoreFilter) => void;
   onToggleFavorites: () => void;
+  onToggleRecent?: () => void;
   onResetFilters: () => void;
   onToggleViewMode: () => void;
   onOpenStats: () => void;
@@ -42,9 +45,9 @@ const PLATFORM_OPTIONS: { store: StoreFilter; icon: string; label: string }[] = 
 ];
 
 export default function BottomNav({
-  currentMode, viewMode, favoritesCount, showFavoritesOnly, language,
+  currentMode, viewMode, favoritesCount, showFavoritesOnly, showRecentOnly, recentCount = 0, language,
   multiSelectActive, visible = true, activeStore = 'all',
-  onModeChange, onStoreChange, onToggleFavorites, onResetFilters, onToggleViewMode, onOpenStats,
+  onModeChange, onStoreChange, onToggleFavorites, onToggleRecent, onResetFilters, onToggleViewMode, onOpenStats,
   onOpenSettings, onToggleMultiSelect, onToggleFilter
 }: BottomNavProps) {
   const [showOverflow, setShowOverflow] = useState(false);
@@ -173,6 +176,18 @@ export default function BottomNav({
           )}
         </div>
       ))}
+
+      <button
+        className={`nav-btn ${showRecentOnly ? 'active' : ''}`}
+        onClick={() => { if (onToggleRecent) onToggleRecent(); vibrate(6); }}
+        title={t('navRecent', language)}
+      >
+        <span className="nav-btn-icon">🆕</span>
+        <span className="nav-btn-label">{t('navRecent', language)}</span>
+        {recentCount > 0 && (
+          <span className="nav-badge">{recentCount > 99 ? '99+' : recentCount}</span>
+        )}
+      </button>
 
       <button
         className={`nav-btn ${showFavoritesOnly ? 'active' : ''}`}

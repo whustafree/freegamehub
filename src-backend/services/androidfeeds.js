@@ -150,6 +150,7 @@ class AndroidFeedsService {
           platformIcon: '📱',
           category: 'android',
           endDate: null,
+          startDate: pubDate ? new Date(pubDate).toISOString() : null,
           worth: worth,
           type: 'Game',
           genre: 'other',

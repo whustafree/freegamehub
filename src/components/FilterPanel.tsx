@@ -62,6 +62,7 @@ const TYPES: TypeOption[] = [
 
 const SORT_OPTIONS: SortOption[] = [
   { value: 'default', icon: '📅', labelKey: 'sortRecent' },
+  { value: 'recent', icon: '🆕', labelKey: 'sortNewest' },
   { value: 'price-desc', icon: '💰', labelKey: 'sortPrice' },
   { value: 'ending-soon', icon: '⏰', labelKey: 'sortEnding' },
   { value: 'title', icon: '🔤', labelKey: 'sortAZ' },

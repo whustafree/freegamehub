@@ -174,6 +174,7 @@ class GooglePlayDealsService {
         platformIcon: '📱',
         category: 'android',
         endDate: null,
+        startDate: post.created_utc ? new Date(post.created_utc * 1000).toISOString() : null,
         worth,
         type: 'Game',
         genre: 'other',

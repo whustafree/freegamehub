@@ -20,6 +20,7 @@ export const translations = {
 
     // Sort chips
     sortRecent: 'Recientes',
+    sortNewest: 'Más recientes',
     sortPrice: 'Precio',
     sortEnding: 'Por terminar',
     sortAZ: 'A-Z',
@@ -45,6 +46,7 @@ export const translations = {
     addFav: 'Añadir favorito',
     seen: 'Visto',
     newBadge: 'Nuevo',
+    addedLabel: 'Añadido',
     freeToPlay: 'Free-to-play',
     freeWeekendBadge: 'Fin de semana gratis',
     limitedOffer: 'Oferta limitada',
@@ -167,6 +169,7 @@ export const translations = {
     // Bottom nav
     navPC: 'PC',
     navAndroid: 'Android',
+    navRecent: 'Novedades',
     navFilters: 'Filtros',
     navFav: 'Fav',
     navReset: 'Reset',
@@ -357,6 +360,7 @@ export const translations = {
 
     // Sort chips
     sortRecent: 'Recent',
+    sortNewest: 'Newest',
     sortPrice: 'Price',
     sortEnding: 'Ending soon',
     sortAZ: 'A-Z',
@@ -381,6 +385,7 @@ export const translations = {
     addFav: 'Add favorite',
     seen: 'Seen',
     newBadge: 'New',
+    addedLabel: 'Added',
     freeToPlay: 'Free-to-play',
     freeWeekendBadge: 'Free weekend',
     limitedOffer: 'Limited offer',
@@ -495,6 +500,7 @@ export const translations = {
 
     navPC: 'PC',
     navAndroid: 'Android',
+    navRecent: 'New',
     navFilters: 'Filters',
     navFav: 'Fav',
     navReset: 'Reset',

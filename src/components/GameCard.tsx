@@ -1,7 +1,7 @@
 import { useRef, useCallback, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Game, ViewMode, Language } from '../types';
-import { getTimeInfo, parsePrice, vibrate, playSound } from '../utils/format';
+import { getTimeInfo, parsePrice, vibrate, playSound, getRelativeDate, getRelativeDateEn } from '../utils/format';
 import { t } from '../i18n';
 import { useSwipeGesture, createRipple } from '../hooks/useSwipeGesture';
 import { showToast } from './Toast';
@@ -223,7 +223,17 @@ export default function GameCard({
               {game.platformIcon || '🎮'} {game.platformName || game.platform}
             </span>
             <div className="card-img-badges">
-              {isNew && <span className="card-img-badge new-badge">{t('newBadge', language)}</span>}
+              {isNew && (() => {
+                const dateStr = game.startDate ? (language === 'es' ? getRelativeDate(game.startDate) : getRelativeDateEn(game.startDate)) : '';
+                return <motion.span className="card-img-badge new-badge" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.1 }}>{t('newBadge', language)}{dateStr ? ` • ${dateStr}` : ''}</motion.span>;
+              })()}
+              {!isNew && game.startDate && (() => {
+                const daysOld = Math.floor((Date.now() - new Date(game.startDate).getTime()) / 86400000);
+                if (daysOld <= 7) {
+                  return <motion.span className="card-img-badge new-badge" style={{ fontSize: '0.4rem' }} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3, delay: 0.15 }}>🆕 {language === 'es' ? getRelativeDate(game.startDate) : getRelativeDateEn(game.startDate)}</motion.span>;
+                }
+                return <motion.span className="card-img-badge" style={{ background: 'rgba(100,100,100,0.5)', color: 'var(--text-muted)', fontSize: '0.38rem' }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3, delay: 0.15 }}>{t('addedLabel', language)} {language === 'es' ? getRelativeDate(game.startDate) : getRelativeDateEn(game.startDate)}</motion.span>;
+              })()}
               {/* Badge: Siempre gratis vs Pasa a gratis */}
               {!game.endDate && game.source === 'fdroid' && (
                 <span className="card-img-badge" style={{ background: 'rgba(76,175,80,0.9)', color: 'white', fontSize: '0.45rem' }}>

@@ -93,6 +93,7 @@ export default function App() {
   const [activeLicense, setActiveLicense] = useState<LicenseFilter>('all');
   const [activeYear, setActiveYear] = useState('all');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showRecentOnly, setShowRecentOnly] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
   // Filter panel state
@@ -532,10 +533,19 @@ export default function App() {
     setActiveType('all');
     setActiveStore('all');
     setShowFavoritesOnly(false);
+    setShowRecentOnly(false);
   }, []);
 
   const handleToggleFavorites = useCallback(() => {
     setShowFavoritesOnly(p => { showToast(p ? t('favoritesOff', language) : t('favoritesOn', language), 'info'); playSound(p ? 'click' : 'favorite'); return !p; });
+  }, [language]);
+
+  const handleToggleRecent = useCallback(() => {
+    setShowRecentOnly(p => {
+      showToast(p ? (language === 'es' ? 'Mostrando todos' : 'Showing all') : (language === 'es' ? '🆕 Novedades activadas' : '🆕 Newest activated'), 'info');
+      return !p;
+    });
+    vibrate(6);
   }, [language]);
 
   const handleResetFilters = useCallback(() => {
@@ -546,6 +556,7 @@ export default function App() {
     setActiveType('all');
     setActiveLicense('all');
     setShowFavoritesOnly(false);
+    setShowRecentOnly(false);
     setActiveCollectionFilter(null);
     showToast(t('filtersReset', language), 'info');
   }, [language]);
@@ -782,13 +793,34 @@ export default function App() {
   const ptrPullDist = Math.max(0, ptrCurrentY.current - ptrStartY.current);
   const isPtrPulled = ptrPullDist > 80;
 
+  // Count of recent games (≤7 days based on startDate) for the badge
+  const recentCount = useMemo(() => {
+    const sevenDaysAgo = Date.now() - 7 * 86400000;
+    return sortedFiltered.filter(g => {
+      const dateStr = g.startDate || g.endDate;
+      if (!dateStr) return false;
+      return new Date(dateStr).getTime() >= sevenDaysAgo;
+    }).length;
+  }, [sortedFiltered]);
+
+  // Filter: only show recent games (≤7 days old based on startDate)
+  const recentFilteredGames = useMemo(() => {
+    if (!showRecentOnly) return displayedGames;
+    const sevenDaysAgo = Date.now() - 7 * 86400000;
+    return displayedGames.filter(g => {
+      const dateStr = g.startDate || g.endDate;
+      if (!dateStr) return false;
+      return new Date(dateStr).getTime() >= sevenDaysAgo;
+    });
+  }, [showRecentOnly, displayedGames]);
+
   // Game ID set for collection filter
   const collectionFilteredGames = useMemo(() => {
-    if (!activeCollectionFilter) return displayedGames;
+    if (!activeCollectionFilter) return recentFilteredGames;
     const col = collections.find(c => c.id === activeCollectionFilter);
-    if (!col) return displayedGames;
-    return displayedGames.filter(g => col.gameIds.includes(g.id));
-  }, [activeCollectionFilter, collections, displayedGames]);
+    if (!col) return recentFilteredGames;
+    return recentFilteredGames.filter(g => col.gameIds.includes(g.id));
+  }, [activeCollectionFilter, collections, recentFilteredGames]);
 
   return (
     <>
@@ -1099,7 +1131,7 @@ export default function App() {
                 <div className="filter-group">
                   <span className="filter-label">{t('sortBy', language)}</span>
                   <div className="filter-chips">
-                    {[['default', '📅', 'sortRecent'], ['price-desc', '💰', 'sortPrice'], ['ending-soon', '⏰', 'sortEnding'], ['title', '🔤', 'sortAZ'], ['popular', '🔥', 'sortPopular']].map(([v, icon, k]) => (
+                    {[['default', '📅', 'sortRecent'], ['recent', '🆕', 'sortNewest'], ['price-desc', '💰', 'sortPrice'], ['ending-soon', '⏰', 'sortEnding'], ['title', '🔤', 'sortAZ'], ['popular', '🔥', 'sortPopular']].map(([v, icon, k]) => (
                       <button key={v} className={`filter-chip ${sortMode === v ? 'active' : ''}`} onClick={() => setSortMode(v as SortMode)}>
                         {icon} {t(k as any, language)}
                       </button>
@@ -1264,12 +1296,15 @@ export default function App() {
         viewMode={viewMode}
         favoritesCount={favorites.length}
         showFavoritesOnly={showFavoritesOnly}
+        showRecentOnly={showRecentOnly}
+        recentCount={recentCount}
         language={language}
         visible={navVisible}
         activeStore={activeStore}
         onModeChange={handleModeChange}
         onStoreChange={setActiveStore}
         onToggleFavorites={handleToggleFavorites}
+        onToggleRecent={handleToggleRecent}
         onResetFilters={handleResetFilters}
         onToggleViewMode={handleToggleViewMode}
         onOpenStats={handleOpenStats}

@@ -115,6 +115,9 @@ class GamerPowerService {
       endDate: game.end_date && game.end_date !== 'N/A' 
         ? game.end_date 
         : null,
+      startDate: game.published_date && game.published_date !== 'N/A' 
+        ? game.published_date 
+        : null,
       worth: game.worth && game.worth !== 'N/A' 
         ? game.worth 
         : null,

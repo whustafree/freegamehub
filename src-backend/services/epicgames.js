@@ -64,6 +64,7 @@ class EpicGamesService {
   formatGame(game) {
     const promotions = game.promotions?.promotionalOffers?.[0]?.promotionalOffers?.[0];
     const endDate = promotions ? promotions.endDate : null;
+    const startDate = promotions ? promotions.startDate : null;
     
     // Construir URL
     const slug = game.catalogNs?.mappings?.[0]?.pageSlug || game.urlSlug;
@@ -86,6 +87,7 @@ class EpicGamesService {
       platform: 'epic',
       platformName: 'Epic Games',
       endDate: endDate,
+      startDate: startDate,
       worth: originalPrice || null,
       type: 'Game',
       category: 'pc',
