@@ -10,39 +10,30 @@ const logger = require('../utils/logger');
 // GET /api/free-games
 router.get('/free-games', async (req, res) => {
   try {
-    // Si cache vacío en cold start, inicia update en background
-    // y espera hasta 12s para recibir datos (maxDuration es 30s)
-    const initial = await gamesService.getGames();
-    if (initial.games.length === 0) {
-      logger.info('Cache vacio, iniciando carga con timeout 12s...');
+    const data = await gamesService.getGames();
+    
+    // Si cache vacío (cold start), iniciar update en background
+    // y esperar hasta 4s por si las APIs rápidas responden
+    if (data.games.length === 0) {
+      logger.info('Cache vacío (cold start), iniciando carga con timeout 4s...');
       
-      // Iniciar actualización si no está ya en curso
       gamesService.updateAll().catch(err => {
         logger.error('Error en updateAll background', err);
       });
       
-      // Esperar hasta 12s a que lleguen datos
-      const data = await gamesService.getGames(12000);
-      
-      if (data.games.length > 0) {
-        logger.success(`Cache actualizado con ${data.games.length} juegos`);
-      } else {
-        logger.warn('Timeout de 12s alcanzado, respondiendo sin datos');
+      // Esperar hasta 4s para dar chance a servicios rápidos
+      const waited = await gamesService.getGames(4000);
+      if (waited.games.length > 0) {
+        data.games = waited.games;
+        data.lastUpdated = waited.lastUpdated;
       }
-      
-      return res.json({
-        success: true,
-        games: data.games,
-        lastUpdated: data.lastUpdated,
-        count: data.games.length
-      });
     }
     
     res.json({
       success: true,
-      games: initial.games,
-      lastUpdated: initial.lastUpdated,
-      count: initial.games.length
+      games: data.games,
+      lastUpdated: data.lastUpdated,
+      count: data.games.length
     });
   } catch (err) {
     logger.error('Error en /api/free-games', err);
