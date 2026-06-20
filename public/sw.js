@@ -129,9 +129,9 @@ self.addEventListener('fetch', (event) => {
 
   if (!isSameOrigin && !isGoogleFonts) return;
 
-  // API: Network First con timeout de 3s
+  // API: Network First con timeout de 15s (Vercel cold start puede tardar)
   if (isSameOrigin && url.pathname.startsWith('/api/')) {
-    event.respondWith(networkFirstTimeout(request, CACHE_NAMES.api, 3000));
+    event.respondWith(networkFirstTimeout(request, CACHE_NAMES.api, 15000));
     return;
   }
 
