@@ -67,17 +67,8 @@ export default function BottomNav({
     return () => document.removeEventListener('mousedown', handleClick);
   }, [showOverflow]);
 
-  // Close platform picker on outside click
-  useEffect(() => {
-    if (!showPlatformPicker) return;
-    const handleClick = (e: MouseEvent) => {
-      if (platformRef.current && !platformRef.current.contains(e.target as Node)) {
-        setShowPlatformPicker(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [showPlatformPicker]);
+  // No need for outside-click handler on platform picker;
+  // the backdrop already covers the screen and closes on click.
 
   const handleOverflowAction = (action: () => void) => {
     setShowOverflow(false);
