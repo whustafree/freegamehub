@@ -57,21 +57,33 @@ export default function GameCard({
   const imgRef = useRef<HTMLImageElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
   
-  // 3D Tilt effect on desktop
+  // 3D Tilt effect on desktop (only on devices with fine pointer, throttled for scroll perf)
+  const tiltRAF = useRef<number | null>(null);
+  
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     const card = cardRef.current;
-    if (!card || window.matchMedia('(hover: none)').matches) return;
-    const rect = card.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5;
-    const y = (e.clientY - rect.top) / rect.height - 0.5;
-    const rotateY = x * 8;
-    const rotateX = -y * 8;
-    card.style.transform = `perspective(600px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-4px)`;
+    if (!card || window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches) return;
+    // Extract event values BEFORE rAF (React pooliza SyntheticEvents)
+    const clientX = e.clientX;
+    const clientY = e.clientY;
+    // Cancel pending frame (throttle via rAF)
+    if (tiltRAF.current) cancelAnimationFrame(tiltRAF.current);
+    tiltRAF.current = requestAnimationFrame(() => {
+      const rect = card.getBoundingClientRect();
+      const x = (clientX - rect.left) / rect.width - 0.5;
+      const y = (clientY - rect.top) / rect.height - 0.5;
+      card.style.transform = `perspective(600px) rotateX(${-y * 6}deg) rotateY(${x * 6}deg) translateY(-3px)`;
+      tiltRAF.current = null;
+    });
   }, []);
   
   const handleMouseLeave = useCallback(() => {
     const card = cardRef.current;
     if (!card) return;
+    if (tiltRAF.current) {
+      cancelAnimationFrame(tiltRAF.current);
+      tiltRAF.current = null;
+    }
     card.style.transform = '';
   }, []);
 
