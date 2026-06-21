@@ -7,8 +7,6 @@ import { vibrate } from '../utils/format';
 interface BottomNavProps {
   currentMode: Mode;
   viewMode: ViewMode;
-  favoritesCount: number;
-  showFavoritesOnly: boolean;
   showRecentOnly?: boolean;
   recentCount?: number;
   language: Language;
@@ -17,11 +15,9 @@ interface BottomNavProps {
   activeStore?: StoreFilter;
   onModeChange: (mode: Mode) => void;
   onStoreChange?: (store: StoreFilter) => void;
-  onToggleFavorites: () => void;
   onToggleRecent?: () => void;
   onResetFilters: () => void;
   onToggleViewMode: () => void;
-  onOpenStats: () => void;
   onOpenSettings?: () => void;
   onToggleMultiSelect?: () => void;
   onToggleFilter?: () => void;
@@ -45,9 +41,9 @@ const PLATFORM_OPTIONS: { store: StoreFilter; icon: string; label: string }[] = 
 ];
 
 export default function BottomNav({
-  currentMode, viewMode, favoritesCount, showFavoritesOnly, showRecentOnly, recentCount = 0, language,
+  currentMode, viewMode, showRecentOnly, recentCount = 0, language,
   multiSelectActive, visible = true, activeStore = 'all',
-  onModeChange, onStoreChange, onToggleFavorites, onToggleRecent, onResetFilters, onToggleViewMode, onOpenStats,
+  onModeChange, onStoreChange, onToggleRecent, onResetFilters, onToggleViewMode,
   onOpenSettings, onToggleMultiSelect, onToggleFilter
 }: BottomNavProps) {
   const [showOverflow, setShowOverflow] = useState(false);
@@ -156,18 +152,6 @@ export default function BottomNav({
       </button>
 
       <button
-        className={`nav-btn ${showFavoritesOnly ? 'active' : ''}`}
-        onClick={() => { onToggleFavorites(); vibrate(6); }}
-        title={t('navFav', language)}
-      >
-        <span className="nav-btn-icon">❤️</span>
-        <span className="nav-btn-label">{t('navFav', language)}</span>
-        {favoritesCount > 0 && (
-          <span className="nav-badge">{favoritesCount > 99 ? '99+' : favoritesCount}</span>
-        )}
-      </button>
-
-      <button
         className="nav-btn"
         onClick={() => { onToggleViewMode(); vibrate(6); }}
         title={viewMode === 'grid' ? t('navList', language) : t('navGrid', language)}
@@ -203,14 +187,6 @@ export default function BottomNav({
             >
               <span>🔍</span>
               {t('filters', language)}
-            </button>
-
-            <button
-              className="nav-overflow-item"
-              onClick={() => handleOverflowAction(onOpenStats)}
-            >
-              <span>📊</span>
-              {t('navStats', language)}
             </button>
 
             <button

@@ -11,7 +11,6 @@ interface HeaderProps {
   currentTheme?: string;
   totalGames?: number;
   totalSavings?: number;
-  favoritesCount?: number;
   onSearchChange: (value: string) => void;
   onClearSearch: () => void;
   onToggleLang: () => void;
@@ -34,7 +33,7 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 export default function Header({
   searchTerm, language, games = [], visible = true, currentTheme = 'dark',
-  totalGames = 0, totalSavings = 0, favoritesCount = 0,
+  totalGames = 0, totalSavings = 0,
   onSearchChange, onClearSearch, onToggleLang, onToggleTheme, onOpenDetail
 }: HeaderProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -170,15 +169,7 @@ export default function Header({
               {totalSavings >= 1000 ? `$${(totalSavings / 1000).toFixed(1)}k` : `$${totalSavings.toFixed(0)}`}
             </span>
           </span>
-          {favoritesCount > 0 && (
-            <>
-              <span style={{ width: '1px', height: '10px', background: 'var(--card-border)', display: 'inline-block' }} />
-              <span title={language === 'es' ? 'Favoritos' : 'Favorites'}>
-                ❤️
-                <span style={{ fontWeight: 700, marginLeft: '0.08rem' }}>{favoritesCount}</span>
-              </span>
-            </>
-          )}
+          {/* Favorites count removed */}
         </div>
 
         <div className="header-actions">

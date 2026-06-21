@@ -10,8 +10,8 @@ export default function Footer({ language }: FooterProps) {
   const handleReset = useCallback(() => {
     const confirmed = window.confirm(
       language === 'es'
-        ? '¿Restablecer todos los datos? Se perderán favoritos, wishlist, estadísticas y colecciones.'
-        : 'Reset all data? Favorites, wishlist, stats and collections will be lost.'
+        ? '¿Restablecer todos los datos? Se perderán wishlist, colecciones y actividad.'
+        : 'Reset all data? Wishlist, collections and activity will be lost.'
     );
     if (confirmed) {
       const keysToKeep = ['fgh_viewMode_v1', 'fgh_language_v1'];

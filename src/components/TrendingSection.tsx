@@ -4,32 +4,26 @@ import GameCard from './GameCard';
 
 interface TrendingSectionProps {
   trendingGames: Game[];
-  favorites: string[];
   viewedGames: string[];
   newGameIds: string[];
   viewMode: ViewMode;
   language: Language;
-  showFavoritesOnly: boolean;
   multiSelectActive: boolean;
-  toggleFavorite: (id: string) => void;
   handleMarkAsViewed: (id: string) => void;
   handleOpenDetail: (game: Game) => void;
 }
 
 export default function TrendingSection({
   trendingGames,
-  favorites,
   viewedGames,
   newGameIds,
   viewMode,
   language,
-  showFavoritesOnly,
   multiSelectActive,
-  toggleFavorite,
   handleMarkAsViewed,
   handleOpenDetail,
 }: TrendingSectionProps) {
-  if (trendingGames.length === 0 || showFavoritesOnly || multiSelectActive) {
+  if (trendingGames.length === 0 || multiSelectActive) {
     return null;
   }
 
@@ -59,12 +53,12 @@ export default function TrendingSection({
             <GameCard
               game={game}
               index={index}
-              isFavorite={favorites.includes(game.id)}
+              isFavorite={false}
               isViewed={viewedGames.includes(game.id)}
               isNew={newGameIds.includes(game.id)}
               viewMode={viewMode}
               language={language}
-              onToggleFavorite={toggleFavorite}
+              onToggleFavorite={() => {}}
               onMarkAsViewed={handleMarkAsViewed}
               onOpenDetail={handleOpenDetail}
             />

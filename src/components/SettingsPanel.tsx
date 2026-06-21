@@ -200,7 +200,7 @@ export default function SettingsPanel({
       <div className="filter-sheet open" onClick={e => e.stopPropagation()} style={{ maxHeight: '85vh' }}>
         <div className="filter-handle" />            <div className="filter-head">
           <h3 className="filter-title">
-            {tab === 'collections' ? '📁' : tab === 'activity' ? '📋' : tab === 'achievements' ? '🏆' : tab === 'tags' ? '🏷️' : '📦'} {t('myStats', language)}
+            {tab === 'collections' ? '📁' : tab === 'activity' ? '📋' : tab === 'achievements' ? '🏆' : tab === 'tags' ? '🏷️' : '📦'} {language === 'es' ? 'Ajustes' : 'Settings'}
           </h3>
           <button className="filter-close" onClick={onClose}>✕</button>
         </div>
@@ -260,27 +260,7 @@ export default function SettingsPanel({
             </div>
           </div>
 
-          {/* Stats summary visible in all tabs */}
-          {tab !== 'achievements' && tab !== 'tags' && tab !== 'data' && (
-            <div className="stats-grid" style={{ marginBottom: '0.25rem' }}>
-              <div className="stat-card">
-                <div className="stat-value">{userStats.totalClaimed}</div>
-                <div className="stat-label">{t('totalClaimed', language)}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">${userStats.totalSavings.toFixed(0)}</div>
-                <div className="stat-label">{t('totalSavingsStats', language)}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{userStats.totalGamesSeen}</div>
-                <div className="stat-label">{t('gamesSeen', language)}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{unlockedCount}/{totalCount}</div>
-                <div className="stat-label">{t('achievements', language)}</div>
-              </div>
-            </div>
-          )}
+          {/* Stats summary removed */}
 
           {/* COLLECTIONS TAB */}
           {tab === 'collections' && (
@@ -474,8 +454,8 @@ export default function SettingsPanel({
             <div style={{ padding: 0 }}>
               <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.75rem', lineHeight: 1.4 }}>
                 {language === 'es'
-                  ? 'Exporta tus datos (favoritos, colecciones, presets, tags, estadísticas) como backup o impórtalos desde otro dispositivo.'
-                  : 'Export your data (favorites, collections, presets, tags, stats) as backup or import from another device.'}
+                  ? 'Exporta tus datos (colecciones, presets, tags, actividad) como backup o impórtalos desde otro dispositivo.'
+                  : 'Export your data (collections, presets, tags, activity) as backup or import from another device.'}
               </div>
 
               {/* Export */}

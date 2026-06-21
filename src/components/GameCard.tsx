@@ -51,14 +51,11 @@ export default function GameCard({
   onToggleMultiSelectGame
 }: GameCardProps) {
   const timeInfo = getTimeInfo(game.endDate, game.type);
-  const [favoritePulse, setFavoritePulse] = useState(false);
-  const favTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isListView = viewMode === 'list';
 
   const cardRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
-  const [favParticles, setFavParticles] = useState<{ id: number; x: number; y: number; emoji: string }[]>([]);
   
   // 3D Tilt effect on desktop
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -91,16 +88,14 @@ export default function GameCard({
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   
   const handleSwipeLeft = useCallback(() => {
-    // Swipe left = add to favorites
-    if (!isFavorite) {
-      onToggleFavorite(game.id);
-      playSound('favorite');
-      showToast(`❤️ ${t('addFav', language)}`, 'success');
-    }
-  }, [game.id, isFavorite, onToggleFavorite, language]);
+    // Swipe left = share game
+    shareGame(game, language);
+    playSound('swipe');
+    vibrate(10);
+  }, [game, language]);
 
   const handleSwipeRight = useCallback(() => {
-    // Swipe right = mark as claimed
+    // Swipe right = open store to claim
     playSound('swipe');
     showToast(`🎮 ${t('reclaim', language)}`, 'info');
     window.open(game.url, '_blank');
@@ -115,14 +110,10 @@ export default function GameCard({
   }, [multiSelectActive]);
 
   const handleDoubleTap = useCallback(() => {
-    // Double tap = toggle favorite
-    onToggleFavorite(game.id);
-    setFavoritePulse(true);
-    setTimeout(() => setFavoritePulse(false), 400);
+    // Double tap = share game
+    shareGame(game, language);
     vibrate(10);
-    playSound('favorite');
-    showToast(isFavorite ? `💔 ${t('removeFav', language)}` : `❤️ ${t('addFav', language)}`, 'info');
-  }, [game.id, onToggleFavorite, isFavorite, language]);
+  }, [game, language]);
 
   const { handlers: swipeHandlers } = useSwipeGesture({
     onSwipeLeft: handleSwipeLeft,
@@ -149,27 +140,7 @@ export default function GameCard({
     return () => document.removeEventListener('click', close);
   }, [contextMenu]);
 
-  const handleFavoriteClick = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onToggleFavorite(game.id);
-    playSound('favorite');
-    setFavoritePulse(true);
-    if (favTimeoutRef.current) clearTimeout(favTimeoutRef.current);
-    favTimeoutRef.current = setTimeout(() => setFavoritePulse(false), 400);
-    
-    // Burst particles
-    if (!isFavorite) {
-      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-      const particles = Array.from({ length: 6 }, (_, i) => ({
-        id: Date.now() + i,
-        x: (Math.random() - 0.5) * 60,
-        y: (Math.random() - 0.5) * 60,
-        emoji: ['❤️', '⭐', '✨', '💖', '🔥', '🎯'][i],
-      }));
-      setFavParticles(particles);
-      setTimeout(() => setFavParticles([]), 700);
-    }
-  }, [game.id, onToggleFavorite, isFavorite]);
+  // Removed handleFavoriteClick — favorites removed from UI
 
   return (
     <motion.article
@@ -180,7 +151,6 @@ export default function GameCard({
         isNew ? 'new-game' : '',
         isListView ? 'list-view' : '',
         isMultiSelected ? 'multi-selected' : '',
-        isFavorite ? 'is-favorite' : '',
       ].filter(Boolean).join(' ')}
       data-id={game.id}
       onClick={handleClick}
@@ -257,9 +227,7 @@ export default function GameCard({
       </div>
 
       {/* Glow overlay on hover */}
-      <div className="card-glow-overlay" />
-
-      {/* Context menu (long press) */}
+      <div className="card-glow-overlay" />            {/* Context menu (long press) */}
       {contextMenu && (
         <div className="safe-dropdown" style={{
           position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
@@ -269,9 +237,6 @@ export default function GameCard({
           minWidth: '160px', maxWidth: 'calc(100vw - 2rem)', animation: 'overflowIn 0.2s var(--ease-spring)',
         }} onClick={e => e.stopPropagation()}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.15rem' }}>
-            <button className="nav-overflow-item" onClick={e => { e.stopPropagation(); onToggleFavorite(game.id); setContextMenu(null); vibrate(8); }}>
-              {isFavorite ? '💔' : '❤️'} {isFavorite ? t('removeFav', language) : t('addFav', language)}
-            </button>
             <button className="nav-overflow-item" onClick={e => { e.stopPropagation(); window.open(game.url, '_blank'); setContextMenu(null); }}>
               🎮 {t('reclaim', language)}
             </button>
@@ -283,27 +248,11 @@ export default function GameCard({
             </button>
             <div className="nav-overflow-divider" />
             <button className="nav-overflow-item" style={{ fontSize: '0.6rem', color: 'var(--text-muted)', cursor: 'default' }}>
-              👆 {language === 'es' ? 'Desliza izq: fav • Der: reclamar' : 'Swipe L: fav • R: claim'}
+              👆 {language === 'es' ? 'Desliza izq: compartir • Der: reclamar' : 'Swipe L: share • R: claim'}
             </button>
           </div>
         </div>
       )}
-
-      {/* Favorite burst particles */}
-      {favParticles.map(p => (
-        <span
-          key={p.id}
-          className="fav-particle"
-          style={{
-            position: 'absolute', top: '50%', left: '80%', zIndex: 10,
-            transform: `translate(${p.x}px, ${p.y}px)`,
-            fontSize: '0.7rem',
-            pointerEvents: 'none',
-          }}
-        >
-          {p.emoji}
-        </span>
-      ))}
 
       {/* Body */}
       <div className="card-body">
@@ -347,11 +296,11 @@ export default function GameCard({
           </div>
           <div className="card-actions">
             <button
-              className={`card-action ${isFavorite ? 'fav' : ''} ${favoritePulse ? 'fav-pulse' : ''}`}
-              onClick={handleFavoriteClick}
-              title={isFavorite ? t('removeFav', language) : t('addFav', language)}
+              className="card-action"
+              onClick={e => { e.stopPropagation(); shareGame(game, language); }}
+              title={t('shareTitle', language)}
             >
-              {isFavorite ? '❤️' : '🤍'}
+              📤
             </button>
             <a
               href={game.url}

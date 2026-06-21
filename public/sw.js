@@ -4,7 +4,7 @@
  * Offline total para assets estáticos + API en caché
  */
 
-const CACHE_VERSION = 'v4';
+const CACHE_VERSION = 'v5';
 const CACHE_NAMES = {
   static: `grd-static-${CACHE_VERSION}`,
   api: `grd-api-${CACHE_VERSION}`,

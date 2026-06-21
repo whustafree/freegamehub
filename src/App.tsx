@@ -18,7 +18,6 @@ import ToastContainer, { showToast } from './components/Toast';
 import BottomNav from './components/BottomNav';
 import GameCard from './components/GameCard';
 import GameDetail from './components/GameDetail';
-import StatsPanel from './components/StatsPanel';
 import Onboarding from './components/Onboarding';
 import SettingsPanel from './components/SettingsPanel';
 import TrendingSection from './components/TrendingSection';
@@ -71,12 +70,12 @@ function createConfetti() {
 
 export default function App() {
   const {
-    games, favorites, viewedGames,
+    games, viewedGames,
     votes, reactions, wishlist, userStats,
     collections, activityLog, achievements, onboardingStep,
     lastUpdated, isLoading, error,
     visibleGamesCount, savings, deepLinkedGame, clearDeepLinked,
-    loadGames, toggleFavorite, markAsViewed,
+    loadGames, markAsViewed,
     handleVote, handleReaction,
     handleToggleWishlist, handleMarkClaimed,
     createCollection, deleteCollection, addToCollection, removeFromCollection,
@@ -92,7 +91,6 @@ export default function App() {
   const [activeType, setActiveType] = useState<TypeFilter>('all');
   const [activeLicense, setActiveLicense] = useState<LicenseFilter>('all');
   const [activeYear, setActiveYear] = useState('all');
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showRecentOnly, setShowRecentOnly] = useState(false);
   const [debouncedSearch, setDebouncedSearch] = useState('');
 
@@ -151,12 +149,12 @@ export default function App() {
       name,
       icon: icons[presets.length % icons.length],
       sortMode, activeGenre, activeStore, activeType, activeLicense,
-      showFavoritesOnly, searchTerm,
+      showFavoritesOnly: false, searchTerm,
     };
     setFilterPresets(addFilterPreset(newPreset));
     showToast(language === 'es' ? '💾 Preset guardado' : '💾 Preset saved', 'success');
     vibrate(10);
-  }, [language, sortMode, activeGenre, activeStore, activeType, activeLicense, showFavoritesOnly, searchTerm]);
+  }, [language, sortMode, activeGenre, activeStore, activeType, activeLicense, searchTerm]);
 
   const handleLoadPreset = useCallback((preset: FilterPreset) => {
     setSortMode(preset.sortMode as SortMode);
@@ -164,7 +162,7 @@ export default function App() {
     setActiveStore(preset.activeStore as StoreFilter);
     setActiveType(preset.activeType as TypeFilter);
     setActiveLicense(preset.activeLicense as LicenseFilter);
-    setShowFavoritesOnly(preset.showFavoritesOnly);
+    // showFavoritesOnly removed from UI
     setSearchTerm(preset.searchTerm);
     showToast(`📋 ${preset.name} ${language === 'es' ? 'cargado' : 'loaded'}`, 'info');
     vibrate(8);
@@ -266,7 +264,6 @@ export default function App() {
 
   // Modals
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [showStats, setShowStats] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   // Offline detection
@@ -370,7 +367,7 @@ export default function App() {
 
   // --- Filtered games ---
   const filteredGames = useFilters({
-    games, favorites, showFavoritesOnly,
+    games,
     currentMode, searchTerm: debouncedSearch, sortMode,
     activeGenre, activeStore, activeType, activeLicense, activeYear
   });
@@ -391,13 +388,12 @@ export default function App() {
 
   // --- Game of the day ---
   const gameOfDay = useMemo(() => {
-    const visible = sortedFiltered.filter(g => !showFavoritesOnly);
-    if (visible.length === 0) return null;
+    if (sortedFiltered.length === 0) return null;
     const today = new Date();
     const daySeed = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
-    const idx = Math.abs(daySeed.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % visible.length;
-    return visible[idx];
-  }, [sortedFiltered, showFavoritesOnly]);
+    const idx = Math.abs(daySeed.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)) % sortedFiltered.length;
+    return sortedFiltered[idx];
+  }, [sortedFiltered]);
 
   // --- Trending (most voted this session) ---
   const trendingGames = useMemo(() => {
@@ -518,13 +514,11 @@ export default function App() {
 
   // Refs for back gesture handler (avoid re-registering listener)
   const selectedGameRef = useRef(selectedGame);
-  const showStatsRef = useRef(showStats);
   const showSettingsRef = useRef(showSettings);
   const multiSelectActiveRef = useRef(multiSelectActive);
 
   // Sync refs on every render for the back gesture handler
   selectedGameRef.current = selectedGame;
-  showStatsRef.current = showStats;
   showSettingsRef.current = showSettings;
   multiSelectActiveRef.current = multiSelectActive;
 
@@ -532,13 +526,8 @@ export default function App() {
     setCurrentMode(mode);
     setActiveType('all');
     setActiveStore('all');
-    setShowFavoritesOnly(false);
     setShowRecentOnly(false);
   }, []);
-
-  const handleToggleFavorites = useCallback(() => {
-    setShowFavoritesOnly(p => { showToast(p ? t('favoritesOff', language) : t('favoritesOn', language), 'info'); playSound(p ? 'click' : 'favorite'); return !p; });
-  }, [language]);
 
   const handleToggleRecent = useCallback(() => {
     setShowRecentOnly(p => {
@@ -555,7 +544,6 @@ export default function App() {
     setActiveStore('all');
     setActiveType('all');
     setActiveLicense('all');
-    setShowFavoritesOnly(false);
     setShowRecentOnly(false);
     setActiveCollectionFilter(null);
     showToast(t('filtersReset', language), 'info');
@@ -602,33 +590,14 @@ export default function App() {
   // Long press to trigger multi-select
   const mainLongPressTimer = useRef<number | null>(null);
 
-  const handleMultiSelectAction = useCallback((action: 'fav' | 'collection') => {
-    if (action === 'fav') {
-      multiSelectedIds.forEach(id => toggleFavorite(id));
-    }
-    showToast(t('multiSelectAction', language).replace('{n}', String(multiSelectedIds.length)), 'success');
-    setMultiSelectedIds([]);
-    setMultiSelectActive(false);
-  }, [multiSelectedIds, toggleFavorite, language]);
-
   // Open specific collection in stats
   const [activeCollectionFilter, setActiveCollectionFilter] = useState<string | null>(null);
 
   const handleOpenCollectionGames = useCallback((collection: import('./types').UserCollection) => {
     setShowSettings(false);
-    setShowFavoritesOnly(false);
     setSearchTerm('');
     setActiveCollectionFilter(collection.id);
     // Can't directly filter by collection in the grid, but we'll use search to hint
-  }, []);
-
-  // Stats & Settings
-  const handleOpenStats = useCallback(() => {
-    setShowStats(true);
-  }, []);
-
-  const handleCloseStats = useCallback(() => {
-    setShowStats(false);
   }, []);
 
   const handleOpenSettings = useCallback(() => {
@@ -647,8 +616,6 @@ export default function App() {
         // Close modals in order of priority (using refs for fresh state)
         if (selectedGameRef.current) {
           handleCloseDetail();
-        } else if (showStatsRef.current) {
-          handleCloseStats();
         } else if (showSettingsRef.current) {
           handleCloseSettings();
         } else if (multiSelectActiveRef.current) {
@@ -747,7 +714,6 @@ export default function App() {
       }
       if (e.key === 'Escape') {
         setSelectedGame(null);
-        setShowStats(false);
         setShowSettings(false);
         if (multiSelectActive) {
           setMultiSelectActive(false);
@@ -838,7 +804,6 @@ export default function App() {
         games={games}
         totalGames={games.length}
         totalSavings={games.reduce((sum, g) => sum + parsePrice(g.worth), 0)}
-        favoritesCount={favorites.length}
       />
 
       {/* Multi-select bar */}
@@ -848,9 +813,6 @@ export default function App() {
             <span className="multi-select-count">
               {t('multiSelectCount', language).replace('{n}', String(multiSelectedIds.length))}
             </span>
-            <button className="multi-select-btn" onClick={() => handleMultiSelectAction('fav')}>
-              {t('multiSelectFavorite', language)}
-            </button>
             <button className="multi-select-btn clear" onClick={() => setMultiSelectedIds([])}>
               {t('multiSelectClear', language)}
             </button>
@@ -902,7 +864,6 @@ export default function App() {
             activeType={activeType}
             activeLicense={activeLicense}
             sortMode={sortMode}
-            showFavoritesOnly={showFavoritesOnly}
             language={language}
             onClearSearch={() => setSearchTerm('')}
             onResetAll={handleResetFilters}
@@ -970,7 +931,7 @@ export default function App() {
             )}
 
             {/* Surprise Me Button */}
-            {!showFavoritesOnly && !multiSelectActive && (
+            {!multiSelectActive && (
               <button className="surprise-btn" onClick={handleSurpriseMe}>
                 🎲 {t('surpriseMe', language)}
               </button>
@@ -1001,7 +962,7 @@ export default function App() {
             )}
 
             {/* Game of the Day */}
-            {gameOfDay && !showFavoritesOnly && !multiSelectActive && (
+            {gameOfDay && !multiSelectActive && (
               <div className="game-of-day" onClick={() => handleOpenDetail(gameOfDay)}>
                 <img src={gameOfDay.image} alt="" className="game-of-day-bg" loading="lazy"
                   onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
@@ -1023,7 +984,7 @@ export default function App() {
             )}
 
             {/* Ending Soon Timeline */}
-            {endingSoonGames.length > 0 && !showFavoritesOnly && !multiSelectActive && (
+            {endingSoonGames.length > 0 && !multiSelectActive && (
               <section className="timeline-section">
                 <div className="timeline-header">
                   <div className="recommended-icon">⏳</div>
@@ -1056,14 +1017,11 @@ export default function App() {
             {/* Trending Section */}
             <TrendingSection
               trendingGames={trendingGames}
-              favorites={favorites}
               viewedGames={viewedGames}
               newGameIds={newGameIds}
               viewMode={viewMode}
               language={language}
-              showFavoritesOnly={showFavoritesOnly}
               multiSelectActive={multiSelectActive}
-              toggleFavorite={toggleFavorite}
               handleMarkAsViewed={handleMarkAsViewed}
               handleOpenDetail={handleOpenDetail}
             />
@@ -1168,14 +1126,7 @@ export default function App() {
                     ))}
                   </div>
                 </div>
-                <div className="filter-group">
-                  <span className="filter-label">{t('specials', language)}</span>
-                  <div className="filter-chips">
-                    <button className={`filter-chip ${showFavoritesOnly ? 'active' : ''}`} onClick={() => setShowFavoritesOnly(p => !p)}>
-                      ❤️ {t('favOnly', language)}
-                    </button>
-                  </div>
-                </div>
+                {/* Favorites filter removed */}
                 <button className="filter-btn secondary" onClick={handleResetFilters} style={{ width: '100%', marginTop: '0.35rem' }}>
                   🔄 {t('reset', language)}
                 </button>
@@ -1184,14 +1135,12 @@ export default function App() {
               <div>
                 <GameGrid
                   games={collectionFilteredGames}
-                  favorites={favorites}
                   viewedGames={viewedGames}
                   newGameIds={newGameIds}
                   viewMode={viewMode}
                   language={language}
                   multiSelectActive={multiSelectActive}
                   multiSelectedIds={multiSelectedIds}
-                  onToggleFavorite={toggleFavorite}
                   onMarkAsViewed={handleMarkAsViewed}
                   onOpenDetail={handleOpenDetail}
                   onToggleMultiSelectGame={handleToggleMultiSelectGame}
@@ -1294,8 +1243,6 @@ export default function App() {
       <BottomNav
         currentMode={currentMode}
         viewMode={viewMode}
-        favoritesCount={favorites.length}
-        showFavoritesOnly={showFavoritesOnly}
         showRecentOnly={showRecentOnly}
         recentCount={recentCount}
         language={language}
@@ -1303,11 +1250,9 @@ export default function App() {
         activeStore={activeStore}
         onModeChange={handleModeChange}
         onStoreChange={setActiveStore}
-        onToggleFavorites={handleToggleFavorites}
         onToggleRecent={handleToggleRecent}
         onResetFilters={handleResetFilters}
         onToggleViewMode={handleToggleViewMode}
-        onOpenStats={handleOpenStats}
         onOpenSettings={handleOpenSettings}
         onToggleMultiSelect={handleToggleMultiSelect}
         onToggleFilter={handleToggleFilter}
@@ -1330,25 +1275,6 @@ export default function App() {
           onToggleWishlist={handleToggleWishlist}
           onMarkClaimed={handleMarkClaimed}
           onOpenGame={handleOpenDetail}
-        />
-      )}
-
-      {/* Stats Panel */}
-      {showStats && (
-        <StatsPanel
-          userStats={userStats}
-          games={games}
-          favorites={favorites}
-          viewedGames={viewedGames}
-          votes={votes}
-          reactions={reactions}
-          wishlist={wishlist}
-          collections={collections}
-          activityLog={activityLog}
-          achievements={achievements}
-          language={language}
-          onClose={handleCloseStats}
-          onOpenSettings={handleOpenSettings}
         />
       )}
 
@@ -1383,7 +1309,6 @@ export default function App() {
         activeLicense={activeLicense}
         activeYear={activeYear}
         sortMode={sortMode}
-        showFavoritesOnly={showFavoritesOnly}
         onClose={() => setIsFilterOpen(false)}
         onSearchChange={setSearchTerm}
         onGenreChange={setActiveGenre}
@@ -1392,7 +1317,6 @@ export default function App() {
         onLicenseChange={setActiveLicense}
         onYearChange={setActiveYear}
         onSortChange={setSortMode}
-        onToggleFavorites={handleToggleFavorites}
         onReset={handleResetFilters}
       />
 

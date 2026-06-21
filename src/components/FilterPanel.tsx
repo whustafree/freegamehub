@@ -12,7 +12,6 @@ interface FilterPanelProps {
   activeType: TypeFilter;
   activeLicense: LicenseFilter;
   sortMode: SortMode;
-  showFavoritesOnly: boolean;
   activeYear: string;
   onYearChange: (year: string) => void;
   onClose: () => void;
@@ -22,7 +21,6 @@ interface FilterPanelProps {
   onTypeChange: (type: TypeFilter) => void;
   onLicenseChange: (license: LicenseFilter) => void;
   onSortChange: (mode: SortMode) => void;
-  onToggleFavorites: () => void;
   onReset: () => void;
 }
 
@@ -92,10 +90,10 @@ const sheetVariants = {
 
 export default function FilterPanel({
   language, isOpen, searchTerm,
-  activeGenre, activeStore, activeType, activeLicense, sortMode, showFavoritesOnly,
+  activeGenre, activeStore, activeType, activeLicense, sortMode,
   onClose, onSearchChange,
   onGenreChange, onStoreChange, onTypeChange, onLicenseChange, onSortChange,
-  onToggleFavorites, onReset,
+  onReset,
   activeYear, onYearChange,
 }: FilterPanelProps) {
   const [localSearch, setLocalSearch] = useState(searchTerm);
@@ -207,12 +205,7 @@ export default function FilterPanel({
                   <button className={`filter-chip ${activeLicense === 'proprietary' ? 'active' : ''}`} onClick={() => onLicenseChange('proprietary')}>🔒 {t('proprietary', language)}</button>
                 </div>
               </div>
-              <div className="filter-group">
-                <span className="filter-label">{t('specials', language)}</span>
-                <div className="filter-chips">
-                  <button className={`filter-chip ${showFavoritesOnly ? 'active' : ''}`} onClick={onToggleFavorites}>❤️ {t('favOnly', language)}</button>
-                </div>
-              </div>
+              {/* Favorites filter removed */}
               <div className="filter-actions">
                 <button className="filter-btn secondary" onClick={onReset}>🔄 {t('reset', language)}</button>
                 <button className="filter-btn primary" onClick={onClose}>{t('apply', language)}</button>

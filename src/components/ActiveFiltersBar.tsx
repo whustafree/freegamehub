@@ -8,7 +8,6 @@ interface ActiveFiltersBarProps {
   activeType: TypeFilter;
   activeLicense: LicenseFilter;
   sortMode: SortMode;
-  showFavoritesOnly: boolean;
   language: Language;
   onClearSearch: () => void;
   onResetAll: () => void;
@@ -30,7 +29,7 @@ const STORE_LABELS: Record<string, string> = {
 
 export default function ActiveFiltersBar({
   searchTerm, activeGenre, activeStore, activeType, activeLicense,
-  sortMode, showFavoritesOnly, language,
+  sortMode, language,
   onClearSearch, onResetAll,
   onRemoveGenre, onRemoveStore, onRemoveType, onRemoveLicense,
 }: ActiveFiltersBarProps) {
@@ -58,10 +57,6 @@ export default function ActiveFiltersBar({
     };
     chips.push({ key: 'sort', label: sortLabels[sortMode] || sortMode });
   }
-  if (showFavoritesOnly) {
-    chips.push({ key: 'fav', label: '❤️ ' + t('favOnly', language) });
-  }
-
   if (chips.length === 0) return null;
 
   return (

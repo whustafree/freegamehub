@@ -222,13 +222,6 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
   from { opacity: 1; transform: translateX(0) scale(1); }
   to { opacity: 0; transform: translateX(60%) scale(.9); }
 }
-@keyframes favBurst {
-  0% { transform: scale(1); }
-  25% { transform: scale(1.4); }
-  50% { transform: scale(0.9); }
-  75% { transform: scale(1.1); }
-  100% { transform: scale(1); }
-}
 @keyframes glowPulse {
   0%, 100% { opacity: 0.15; transform: scale(1); }
   50% { opacity: 0.4; transform: scale(1.02); }
@@ -592,8 +585,6 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 .game-card.viewed { opacity: .35; }
 .game-card.viewed:hover { opacity: .5; }
 .game-card.multi-selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
-.game-card.is-favorite .card-action.fav { color: var(--accent-light); }
-
 /* 3D Tilt overlay */
 .card-tilt-overlay {
   position: absolute;
@@ -619,16 +610,6 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 }
 .game-card:hover .card-glow-overlay { opacity: 1; }
 .game-card:hover .card-img img { transform: scale(1.06); }
-
-/* Favorite burst */
-.card-action.fav-pulse { animation: favBurst .4s var(--ease-spring); }
-.fav-particle {
-  position: absolute;
-  pointer-events: none;
-  font-size: .5rem;
-  animation: sparkle 0.6s var(--ease-out) forwards;
-  z-index: 10;
-}
 
 /* Platform tag floating */
 .card-platform-tag {
@@ -974,6 +955,19 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 .swipe-indicator.left { left: 0; background: linear-gradient(to right, var(--overlay-bg), transparent); }
 .swipe-indicator.right { right: 0; background: linear-gradient(to left, var(--overlay-bg), transparent); }
 .swipe-indicator.visible { opacity: 1; }
+
+/* Mejorar feedback táctil en swipe */
+.game-card {
+  touch-action: pan-y pinch-zoom; /* Scroll vertical nativo, zoom permitido */
+  -webkit-user-select: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  /* En móvil, reducir umbral de swipe para mejor respuesta */
+  .game-card:active .card-img img { transform: scale(1.03); }
+  .game-card .card-actions { gap: .35rem; }
+  .game-card .claim-btn { padding: .3rem .7rem; font-size: .62rem; }
+}
 
 /* === PLATFORM GROUPS === */
 .platform-group { margin-bottom: .85rem; animation: fadeUp .4s var(--ease) backwards; }
@@ -1647,7 +1641,7 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
   }
 }
 
-/* === BOTTOM NAV === */
+/* === BOTTOM NAV — Estilo nativo para móvil === */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -1662,31 +1656,63 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
   justify-content: space-around;
   align-items: flex-start;
   height: var(--nav-h);
-  padding: .3rem 0 .2rem;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding: .3rem 0 calc(.2rem + env(safe-area-inset-bottom, 0px));
   transition: transform .4s var(--ease-spring);
+  /* Mejorar zona táctil en Android */
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  /* Evitar que gestos del navegador interfieran */
+  overscroll-behavior: none;
 }
 .bottom-nav.hidden { transform: translateY(110%); }
 
-/* Animated active indicator */
+/* Zona de gestos nativos — área segura para gestos Android */
+.bottom-nav::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: transparent;
+  pointer-events: none;
+  /* Permitir gestos de retroceso de Android en esta zona */
+  -webkit-user-select: none;
+}
+
+@media (min-width: 1024px) {
+  .bottom-nav::before { display: none; }
+}
+
+/* Animated active indicator — botones con área táctil generosa */
 .nav-btn {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: .08rem;
-  padding: .1rem .25rem;
+  padding: .15rem .35rem;
   border: none;
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
   min-width: 44px;
+  min-height: 44px; /* Zona táctil mínima recomendada (Apple HIG / Material) */
   position: relative;
   font-family: inherit;
   transition: color .25s var(--ease);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
 }
-.nav-btn:active { transform: scale(.85); }
+.nav-btn:active { transform: scale(.88); transition: transform .1s var(--ease-spring); }
 .nav-btn.active { color: var(--accent-light); }
 .nav-btn.active .nav-btn-icon { filter: drop-shadow(0 0 4px var(--accent-glow)); }
+
+/* Área de retroceso gestual — evitar que bottom nav bloquee gestos nativos */
+.bottom-nav .nav-btn {
+  -webkit-user-select: none;
+  touch-action: pan-y; /* Solo scroll vertical, no horizontal */
+}
 
 /* Active indicator bar */
 .nav-btn::after {
@@ -2293,30 +2319,6 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
 .multi-select-btn:hover { border-color: var(--accent-glow); color: var(--accent-light); }
 .multi-select-btn.clear:hover { border-color: rgba(255,69,58,0.3); color: #ff6961; }
 
-/* === STATS MODAL === */
-.stats-modal { padding: 1rem; display: flex; flex-direction: column; gap: .85rem; }
-.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
-.stat-card {
-  background: var(--bg-hover);
-  border: 0.5px solid var(--card-border);
-  border-radius: var(--radius);
-  padding: .6rem;
-  text-align: center;
-  transition: all .2s var(--ease);
-}
-.stat-card:hover { border-color: var(--accent-glow); }
-.stat-value {
-  font-size: 1.15rem;
-  font-weight: 800;
-  background: linear-gradient(135deg, var(--accent-light), hsl(var(--accent-h), 80%, 60%));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: countUp .5s var(--ease-spring);
-}
-.stat-label { font-size: .55rem; color: var(--text-muted); margin-top: .1rem; text-transform: uppercase; letter-spacing: .3px; }
-.stats-actions { display: flex; gap: .4rem; flex-wrap: wrap; }
-
 /* Chart title */
 .chart-title {
   font-size: .55rem;
@@ -2647,11 +2649,11 @@ input, textarea, [contenteditable] { user-select: text; -webkit-user-select: tex
   align-self: flex-start;
 }
 
-/* === MAIN LAYOUT === */
+/* === MAIN LAYOUT — scroll suave nativo === */
 main {
   flex: 1;
   padding: .65rem;
-  padding-bottom: calc(var(--nav-h) + 1rem);
+  padding-bottom: calc(var(--nav-h) + 1.25rem);
   max-width: 1280px;
   width: 100%;
   margin: 0 auto;
@@ -2659,6 +2661,16 @@ main {
   z-index: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  scroll-behavior: smooth;
+  /* Mejor rendimiento de scroll */
+  will-change: scroll-position;
+}
+
+/* Prevenir scroll horizontal en móvil */
+main::-webkit-scrollbar { width: 2px; }
+main {
+  scrollbar-width: thin;
 }
 
 /* === OVERFLOW SAFE GUARD === */
@@ -2677,6 +2689,12 @@ main {
 
 /* === DESKTOP SIDEBAR === */
 .desktop-sidebar { display: none; }
+
+/* Mejorar experiencia de scroll en el sidebar */
+.desktop-sidebar {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
 
 @media (min-width: 1024px) {
   .desktop-sidebar { display: block; }

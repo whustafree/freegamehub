@@ -4,23 +4,21 @@ import GameCard from './GameCard';
 
 interface GameGridProps {
   games: Game[];
-  favorites: string[];
   viewedGames: string[];
   newGameIds: string[];
   viewMode: ViewMode;
   language: Language;
   multiSelectActive?: boolean;
   multiSelectedIds?: string[];
-  onToggleFavorite: (id: string) => void;
   onMarkAsViewed: (id: string) => void;
   onOpenDetail: (game: Game) => void;
   onToggleMultiSelectGame?: (id: string) => void;
 }
 
 export default function GameGrid({
-  games, favorites, viewedGames, newGameIds, viewMode, language,
+  games, viewedGames, newGameIds, viewMode, language,
   multiSelectActive, multiSelectedIds,
-  onToggleFavorite, onMarkAsViewed, onOpenDetail,
+  onMarkAsViewed, onOpenDetail,
   onToggleMultiSelectGame,
 }: GameGridProps) {
 
@@ -42,14 +40,14 @@ export default function GameGrid({
             key={game.id}
             game={game}
             index={index}
-            isFavorite={favorites.includes(game.id)}
+            isFavorite={false}
             isViewed={viewedGames.includes(game.id)}
             isNew={newGameIds.includes(game.id)}
             viewMode={viewMode}
             language={language}
             multiSelectActive={multiSelectActive}
             isMultiSelected={multiSelectedIds?.includes(game.id)}
-            onToggleFavorite={onToggleFavorite}
+            onToggleFavorite={() => {}}
             onMarkAsViewed={onMarkAsViewed}
             onOpenDetail={onOpenDetail}
             onToggleMultiSelectGame={onToggleMultiSelectGame}

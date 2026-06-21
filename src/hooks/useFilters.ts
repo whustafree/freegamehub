@@ -4,8 +4,6 @@ import { GENRE_KEYWORDS, parsePrice } from '../utils/format';
 
 interface UseFiltersProps {
   games: Game[];
-  favorites: string[];
-  showFavoritesOnly: boolean;
   currentMode: Mode;
   searchTerm: string;
   sortMode: SortMode;
@@ -17,12 +15,11 @@ interface UseFiltersProps {
 }
 
 export function useFilters({
-  games, favorites, showFavoritesOnly,
+  games,
   currentMode, searchTerm, sortMode, activeGenre, activeStore, activeType, activeLicense, activeYear
 }: UseFiltersProps) {
   return useMemo(() => {
     let filtered = games.filter(game => {
-      if (showFavoritesOnly) return favorites.includes(game.id);
       if (game.category !== currentMode) return false;
       if (currentMode === 'pc' && activeStore !== 'all') {
         if (!game.platform?.includes(activeStore)) return false;
@@ -93,5 +90,5 @@ export function useFilters({
     }
 
     return filtered;
-  }, [games, favorites, showFavoritesOnly, currentMode, searchTerm, sortMode, activeGenre, activeStore, activeType, activeLicense]);
+  }, [games, currentMode, searchTerm, sortMode, activeGenre, activeStore, activeType, activeLicense, activeYear]);
 }

@@ -132,7 +132,7 @@ export default function GameDetail({
 
   const handleWishlist = () => {
     onToggleWishlist(game.id);
-    playSound('favorite');
+    playSound('click');
     showToast(wishlistStatus ? t('gameRemoved', language) : t('gameWishlisted', language), 'info');
     if (navigator.vibrate) navigator.vibrate(10);
   };
