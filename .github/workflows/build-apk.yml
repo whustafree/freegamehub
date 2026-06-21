@@ -10,6 +10,9 @@ on:
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -42,8 +45,8 @@ jobs:
 
       - name: Restore custom app icon (prevent Capacitor overwrite)
         run: |
-          git checkout -- android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-          git checkout -- android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+          git checkout -- android/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml 2>/dev/null || true
+          git checkout -- android/app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml 2>/dev/null || true
 
       - name: Create keystore from secret
         env:
@@ -65,26 +68,33 @@ jobs:
           fi
           ./gradlew bundleRelease assembleRelease assembleDebug
 
-      - name: Upload AAB (for Play Store)
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          path: android/app/build/outputs/bundle/release/*.aab
-          name: GameRadar-AAB
-          if-no-files-found: warn
+      - name: Generate version tag
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          DATE=$(date +'%Y%m%d')
+          echo "tag=v${VERSION}-build-${DATE}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
 
-      - name: Upload Release APK
-        if: always()
-        uses: actions/upload-artifact@v4
+      - name: Publish to GitHub Releases
+        uses: softprops/action-gh-release@v2
         with:
-          path: android/app/build/outputs/apk/release/*.apk
-          name: GameRadar-Release
-          if-no-files-found: warn
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: GameRadar v${{ steps.version.outputs.version }}
+          body: |
+            ## 🎮 GameRadar v${{ steps.version.outputs.version }}
 
-      - name: Upload Debug APK
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          path: android/app/build/outputs/apk/debug/*.apk
-          name: GameRadar-Debug
-          if-no-files-found: warn
+            **Commit:** `${{ github.sha }}`
+
+            ### 📦 Archivos incluidos:
+            - `GameRadar-Release.apk` — APK firmado listo para instalar
+            - `GameRadar-Debug.apk` — APK de depuración
+            - `GameRadar.aab` — Bundle para Play Store
+          files: |
+            android/app/build/outputs/apk/release/*.apk
+            android/app/build/outputs/apk/debug/*.apk
+            android/app/build/outputs/bundle/release/*.aab
+          fail_on_unmatched_files: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
