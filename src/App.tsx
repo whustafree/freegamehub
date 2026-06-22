@@ -465,9 +465,12 @@ export default function App() {
     return () => { if (sentinel) observer.unobserve(sentinel); };
   }, [hasMore, sortedFiltered.length]);
 
-  // --- Pull to refresh ---
+  // --- Pull to refresh (mejorado, menos sensible) ---
+  const ptrLockRef = useRef(false);
+  
   const handleTouchStart = useCallback((e: TouchEvent) => {
-    if (mainRef.current && mainRef.current.scrollTop <= 0) {
+    // Solo activar si estamos exactamente en el top y no hay scroll
+    if (mainRef.current && mainRef.current.scrollTop <= 0 && !ptrLockRef.current) {
       ptrStartY.current = e.touches[0].clientY;
       ptrCurrentY.current = e.touches[0].clientY;
       setPtrState('pulling');
@@ -475,20 +478,29 @@ export default function App() {
   }, []);
 
   const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (ptrState === 'pulling' || ptrState === 'loading') {
+    if (ptrState === 'pulling') {
       ptrCurrentY.current = e.touches[0].clientY;
+      // Resistencia: el indicador se mueve más lento que el dedo
+      const diff = ptrCurrentY.current - ptrStartY.current;
+      if (diff < 0) {
+        // Scroll hacia arriba normal - cancelar PTR
+        setPtrState('idle');
+      }
     }
   }, [ptrState]);
 
   const handleTouchEnd = useCallback(() => {
     if (ptrState === 'pulling') {
       const diff = ptrCurrentY.current - ptrStartY.current;
-      if (diff > 80) {
+      // Umbral más alto (120px) y Timeout para evitar refrescos accidentales
+      if (diff > 120 && !ptrLockRef.current) {
+        ptrLockRef.current = true;
         setPtrState('loading');
         loadGames().then(() => {
           setPtrState('idle');
           setDisplayCount(ITEMS_PER_PAGE);
           if (navigator.vibrate) navigator.vibrate(15);
+          setTimeout(() => { ptrLockRef.current = false; }, 2000);
         });
       } else {
         setPtrState('idle');
@@ -501,7 +513,7 @@ export default function App() {
     if (!main) return;
     main.addEventListener('touchstart', handleTouchStart, { passive: true });
     main.addEventListener('touchmove', handleTouchMove, { passive: true });
-    main.addEventListener('touchend', handleTouchEnd);
+    main.addEventListener('touchend', handleTouchEnd, { passive: true });
     return () => {
       main.removeEventListener('touchstart', handleTouchStart);
       main.removeEventListener('touchmove', handleTouchMove);
@@ -878,10 +890,10 @@ export default function App() {
         {isLoaded && (
           <motion.div
             key={currentMode}
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.25, ease: 'easeInOut' }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
           >
             {/* 🆕 Widget de juegos nuevos - Banner mejorado */}
             {showNewGamesBanner && newGameIds.length > 0 && (
