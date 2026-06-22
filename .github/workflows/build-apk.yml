@@ -75,6 +75,26 @@ jobs:
           DATE=$(date +'%Y%m%d')
           echo "tag=v${VERSION}-build-${DATE}" >> "$GITHUB_OUTPUT"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "app_name=GameRadar-v${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Rename APK files with version
+        run: |
+          APP_NAME="${{ steps.version.outputs.app_name }}"
+          
+          # Debug APK
+          if [ -f android/app/build/outputs/apk/debug/app-debug.apk ]; then
+            cp android/app/build/outputs/apk/debug/app-debug.apk "android/app/build/outputs/apk/debug/${APP_NAME}-debug.apk"
+          fi
+          
+          # Release APK
+          if [ -f android/app/build/outputs/apk/release/app-release.apk ]; then
+            cp android/app/build/outputs/apk/release/app-release.apk "android/app/build/outputs/apk/release/${APP_NAME}-release.apk"
+          fi
+          
+          # Release AAB
+          if [ -f android/app/build/outputs/bundle/release/app-release.aab ]; then
+            cp android/app/build/outputs/bundle/release/app-release.aab "android/app/build/outputs/bundle/release/${APP_NAME}.aab"
+          fi
 
       - name: Publish to GitHub Releases
         uses: softprops/action-gh-release@v2
@@ -87,13 +107,13 @@ jobs:
             **Commit:** `${{ github.sha }}`
 
             ### 📦 Archivos incluidos:
-            - `GameRadar-Release.apk` — APK firmado listo para instalar
-            - `GameRadar-Debug.apk` — APK de depuración
-            - `GameRadar.aab` — Bundle para Play Store
+            - `${{ steps.version.outputs.app_name }}-release.apk` — APK firmado listo para instalar
+            - `${{ steps.version.outputs.app_name }}-debug.apk` — APK de depuración
+            - `${{ steps.version.outputs.app_name }}.aab` — Bundle para Play Store
           files: |
-            android/app/build/outputs/apk/release/*.apk
-            android/app/build/outputs/apk/debug/*.apk
-            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/GameRadar-v*.apk
+            android/app/build/outputs/apk/debug/GameRadar-v*.apk
+            android/app/build/outputs/bundle/release/GameRadar-v*.aab
           fail_on_unmatched_files: true
           make_latest: true
         env:
